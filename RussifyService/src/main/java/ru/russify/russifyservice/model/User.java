@@ -1,4 +1,4 @@
-package io.github.bagdad.russifyservice.model;
+package ru.russify.russifyservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -7,13 +7,11 @@ import java.time.OffsetDateTime;
 import java.util.Set;
 
 @Entity(name = "user")
+@Table(name = "usertus")
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
 @Builder
-@ToString
 public class User {
 
     @Id

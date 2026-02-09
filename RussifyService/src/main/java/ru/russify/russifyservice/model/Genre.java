@@ -1,4 +1,4 @@
-package io.github.bagdad.russifyservice.model;
+package ru.russify.russifyservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -7,13 +7,10 @@ import java.util.Set;
 
 @Entity(name = "genre")
 @Table(name = "genres")
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
 @Builder
-@ToString
 public class Genre {
 
     @Id

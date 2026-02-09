@@ -1,4 +1,4 @@
-package io.github.bagdad.russifyservice.model;
+package ru.russify.russifyservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,13 +8,10 @@ import java.util.Set;
 
 @Entity(name = "album")
 @Table(name = "album")
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
 @Builder
-@ToString
 public class Album {
 
     @Id

@@ -1,17 +1,14 @@
-package io.github.bagdad.russifyservice.model;
+package ru.russify.russifyservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity(name = "favourite_album")
 @Table(name = "favourite_albums")
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 @Builder
-@ToString
 public class FavouriteAlbum {
 
     @Id

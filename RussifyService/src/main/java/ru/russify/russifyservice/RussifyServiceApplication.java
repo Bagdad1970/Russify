@@ -1,4 +1,4 @@
-package io.github.bagdad.russifyservice;
+package ru.russify.russifyservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

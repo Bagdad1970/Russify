@@ -1,17 +1,14 @@
-package io.github.bagdad.russifyservice.model;
+package ru.russify.russifyservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity(name = "author_album")
 @Table(name = "author_of_album")
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 @Builder
-@ToString
 public class AuthorAlbum {
 
     @Id

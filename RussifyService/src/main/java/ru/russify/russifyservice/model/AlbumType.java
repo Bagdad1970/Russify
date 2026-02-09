@@ -1,4 +1,4 @@
-package io.github.bagdad.russifyservice.model;
+package ru.russify.russifyservice.model;
 
 public enum AlbumType {
 

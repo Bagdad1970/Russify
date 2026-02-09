@@ -8,7 +8,7 @@
         <version>4.0.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>io.github.bagdad</groupId>
+    <groupId>ru.russify</groupId>
     <artifactId>RussifyService</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>RussifyService</name>

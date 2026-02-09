@@ -1,17 +1,14 @@
-package io.github.bagdad.russifyservice.model;
+package ru.russify.russifyservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity(name = "track_playlist")
 @Table(name = "track_of_playlist")
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 @Builder
-@ToString
 public class TrackPlaylist {
 
     @Id
