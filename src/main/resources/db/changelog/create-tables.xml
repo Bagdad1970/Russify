@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!--    TABLE ROLE-->
+    <changeSet id="3" author="LittleBlBb">
+        <createTable tableName="role" schemaName="app">
+            <column name="role_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="role_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+<!--        TABLE USER-->
+    <changeSet id="4" author="LittleBlBb">
+        <createTable tableName="user" schemaName="app">
+            <column name="user_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="email" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+<!--        TABLE PLAYLIST-->
+    <changeSet id="5" author="LittleBlBb">
+        <createTable tableName="playlist" schemaName="app">
+            <column name="playlist_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="playlist_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_system" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!--        TABLE ALBUM-->
+
+    <changeSet id="6" author="LittleBlBb">
+        <createTable tableName="album" schemaName="app">
+            <column name="album_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="album_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+<!--        TABLE AUTHOR-->
+    <changeSet id="7" author="LittleBlBb">
+        <createTable tableName="author" schemaName="app">
+            <column name="author_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="author_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+<!--        TABLE TRACK-->
+    <changeSet id="8" author="LittleBlBb">
+        <createTable tableName="track" schemaName="app">
+            <column name="track_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="track_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="genre" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="path" type="VARCHAR(512)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+<!--        JOIN TABLES-->
+
+<!--        TABLE FAVORITE_ALBUMS-->
+    <changeSet id="9" author="LittleBlBb">
+        <createTable tableName="favorite_albums" schemaName="app">
+            <column name="favorite_albums_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="album_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+    <!--        TABLE TRACK_OF_PLAYLIST-->
+    <changeSet id="10" author="LittleBlBb">
+        <createTable tableName="track_of_playlist" schemaName="app">
+            <column name="connection_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="playlist_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="track_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+<!--        TABLE TRACK_OF_ALBUM-->
+    <changeSet id="11" author="LittleBlBb">
+        <createTable tableName="track_of_album" schemaName="app">
+            <column name="track_of_album_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="track_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="album_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+<!--        TABLE AUTHOR_OF_ALBUM-->
+
+    <changeSet id="12" author="LittleBlBb">
+        <createTable tableName="author_of_album" schemaName="app">
+            <column name="author_of_album_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="album_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+<!--        TABLE AUTHOR_OF_TRACK-->
+
+    <changeSet id="13" author="LittleBlBb">
+        <createTable tableName="author_of_track" schemaName="app">
+            <column name="author_of_track_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="track_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+<!--        TABLE FAVORITE_TRACKS-->
+    <changeSet id="14" author="LittleBlBb">
+        <createTable tableName="favorite_tracks" schemaName="app">
+            <column name="favorite_track_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="track_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+<!--CONSTRAINTS-->
+    <changeSet id="15" author="LittleBlBb">
+        <!--        CONSTRAINT FK_FAVORITE_TRACKS_TRACK-->
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="favorite_tracks"
+                                 baseColumnNames="track_id"
+                                 constraintName="fk_favorite_tracks_track"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="track"
+                                 referencedColumnNames="track_id"/>
+
+        <!--        CONSTRAINT FK_FAVORITE_TRACKS_USER-->
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="favorite_tracks"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_favorite_tracks_user"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="user"
+                                 referencedColumnNames="user_id"/>
+
+        <!--        CONSTRAINT FK_FAVORITE_ALBUMS_ALBUM-->
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="favorite_albums"
+                                 baseColumnNames="album_id"
+                                 constraintName="fk_favorite_albums_album"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="album"
+                                 referencedColumnNames="album_id"/>
+
+        <!--        CONSTRAINT FK_FAVORITE_ALBUMS_USER-->
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="favorite_albums"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_favorite_albums_user"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="user"
+                                 referencedColumnNames="user_id"/>
+        <!--        CONSTRAINT FK_AUTHOR_OF_TRACK_AUTHOR-->
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="author_of_track"
+                                 baseColumnNames="author_id"
+                                 constraintName="fk_author_of_track_author"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="author"
+                                 referencedColumnNames="author_id"/>
+
+        <!--        CONSTRAINT FK_AUTHOR_OF_TRACK_TRACK-->
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="author_of_track"
+                                 baseColumnNames="track_id"
+                                 constraintName="fk_author_of_track_track"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="track"
+                                 referencedColumnNames="track_id"/>
+
+        <!--        CONSTRAINT FK_AUTHOR_OF_ALBUM_AUTHOR-->
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="author_of_album"
+                                 baseColumnNames="author_id"
+                                 constraintName="fk_author_of_album_author"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="author"
+                                 referencedColumnNames="author_id"/>
+
+        <!--        CONSTRAINT FK_AUTHOR_OF_ALBUM_ALBUM-->
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="author_of_album"
+                                 baseColumnNames="album_id"
+                                 constraintName="fk_author_of_album_album"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="album"
+                                 referencedColumnNames="album_id"/>
+
+        <!--        CONSTRAINT FK_TRACK_OF_ALBUM_TRACK-->
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="track_of_album"
+                                 baseColumnNames="track_id"
+                                 constraintName="fk_track_of_album_track"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="track"
+                                 referencedColumnNames="track_id"/>
+
+        <!--        CONSTRAINT FK_TRACK_OF_ALBUM_ALBUM-->
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="track_of_album"
+                                 baseColumnNames="album_id"
+                                 constraintName="fk_track_of_album_album"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="album"
+                                 referencedColumnNames="album_id"/>
+
+        <!--        CONSTRAINT TRACK_OF_PLAYLIST_PLAYLIST-->
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="track_of_playlist"
+                                 baseColumnNames="playlist_id"
+                                 constraintName="fk_track_of_playlist_playlist"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="playlist"
+                                 referencedColumnNames="playlist_id"/>
+
+        <!--        CONSTRAINT TRACK_OF_PLAYLIST_TRACK-->
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="track_of_playlist"
+                                 baseColumnNames="track_id"
+                                 constraintName="fk_track_of_playlist_track"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="track"
+                                 referencedColumnNames="track_id"/>
+
+
+        <!--        CONSTRAINT FK_PLAYLIST_USER-->
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="playlist"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_playlist_user"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="user"
+                                 referencedColumnNames="user_id"/>
+
+        <!--        CONSTRAINT FK_USER_ROLE-->
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="user"
+                                 baseColumnNames="role_id"
+                                 constraintName="fk_user_role"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="role"
+                                 referencedColumnNames="role_id"/>
+    </changeSet>
+</databaseChangeLog>
