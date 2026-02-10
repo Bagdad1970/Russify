@@ -7,7 +7,7 @@ import java.time.OffsetDateTime;
 import java.util.Set;
 
 @Entity(name = "user")
-@Table(name = "usertus")
+@Table(name = "users")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -35,7 +35,7 @@ public class User {
     @Column(name = "username", nullable = false, length = 50, unique = true)
     private String username;
 
-    @Column(name = "email", nullable = false, length = 100)
+    @Column(name = "email", nullable = false, length = 100, unique = true)
     private String email;
 
     @Column(name = "password", nullable = false, length = 255)

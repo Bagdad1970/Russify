@@ -7,7 +7,7 @@ import java.time.OffsetDateTime;
 import java.util.Set;
 
 @Entity(name = "album")
-@Table(name = "album")
+@Table(name = "albums")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,10 +20,11 @@ public class Album {
     private Long id;
 
     @Column(name = "title", nullable = false, length = 255)
-    private String name;
+    private String title;
 
-    @Column(name = "type", nullable = false, length = 50)
-    private AlbumType type;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "album_type_id", nullable = false)
+    private AlbumType albumType;
 
     @Column(name = "released_at", nullable = false)
     private OffsetDateTime releasedAt;

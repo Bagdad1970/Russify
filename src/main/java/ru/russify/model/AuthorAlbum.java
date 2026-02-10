@@ -2,8 +2,10 @@ package ru.russify.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ru.russify.model.compositekey.AuthorAlbumPK;
 
 @Entity(name = "author_album")
+@IdClass(AuthorAlbumPK.class)
 @Table(name = "author_of_album")
 @Data
 @AllArgsConstructor
@@ -12,8 +14,10 @@ import lombok.*;
 public class AuthorAlbum {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long authorId;
+
+    @Id
+    private Long albumId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)

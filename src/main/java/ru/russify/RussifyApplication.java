@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class RussifyServiceApplication {
+public class RussifyApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(RussifyServiceApplication.class, args);
+        SpringApplication.run(RussifyApplication.class, args);
     }
 
 }

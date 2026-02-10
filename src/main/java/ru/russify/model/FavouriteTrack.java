@@ -2,8 +2,10 @@ package ru.russify.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ru.russify.model.compositekey.FavouriteTrackPK;
 
 @Entity(name = "favourite_track")
+@IdClass(FavouriteTrackPK.class)
 @Table(name = "favourite_tracks")
 @Data
 @AllArgsConstructor
@@ -12,8 +14,10 @@ import lombok.*;
 public class FavouriteTrack {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long userId;
+
+    @Id
+    private Long trackId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "track_id", nullable = false)

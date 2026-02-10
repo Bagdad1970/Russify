@@ -6,7 +6,7 @@ import lombok.*;
 import java.util.Set;
 
 @Entity(name = "author")
-@Table(name = "author")
+@Table(name = "authors")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

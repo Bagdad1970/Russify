@@ -6,7 +6,7 @@ import lombok.*;
 import java.util.Set;
 
 @Entity(name = "role")
-@Table(name = "role")
+@Table(name = "roles")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,7 +15,7 @@ public class Role {
 
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE)
-    @Column(name = "role_name", nullable = false, length = 100)
+    @Column(name = "role_id")
     private Long id;
 
     @Column(name = "role_name", nullable = false, length = 100)

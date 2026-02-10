@@ -6,7 +6,7 @@ import lombok.*;
 import java.util.Set;
 
 @Entity(name = "track")
-@Table(name = "track")
+@Table(name = "tracks")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

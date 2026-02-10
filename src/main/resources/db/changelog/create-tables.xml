@@ -7,7 +7,7 @@
 
     <!--    TABLE ROLE-->
     <changeSet id="3" author="LittleBlBb">
-        <createTable tableName="role" schemaName="app">
+        <createTable tableName="roles" schemaName="app">
             <column name="role_id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -17,10 +17,21 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="4" author="Bagdad1970">
+        <createTable tableName="album_types" schemaName="app">
+            <column name="album_type_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
 
 <!--        TABLE USER-->
-    <changeSet id="4" author="LittleBlBb">
-        <createTable tableName="user" schemaName="app">
+    <changeSet id="5" author="LittleBlBb">
+        <createTable tableName="users" schemaName="app">
             <column name="user_id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -43,8 +54,8 @@
     </changeSet>
 
 <!--        TABLE PLAYLIST-->
-    <changeSet id="5" author="LittleBlBb">
-        <createTable tableName="playlist" schemaName="app">
+    <changeSet id="6" author="LittleBlBb">
+        <createTable tableName="playlists" schemaName="app">
             <column name="playlist_id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -62,18 +73,21 @@
 
     <!--        TABLE ALBUM-->
 
-    <changeSet id="6" author="LittleBlBb">
-        <createTable tableName="album" schemaName="app">
+    <changeSet id="7" author="LittleBlBb">
+        <createTable tableName="albums" schemaName="app">
             <column name="album_id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="album_name" type="VARCHAR(255)">
+            <column name="title" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="type" type="VARCHAR(50)">
+            <column name="album_type_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+            <column name="cover_filepath" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="released_at" type="TIMESTAMP WITHOUT TIME ZONE">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -81,31 +95,51 @@
 
 
 <!--        TABLE AUTHOR-->
-    <changeSet id="7" author="LittleBlBb">
-        <createTable tableName="author" schemaName="app">
+    <changeSet id="8" author="LittleBlBb">
+        <createTable tableName="authors" schemaName="app">
             <column name="author_id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="author_name" type="VARCHAR(255)">
+            <column name="name" type="VARCHAR(255)">
                 <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="photo_filepath" type="VARCHAR(255)">
+                <constraints nullable="true"/>
             </column>
         </createTable>
     </changeSet>
 
 
 <!--        TABLE TRACK-->
-    <changeSet id="8" author="LittleBlBb">
-        <createTable tableName="track" schemaName="app">
+    <changeSet id="9" author="LittleBlBb">
+        <createTable tableName="tracks" schemaName="app">
             <column name="track_id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="track_name" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="genre" type="VARCHAR(100)">
+            <column name="genre_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="path" type="VARCHAR(512)">
+            <column name="audio_filepath" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cover_filepath" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="10" author="Bagdad1970">
+        <createTable tableName="genres" schemaName="app">
+            <column name="genre_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -115,100 +149,82 @@
 <!--        JOIN TABLES-->
 
 <!--        TABLE FAVORITE_ALBUMS-->
-    <changeSet id="9" author="LittleBlBb">
+    <changeSet id="11" author="LittleBlBb">
         <createTable tableName="favorite_albums" schemaName="app">
-            <column name="favorite_albums_id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
             <column name="album_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="user_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
         </createTable>
     </changeSet>
 
 
     <!--        TABLE TRACK_OF_PLAYLIST-->
-    <changeSet id="10" author="LittleBlBb">
+    <changeSet id="12" author="LittleBlBb">
         <createTable tableName="track_of_playlist" schemaName="app">
-            <column name="connection_id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
             <column name="playlist_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="track_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
         </createTable>
     </changeSet>
 
 <!--        TABLE TRACK_OF_ALBUM-->
-    <changeSet id="11" author="LittleBlBb">
+    <changeSet id="13" author="LittleBlBb">
         <createTable tableName="track_of_album" schemaName="app">
-            <column name="track_of_album_id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
             <column name="track_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="album_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
         </createTable>
     </changeSet>
 
 <!--        TABLE AUTHOR_OF_ALBUM-->
 
-    <changeSet id="12" author="LittleBlBb">
+    <changeSet id="14" author="LittleBlBb">
         <createTable tableName="author_of_album" schemaName="app">
-            <column name="author_of_album_id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
             <column name="author_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="album_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
         </createTable>
     </changeSet>
 
 <!--        TABLE AUTHOR_OF_TRACK-->
 
-    <changeSet id="13" author="LittleBlBb">
+    <changeSet id="15" author="LittleBlBb">
         <createTable tableName="author_of_track" schemaName="app">
-            <column name="author_of_track_id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
             <column name="author_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="track_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
         </createTable>
     </changeSet>
 
 <!--        TABLE FAVORITE_TRACKS-->
-    <changeSet id="14" author="LittleBlBb">
+    <changeSet id="16" author="LittleBlBb">
         <createTable tableName="favorite_tracks" schemaName="app">
-            <column name="favorite_track_id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
             <column name="track_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="user_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
         </createTable>
     </changeSet>
 
 <!--CONSTRAINTS-->
-    <changeSet id="15" author="LittleBlBb">
+    <changeSet id="17" author="LittleBlBb">
         <!--        CONSTRAINT FK_FAVORITE_TRACKS_TRACK-->
 
         <addForeignKeyConstraint baseTableSchemaName="app"
@@ -216,7 +232,7 @@
                                  baseColumnNames="track_id"
                                  constraintName="fk_favorite_tracks_track"
                                  referencedTableSchemaName="app"
-                                 referencedTableName="track"
+                                 referencedTableName="tracks"
                                  referencedColumnNames="track_id"/>
 
         <!--        CONSTRAINT FK_FAVORITE_TRACKS_USER-->
@@ -226,7 +242,7 @@
                                  baseColumnNames="user_id"
                                  constraintName="fk_favorite_tracks_user"
                                  referencedTableSchemaName="app"
-                                 referencedTableName="user"
+                                 referencedTableName="users"
                                  referencedColumnNames="user_id"/>
 
         <!--        CONSTRAINT FK_FAVORITE_ALBUMS_ALBUM-->
@@ -236,7 +252,7 @@
                                  baseColumnNames="album_id"
                                  constraintName="fk_favorite_albums_album"
                                  referencedTableSchemaName="app"
-                                 referencedTableName="album"
+                                 referencedTableName="albums"
                                  referencedColumnNames="album_id"/>
 
         <!--        CONSTRAINT FK_FAVORITE_ALBUMS_USER-->
@@ -246,7 +262,7 @@
                                  baseColumnNames="user_id"
                                  constraintName="fk_favorite_albums_user"
                                  referencedTableSchemaName="app"
-                                 referencedTableName="user"
+                                 referencedTableName="users"
                                  referencedColumnNames="user_id"/>
         <!--        CONSTRAINT FK_AUTHOR_OF_TRACK_AUTHOR-->
 
@@ -255,7 +271,7 @@
                                  baseColumnNames="author_id"
                                  constraintName="fk_author_of_track_author"
                                  referencedTableSchemaName="app"
-                                 referencedTableName="author"
+                                 referencedTableName="authors"
                                  referencedColumnNames="author_id"/>
 
         <!--        CONSTRAINT FK_AUTHOR_OF_TRACK_TRACK-->
@@ -265,7 +281,7 @@
                                  baseColumnNames="track_id"
                                  constraintName="fk_author_of_track_track"
                                  referencedTableSchemaName="app"
-                                 referencedTableName="track"
+                                 referencedTableName="tracks"
                                  referencedColumnNames="track_id"/>
 
         <!--        CONSTRAINT FK_AUTHOR_OF_ALBUM_AUTHOR-->
@@ -275,7 +291,7 @@
                                  baseColumnNames="author_id"
                                  constraintName="fk_author_of_album_author"
                                  referencedTableSchemaName="app"
-                                 referencedTableName="author"
+                                 referencedTableName="authors"
                                  referencedColumnNames="author_id"/>
 
         <!--        CONSTRAINT FK_AUTHOR_OF_ALBUM_ALBUM-->
@@ -285,7 +301,7 @@
                                  baseColumnNames="album_id"
                                  constraintName="fk_author_of_album_album"
                                  referencedTableSchemaName="app"
-                                 referencedTableName="album"
+                                 referencedTableName="albums"
                                  referencedColumnNames="album_id"/>
 
         <!--        CONSTRAINT FK_TRACK_OF_ALBUM_TRACK-->
@@ -295,7 +311,7 @@
                                  baseColumnNames="track_id"
                                  constraintName="fk_track_of_album_track"
                                  referencedTableSchemaName="app"
-                                 referencedTableName="track"
+                                 referencedTableName="tracks"
                                  referencedColumnNames="track_id"/>
 
         <!--        CONSTRAINT FK_TRACK_OF_ALBUM_ALBUM-->
@@ -305,7 +321,7 @@
                                  baseColumnNames="album_id"
                                  constraintName="fk_track_of_album_album"
                                  referencedTableSchemaName="app"
-                                 referencedTableName="album"
+                                 referencedTableName="albums"
                                  referencedColumnNames="album_id"/>
 
         <!--        CONSTRAINT TRACK_OF_PLAYLIST_PLAYLIST-->
@@ -315,7 +331,7 @@
                                  baseColumnNames="playlist_id"
                                  constraintName="fk_track_of_playlist_playlist"
                                  referencedTableSchemaName="app"
-                                 referencedTableName="playlist"
+                                 referencedTableName="playlists"
                                  referencedColumnNames="playlist_id"/>
 
         <!--        CONSTRAINT TRACK_OF_PLAYLIST_TRACK-->
@@ -325,28 +341,50 @@
                                  baseColumnNames="track_id"
                                  constraintName="fk_track_of_playlist_track"
                                  referencedTableSchemaName="app"
-                                 referencedTableName="track"
+                                 referencedTableName="tracks"
                                  referencedColumnNames="track_id"/>
 
 
         <!--        CONSTRAINT FK_PLAYLIST_USER-->
 
         <addForeignKeyConstraint baseTableSchemaName="app"
-                                 baseTableName="playlist"
+                                 baseTableName="playlists"
                                  baseColumnNames="user_id"
                                  constraintName="fk_playlist_user"
                                  referencedTableSchemaName="app"
-                                 referencedTableName="user"
+                                 referencedTableName="users"
                                  referencedColumnNames="user_id"/>
 
         <!--        CONSTRAINT FK_USER_ROLE-->
 
         <addForeignKeyConstraint baseTableSchemaName="app"
-                                 baseTableName="user"
+                                 baseTableName="users"
                                  baseColumnNames="role_id"
                                  constraintName="fk_user_role"
                                  referencedTableSchemaName="app"
-                                 referencedTableName="role"
+                                 referencedTableName="roles"
                                  referencedColumnNames="role_id"/>
+
+        <!--        CONSTRAINT FK_USER_ROLE-->
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="tracks"
+                                 baseColumnNames="genre_id"
+                                 constraintName="fk_track_genre"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="genres"
+                                 referencedColumnNames="genre_id"/>
+
+        <!--        CONSTRAINT FK_USER_ROLE-->
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="albums"
+                                 baseColumnNames="album_type_id"
+                                 constraintName="fk_album_album_type"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="album_types"
+                                 referencedColumnNames="album_type_id"/>
+
+
     </changeSet>
 </databaseChangeLog>

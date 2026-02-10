@@ -2,8 +2,10 @@ package ru.russify.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ru.russify.model.compositekey.FavouriteAlbumPK;
 
 @Entity(name = "favourite_album")
+@IdClass(FavouriteAlbumPK.class)
 @Table(name = "favourite_albums")
 @Data
 @AllArgsConstructor
@@ -12,8 +14,10 @@ import lombok.*;
 public class FavouriteAlbum {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long userId;
+
+    @Id
+    private Long albumId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "album_id", nullable = false)
