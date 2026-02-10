@@ -27,7 +27,7 @@ public class Author {
     @Column(name = "description", nullable = true, length = 500)
     private String description;
 
-    @OneToMany(mappedBy = "author_album", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AuthorAlbum> authorAlbums;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)

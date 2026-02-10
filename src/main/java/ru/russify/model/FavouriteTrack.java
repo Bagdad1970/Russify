@@ -5,7 +5,6 @@ import lombok.*;
 import ru.russify.model.compositekey.FavouriteTrackPK;
 
 @Entity(name = "favourite_track")
-@IdClass(FavouriteTrackPK.class)
 @Table(name = "favourite_tracks")
 @Data
 @AllArgsConstructor
@@ -13,17 +12,16 @@ import ru.russify.model.compositekey.FavouriteTrackPK;
 @Builder
 public class FavouriteTrack {
 
-    @Id
-    private Long userId;
-
-    @Id
-    private Long trackId;
+    @EmbeddedId
+    private FavouriteTrackPK id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("trackId")
     @JoinColumn(name = "track_id", nullable = false)
     private Track track;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("userId")
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

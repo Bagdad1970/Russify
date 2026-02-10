@@ -5,7 +5,6 @@ import lombok.*;
 import ru.russify.model.compositekey.AuthorAlbumPK;
 
 @Entity(name = "author_album")
-@IdClass(AuthorAlbumPK.class)
 @Table(name = "author_of_album")
 @Data
 @AllArgsConstructor
@@ -13,17 +12,16 @@ import ru.russify.model.compositekey.AuthorAlbumPK;
 @Builder
 public class AuthorAlbum {
 
-    @Id
-    private Long authorId;
-
-    @Id
-    private Long albumId;
+    @EmbeddedId
+    private AuthorAlbumPK id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("authorId")
     @JoinColumn(name = "author_id", nullable = false)
     private Author author;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("albumId")
     @JoinColumn(name = "album_id", nullable = false)
     private Album album;
 

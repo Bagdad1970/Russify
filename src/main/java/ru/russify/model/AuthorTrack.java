@@ -5,7 +5,6 @@ import lombok.*;
 import ru.russify.model.compositekey.AuthorTrackPK;
 
 @Entity(name = "author_track")
-@IdClass(AuthorTrackPK.class)
 @Table(name = "author_of_track")
 @Data
 @AllArgsConstructor
@@ -13,17 +12,16 @@ import ru.russify.model.compositekey.AuthorTrackPK;
 @Builder
 public class AuthorTrack {
 
-    @Id
-    private Long authorId;
-
-    @Id
-    private Long trackId;
+    @EmbeddedId
+    private AuthorTrackPK id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("authorId")
     @JoinColumn(name = "author_id", nullable = false)
     private Author author;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("trackId")
     @JoinColumn(name = "track_id", nullable = false)
     private Track track;
 

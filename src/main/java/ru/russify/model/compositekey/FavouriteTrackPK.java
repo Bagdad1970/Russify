@@ -1,11 +1,15 @@
 package ru.russify.model.compositekey;
 
+import jakarta.persistence.Embeddable;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
-@Getter
+@Data
+@Embeddable
+@AllArgsConstructor
 @EqualsAndHashCode
 public class FavouriteTrackPK {
 

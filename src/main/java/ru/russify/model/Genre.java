@@ -17,7 +17,7 @@ public class Genre {
     @GeneratedValue(strategy= GenerationType.SEQUENCE)
     private Long id;
 
-    @OneToMany(mappedBy="track")
+    @OneToMany(mappedBy="genre")
     private Set<Track> tracks;
 
     private String name;

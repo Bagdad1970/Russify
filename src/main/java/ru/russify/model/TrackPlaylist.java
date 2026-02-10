@@ -5,7 +5,6 @@ import lombok.*;
 import ru.russify.model.compositekey.TrackPlaylistPK;
 
 @Entity(name = "track_playlist")
-@IdClass(TrackPlaylistPK.class)
 @Table(name = "track_of_playlist")
 @Data
 @AllArgsConstructor
@@ -13,17 +12,16 @@ import ru.russify.model.compositekey.TrackPlaylistPK;
 @Builder
 public class TrackPlaylist {
 
-    @Id
-    private Long trackId;
-
-    @Id
-    private Long playlistId;
+    @EmbeddedId
+    private TrackPlaylistPK id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("playlistId")
     @JoinColumn(name = "playlist_id", nullable = false)
     private Playlist playlist;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("trackId")
     @JoinColumn(name = "track_id", nullable = false)
     private Track track;
 

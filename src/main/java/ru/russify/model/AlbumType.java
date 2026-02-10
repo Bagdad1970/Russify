@@ -22,7 +22,7 @@ public class AlbumType {
 
     private String name;
 
-    @OneToMany(mappedBy="album_type")
+    @OneToMany(mappedBy="albumType")
     private Set<Album> albums;
 
 }
