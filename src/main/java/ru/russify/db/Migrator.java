@@ -10,6 +10,7 @@ import java.sql.Statement;
 
 /**
  * Класс для выполнения миграций из resources/db/changelog
+ * Временно исполняемый
  */
 public class Migrator {
     /**
@@ -44,5 +45,9 @@ public class Migrator {
             }
             System.out.println("Schemas ready, running Liquibase...");
         }
+    }
+
+    public static void main(String[] args) {
+        migrate(args);
     }
 }

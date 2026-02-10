@@ -23,7 +23,16 @@ cd MusicPlayer
 docker-compose.yml -up
 ```
 
-This should start PostgreSQL on port 15532 with user `admin`, password `password` and db_name `postgres`. 
+This should start PostgreSQL:
+- **port**: `15532`,
+- **user**: `admin`,
+- **password**: `password`,
+- **db_name**: `postgres`. 
 
 ## Functional
-Now u can only start migrations by using `App.java`
+- **You can start migrations by using `Migrator.java`**
+- **You can start server by using `App.java`**
+
+### Server
+- While App.java is running our server is available on `localhost:8080`
+- You can see swagger page on url `localhost:8080/swagger-ui/index.html`
