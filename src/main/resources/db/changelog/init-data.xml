@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+    
+    <changeSet id="16" author="LittleBlBb">
+        <insert tableName="role" schemaName="app">
+            <column name="role_name" value="admin"></column>
+        </insert>
+        <insert tableName="role" schemaName="app">
+            <column name="role_name" value="author"></column>
+        </insert>
+        <insert tableName="role" schemaName="app">
+            <column name="role_name" value="user"></column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="17" author="LittleBlBb">
+        <insert tableName="user" schemaName="app">
+            <column name="username" value="root"/>
+            <column name="role_id" value="1"/>
+            <column name="password" value="password1234"/>
+            <column name="email" value="test@gmail.com"/>
+            <column name="created_at" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="user" schemaName="app">
+            <column name="username" value="author"/>
+            <column name="role_id" value="2"/>
+            <column name="password" value="authorPassword1234"/>
+            <column name="email" value="coolAuthor@gmail.com"/>
+            <column name="created_at" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="user" schemaName="app">
+            <column name="username" value="default"/>
+            <column name="role_id" value="3"/>
+            <column name="password" value="defaultPassword1234"/>
+            <column name="email" value="defaultUser@gmail.com"/>
+            <column name="created_at" valueComputed="NOW()"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="18" author="LittleBlBb">
+        <insert tableName="playlist" schemaName="app">
+            <column name="user_id" value="3"/>
+            <column name="playlist_name" value="first_system_playlist"/>
+            <column name="is_system" value="true"/>
+        </insert>
+        <insert tableName="playlist" schemaName="app">
+            <column name="user_id" value="3"/>
+            <column name="playlist_name" value="second_system_playlist"/>
+            <column name="is_system" value="true"/>
+        </insert>
+        <insert tableName="playlist" schemaName="app">
+            <column name="user_id" value="3"/>
+            <column name="playlist_name" value="third_non_system_playlist"/>
+            <column name="is_system" value="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="19" author="LittleBlBb">
+        <insert tableName="album" schemaName="app">
+            <column name="type" value="album"/>
+            <column name="album_name" value="Most valuable pirate"/>
+            <column name="created_at" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="album" schemaName="app">
+            <column name="type" value="album"/>
+            <column name="album_name" value="Cruiser Aurora"/>
+            <column name="created_at" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="album" schemaName="app">
+            <column name="type" value="single"/>
+            <column name="album_name" value="2 Goyard"/>
+            <column name="created_at" valueComputed="NOW()"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20" author="LittleBlBb">
+        <insert tableName="author" schemaName="app">
+            <column name="author_name" value="Friendly Thug 52 NGG"></column>
+        </insert>
+        <insert tableName="author" schemaName="app">
+            <column name="author_name" value="Alblak 52"></column>
+        </insert>
+        <insert tableName="author" schemaName="app">
+            <column name="author_name" value="Whole lotta swag"></column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="21" author="LittleBlBb">
+        <insert tableName="track" schemaName="app">
+            <column name="track_name" value="2 Goyard"></column>
+            <column name="genre" value="rap"></column>
+            <column name="path" value="temp_path1"></column>
+        </insert>
+        <insert tableName="track" schemaName="app">
+            <column name="track_name" value="2 Goyard"></column>
+            <column name="genre" value="rap"></column>
+            <column name="path" value="temp_path1"></column>
+        </insert>
+        <insert tableName="track" schemaName="app">
+            <column name="track_name" value="2 Goyard"></column>
+            <column name="genre" value="rap"></column>
+            <column name="path" value="temp_path1"></column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="22" author="LittleBlBb">
+        <insert tableName="favorite_albums" schemaName="app">
+            <column name="album_id" value="1"></column>
+            <column name="user_id" value="1"></column>
+        </insert>
+        <insert tableName="favorite_albums" schemaName="app">
+            <column name="album_id" value="2"></column>
+            <column name="user_id" value="2"></column>
+        </insert>
+        <insert tableName="favorite_albums" schemaName="app">
+            <column name="album_id" value="3"></column>
+            <column name="user_id" value="3"></column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="23" author="LittleBlBb">
+        <insert tableName="track_of_playlist" schemaName="app">
+            <column name="playlist_id" value="1"></column>
+            <column name="track_id" value="1"></column>
+        </insert>
+        <insert tableName="track_of_playlist" schemaName="app">
+            <column name="playlist_id" value="2"></column>
+            <column name="track_id" value="2"></column>
+        </insert>
+        <insert tableName="track_of_playlist" schemaName="app">
+            <column name="playlist_id" value="3"></column>
+            <column name="track_id" value="3"></column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="24" author="LittleBlBb">
+        <insert tableName="track_of_album" schemaName="app">
+            <column name="album_id" value="1"></column>
+            <column name="track_id" value="1"></column>
+        </insert>
+        <insert tableName="track_of_album" schemaName="app">
+            <column name="album_id" value="2"></column>
+            <column name="track_id" value="2"></column>
+        </insert>
+        <insert tableName="track_of_album" schemaName="app">
+            <column name="album_id" value="3"></column>
+            <column name="track_id" value="3"></column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="25" author="LittleBlBb">
+        <insert tableName="author_of_album" schemaName="app">
+            <column name="album_id" value="1"></column>
+            <column name="author_id" value="1"></column>
+        </insert>
+        <insert tableName="author_of_album" schemaName="app">
+            <column name="album_id" value="2"></column>
+            <column name="author_id" value="2"></column>
+        </insert>
+        <insert tableName="author_of_album" schemaName="app">
+            <column name="album_id" value="3"></column>
+            <column name="author_id" value="3"></column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="26" author="LittleBlBb">
+        <insert tableName="author_of_track" schemaName="app">
+            <column name="author_id" value="1"></column>
+            <column name="track_id" value="1"></column>
+        </insert>
+        <insert tableName="author_of_track" schemaName="app">
+            <column name="author_id" value="2"></column>
+            <column name="track_id" value="2"></column>
+        </insert>
+        <insert tableName="author_of_track" schemaName="app">
+            <column name="author_id" value="3"></column>
+            <column name="track_id" value="3"></column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="27" author="LittleBlBb">
+        <insert tableName="favorite_tracks" schemaName="app">
+            <column name="track_id" value="1"></column>
+            <column name="user_id" value="1"></column>
+        </insert>
+        <insert tableName="favorite_tracks" schemaName="app">
+            <column name="track_id" value="2"></column>
+            <column name="user_id" value="2"></column>
+        </insert>
+        <insert tableName="favorite_tracks" schemaName="app">
+            <column name="track_id" value="3"></column>
+            <column name="user_id" value="3"></column>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
