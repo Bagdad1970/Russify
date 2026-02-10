@@ -1,4 +1,3 @@
-// UserDto.java
 package ru.russify.dto;
 
 import jakarta.validation.constraints.Email;
@@ -11,23 +10,25 @@ import java.time.OffsetDateTime;
 
 @Data
 public class UserDto {
+
     private Long id;
 
-    @NotNull(message = "Роль обязательна")
+    @NotNull(message = "Role is required")
     private Long roleId;
 
-    @NotBlank(message = "Имя пользователя не может быть пустым")
+    @NotBlank(message = "Username cannot be empty")
     @Size(min = 3, max = 50, message = "Имя пользователя должно быть от 3 до 50 символов")
     private String username;
 
-    @NotBlank(message = "Email не может быть пустым")
-    @Email(message = "Некорректный формат email")
-    @Size(max = 100, message = "Email не должен превышать 100 символов")
+    @NotBlank(message = "Email cannot be empty")
+    @Email(message = "Incorrect email format")
+    @Size(max = 100, message = "Email must not exceed 100 characters")
     private String email;
 
-    @NotBlank(message = "Пароль не может быть пустым")
-    @Size(min = 6, max = 255, message = "Пароль должен быть от 6 до 255 символов")
+    @NotBlank(message = "Password cannot be empty")
+    @Size(min = 6, max = 255, message = "Password must contain from 6 to 255 characters")
     private String password;
 
     private OffsetDateTime createdAt;
+
 }

@@ -1,6 +1,7 @@
 package ru.russify.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -9,17 +10,22 @@ import java.util.Set;
 
 @Data
 public class AlbumDto {
+
     private Long id;
 
-    @NotBlank(message = "Название альбома не может быть пустым")
+    @NotBlank(message = "The album title cannot be empty")
     private String name;
 
-    @NotNull(message = "Тип альбома обязателен")
-    private AuthorDto type;
+    @NotNull(message = "The album type is required")
+    private AlbumTypeDto type;
 
-    @NotNull(message = "Дата выпуска обязательна")
+    @NotNull(message = "The release date is required")
     private OffsetDateTime releasedAt;
 
+    @NotEmpty(message = "Album must contain at least one track")
     private Set<Long> trackIds;
+
+    @NotEmpty(message = "Album must contain at least one author")
     private Set<Long> authorIds;
+
 }

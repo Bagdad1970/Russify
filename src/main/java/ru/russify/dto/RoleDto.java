@@ -5,8 +5,10 @@ import lombok.Data;
 
 @Data
 public class RoleDto {
+
     private Long id;
 
-    @NotBlank(message = "Название роли не может быть пустым")
+    @NotBlank(message = "Role name cannot be empty")
     private String name;
+
 }

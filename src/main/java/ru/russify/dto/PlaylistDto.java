@@ -8,16 +8,18 @@ import java.util.Set;
 
 @Data
 public class PlaylistDto {
+
     private Long id;
 
-    @NotBlank(message = "Название плейлиста не может быть пустым")
+    @NotBlank(message = "Playlist name cannot be empty")
     private String name;
 
-    @NotNull(message = "ID пользователя обязателен")
+    @NotNull(message = "User id is required")
     private Long userId;
 
-    @NotNull(message = "Флаг системного плейлиста обязателен")
+    @NotNull(message = "System playlist flag is required")
     private Boolean isSystem;
 
     private Set<Long> trackIds;
+
 }

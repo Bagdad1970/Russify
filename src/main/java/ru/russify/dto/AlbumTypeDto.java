@@ -4,15 +4,11 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class AuthorDto {
+public class AlbumTypeDto {
 
     private Long id;
 
-    @NotBlank(message = "Author name cannot be empty")
+    @NotBlank(message = "The album type name cannot be empty")
     private String name;
-
-    private String photoFilepath;
-
-    private String description;
 
 }

@@ -5,8 +5,10 @@ import lombok.Data;
 
 @Data
 public class GenreDto {
+
     private Long id;
 
-    @NotBlank(message = "Название жанра не может быть пустым")
+    @NotBlank(message = "The genre name cannot be empty")
     private String name;
+
 }
