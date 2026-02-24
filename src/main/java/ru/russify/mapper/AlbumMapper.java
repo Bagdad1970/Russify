@@ -3,6 +3,7 @@ package ru.russify.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.russify.dto.AlbumDto;
+import ru.russify.dto.request.CreateAlbumDto;
 import ru.russify.model.Album;
 
 @Mapper(componentModel = "spring",
@@ -24,10 +25,11 @@ public interface AlbumMapper {
     AlbumDto toDto(Album entity);
 
 
-    @Mapping(source = "name", target = "title")
-    @Mapping(source = "type", target = "albumType")
+    @Mapping(source = "title", target = "title")
+    @Mapping(source = "releasedAt", target = "releasedAt")
+    @Mapping(target = "albumType", ignore = true)
     @Mapping(target = "trackAlbums", ignore = true)
     @Mapping(target = "authorAlbums", ignore = true)
     @Mapping(target = "favouriteAlbums", ignore = true)
-    Album toEntity(AlbumDto dto);
+    Album toEntity(CreateAlbumDto dto);
 }
