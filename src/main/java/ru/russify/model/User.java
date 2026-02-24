@@ -8,7 +8,8 @@ import java.util.Set;
 
 @Entity(name = "user")
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

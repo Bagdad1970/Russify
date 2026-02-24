@@ -6,7 +6,7 @@
   </component>
   <component name="DBNavigator.Project.DataEditorManager">
     <record-view-column-sorting-type value="BY_INDEX" />
-    <value-preview-text-wrapping value="true" />
+    <value-preview-text-wrapping value="false" />
     <value-preview-pinned value="false" />
   </component>
   <component name="DBNavigator.Project.DatabaseAssistantManager">
@@ -44,6 +44,7 @@
       </filter>
     </filter-actions>
     <filter-actions connection-id="e2a8ec6f-ae61-4ce1-9efe-cde7e9ab6e11" dataset="app.album" active-filter-id="" />
+    <filter-actions connection-id="e2a8ec6f-ae61-4ce1-9efe-cde7e9ab6e11" dataset="app.albums" active-filter-id="EMPTY_FILTER" />
   </component>
   <component name="DBNavigator.Project.ObjectQuickFilterManager">
     <last-used-operator value="EQUAL" />

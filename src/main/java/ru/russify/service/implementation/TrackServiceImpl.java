@@ -1,5 +1,6 @@
 package ru.russify.service.implementation;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.russify.exception.TrackNotFoundException;
 import ru.russify.model.Track;
@@ -12,11 +13,8 @@ import java.util.Optional;
 @Service
 public class TrackServiceImpl implements TrackService {
 
-    private final TrackRepository repository;
-
-    public TrackServiceImpl(TrackRepository repository) {
-        this.repository = repository;
-    }
+    @Autowired
+    private TrackRepository repository;
 
     @Override
     public Track save(Track track) {

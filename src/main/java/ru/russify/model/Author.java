@@ -7,7 +7,8 @@ import java.util.Set;
 
 @Entity(name = "author")
 @Table(name = "authors")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

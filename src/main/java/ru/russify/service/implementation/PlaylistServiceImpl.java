@@ -1,5 +1,6 @@
 package ru.russify.service.implementation;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.russify.exception.PlaylistNotFoundException;
 import ru.russify.model.Playlist;
@@ -12,11 +13,8 @@ import java.util.Optional;
 @Service
 public class PlaylistServiceImpl implements PlaylistService {
 
-    private final PlaylistRepository repository;
-
-    public PlaylistServiceImpl(PlaylistRepository repository) {
-        this.repository = repository;
-    }
+    @Autowired
+    private PlaylistRepository repository;
 
     @Override
     public Playlist save(Playlist playlist) {

@@ -1,5 +1,6 @@
 package ru.russify.service.implementation;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.russify.exception.GenreNotFoundException;
 import ru.russify.model.Genre;
@@ -12,11 +13,8 @@ import java.util.Optional;
 @Service
 public class GenreServiceImpl implements GenreService {
 
-    private final GenreRepository repository;
-
-    public GenreServiceImpl(GenreRepository repository) {
-        this.repository = repository;
-    }
+    @Autowired
+    private GenreRepository repository;
 
     @Override
     public Genre save(Genre genre) {

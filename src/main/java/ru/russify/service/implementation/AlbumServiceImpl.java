@@ -1,7 +1,10 @@
 package ru.russify.service.implementation;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.russify.dto.AlbumDto;
 import ru.russify.exception.AlbumNotFoundException;
+import ru.russify.mapper.AlbumMapper;
 import ru.russify.model.Album;
 import ru.russify.repository.AlbumRepository;
 import ru.russify.service.interfaces.AlbumService;
@@ -9,19 +12,36 @@ import ru.russify.service.interfaces.AlbumService;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Сервис для управления альбомами.
+ * Позволяет сохранять, редактировать, искать и удалять альбомы.
+ */
+
 @Service
 public class AlbumServiceImpl implements AlbumService {
 
-    private final AlbumRepository repository;
+    @Autowired
+    private AlbumRepository repository;
 
-    public AlbumServiceImpl(AlbumRepository repository) {
-        this.repository = repository;
+    @Autowired
+    private AlbumMapper mapper;
+
+
+    public List<AlbumDto> findAllWithRelations() {
+        return repository.findAllAlbumsDto();
     }
 
+    /**
+     * Метод сохранения альбома в бд.
+     *
+     * @param album - экземпляр класса {@code Album }
+     * @return
+     */
     @Override
     public Album save(Album album) {
         return repository.save(album);
     }
+
 
     @Override
     public Album update(Album album) {
@@ -49,5 +69,4 @@ public class AlbumServiceImpl implements AlbumService {
     public void deleteById(Long id) {
         repository.deleteById(id);
     }
-
 }

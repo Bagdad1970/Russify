@@ -6,7 +6,8 @@ import ru.russify.model.compositekey.AuthorTrackPK;
 
 @Entity(name = "author_track")
 @Table(name = "author_of_track")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

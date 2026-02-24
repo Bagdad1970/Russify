@@ -6,7 +6,8 @@ import ru.russify.model.compositekey.FavouriteAlbumPK;
 
 @Entity(name = "favourite_album")
 @Table(name = "favourite_albums")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

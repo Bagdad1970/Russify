@@ -11,6 +11,8 @@ spring:
     show-sql: true
     properties:
       hibernate:
+        default_batch_fetch_size: 30
+        default_schema: app
         format_sql: true
 
   liquibase:

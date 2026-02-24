@@ -7,7 +7,8 @@ import java.util.Set;
 
 @Entity(name = "track")
 @Table(name = "tracks")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

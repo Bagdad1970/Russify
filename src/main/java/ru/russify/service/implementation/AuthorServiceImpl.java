@@ -1,5 +1,6 @@
 package ru.russify.service.implementation;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.russify.exception.AuthorNotFoundException;
 import ru.russify.model.Author;
@@ -12,11 +13,8 @@ import java.util.Optional;
 @Service
 public class AuthorServiceImpl implements AuthorService {
 
-    private final AuthorRepository repository;
-
-    public AuthorServiceImpl(AuthorRepository repository) {
-        this.repository = repository;
-    }
+    @Autowired
+    private AuthorRepository repository;
 
     @Override
     public Author save(Author author) {

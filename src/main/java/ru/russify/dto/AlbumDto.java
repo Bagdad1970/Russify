@@ -28,4 +28,16 @@ public class AlbumDto {
     @NotEmpty(message = "Album must contain at least one author")
     private Set<Long> authorIds;
 
+    public AlbumDto(
+            Long id,
+            String name,
+            String typeName,
+            OffsetDateTime releasedAt
+    ) {
+        this.id = id;
+        this.name = name;
+        this.type = new AlbumTypeDto();
+        this.type.setName(typeName);
+        this.releasedAt = releasedAt;
+    }
 }

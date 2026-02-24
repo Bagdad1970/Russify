@@ -7,7 +7,8 @@ import java.util.Set;
 
 @Entity(name = "playlist")
 @Table(name = "playlists")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -18,7 +19,7 @@ public class Playlist {
     @Column(name = "playlist_id")
     private Long id;
 
-    @Column(name = "name", nullable = false, length = 255)
+    @Column(name = "playlist_name", nullable = false, length = 255)
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)

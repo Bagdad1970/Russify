@@ -6,7 +6,8 @@ import ru.russify.model.compositekey.TrackAlbumPK;
 
 @Entity(name = "track_album")
 @Table(name = "track_of_album")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

@@ -103,13 +103,13 @@
 
     <changeSet id="24" author="LittleBlBb">
         <insert tableName="authors" schemaName="app">
-            <column name="name" value="Friendly Thug 52 NGG"></column>
+            <column name="author_name" value="Friendly Thug 52 NGG"></column>
         </insert>
         <insert tableName="authors" schemaName="app">
-            <column name="name" value="Alblak 52"></column>
+            <column name="author_name" value="Alblak 52"></column>
         </insert>
         <insert tableName="authors" schemaName="app">
-            <column name="name" value="Whole lotta swag"></column>
+            <column name="author_name" value="Whole lotta swag"></column>
         </insert>
     </changeSet>
 
@@ -135,15 +135,15 @@
     </changeSet>
 
     <changeSet id="26" author="LittleBlBb">
-        <insert tableName="favorite_albums" schemaName="app">
+        <insert tableName="favourite_albums" schemaName="app">
             <column name="album_id" value="1"></column>
             <column name="user_id" value="1"></column>
         </insert>
-        <insert tableName="favorite_albums" schemaName="app">
+        <insert tableName="favourite_albums" schemaName="app">
             <column name="album_id" value="2"></column>
             <column name="user_id" value="2"></column>
         </insert>
-        <insert tableName="favorite_albums" schemaName="app">
+        <insert tableName="favourite_albums" schemaName="app">
             <column name="album_id" value="3"></column>
             <column name="user_id" value="3"></column>
         </insert>
@@ -210,15 +210,15 @@
     </changeSet>
 
     <changeSet id="31" author="LittleBlBb">
-        <insert tableName="favorite_tracks" schemaName="app">
+        <insert tableName="favourite_tracks" schemaName="app">
             <column name="track_id" value="1"></column>
             <column name="user_id" value="1"></column>
         </insert>
-        <insert tableName="favorite_tracks" schemaName="app">
+        <insert tableName="favourite_tracks" schemaName="app">
             <column name="track_id" value="2"></column>
             <column name="user_id" value="2"></column>
         </insert>
-        <insert tableName="favorite_tracks" schemaName="app">
+        <insert tableName="favourite_tracks" schemaName="app">
             <column name="track_id" value="3"></column>
             <column name="user_id" value="3"></column>
         </insert>

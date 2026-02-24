@@ -6,7 +6,8 @@ import ru.russify.model.compositekey.AuthorAlbumPK;
 
 @Entity(name = "author_album")
 @Table(name = "author_of_album")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

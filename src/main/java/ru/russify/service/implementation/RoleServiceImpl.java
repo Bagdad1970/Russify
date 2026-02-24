@@ -1,5 +1,7 @@
 package ru.russify.service.implementation;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import ru.russify.exception.RoleNotFoundException;
 import ru.russify.model.Role;
 import ru.russify.repository.RoleRepository;
@@ -8,13 +10,10 @@ import ru.russify.service.interfaces.RoleService;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class RoleServiceImpl implements RoleService {
-
-    private final RoleRepository repository;
-
-    public RoleServiceImpl(RoleRepository repository) {
-        this.repository = repository;
-    }
+    @Autowired
+    private RoleRepository repository;
 
     @Override
     public Role save(Role role) {
