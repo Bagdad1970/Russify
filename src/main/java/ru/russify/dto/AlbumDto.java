@@ -8,6 +8,10 @@ import lombok.Data;
 import java.time.OffsetDateTime;
 import java.util.Set;
 
+/**
+ * КТО ПРОЧИТАЛ ТОТ молодец
+ * параметры в DTO и MODEL ДОЛЖНЫ называться также, как и в таблицах!!!
+ */
 @Data
 public class AlbumDto {
 

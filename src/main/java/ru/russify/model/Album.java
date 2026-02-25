@@ -20,6 +20,11 @@ import lombok.Setter;
 import java.time.OffsetDateTime;
 import java.util.Set;
 
+
+/**
+ * КТО ПРОЧИТАЛ ТОТ молодец
+ * параметры в DTO и MODEL ДОЛЖНЫ называться также, как и в таблицах!!!
+ */
 @Entity
 @Table(name = "albums")
 @Getter
