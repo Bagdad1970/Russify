@@ -1,0 +1,279 @@
+.favorite-card-full-width {
+    width: 100%;
+    background: linear-gradient(to right, #ffb703 0%, #8b5cf6 100%);
+    padding: 50px 24px;
+    border-radius: 16px 16px 44px 44px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+@media (min-width: 1200px) {
+    .favorite-card-full-width {
+        background: radial-gradient(
+                circle at 50% 20%,
+                #ffb703 0%,
+                #8b5cf6 35%,
+                #222 65%
+        );
+    }
+
+    .favorite-card-full-width::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+                circle at 50% 30%,
+                rgba(255, 255, 255, 0.15),
+                transparent 60%
+        );
+        opacity: 0;
+        animation: combinedPulse 6s ease-in-out infinite;
+    }
+}
+/* <<<--- КОНЕЦ ДЕСКТОПА --->>> */
+
+@keyframes combinedPulse {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 0.5; }
+}
+
+.content-area {
+    max-width: 840px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #e6e6e6;
+    position: relative;
+    text-align: center;
+}
+
+/* <<<--- ОСНОВНАЯ РАЗМЕТКА: ДВЕ КОЛОНКИ --- >>> */
+.carousel-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 640px;
+    gap: 40px; /* отступ между колонками */
+}
+
+/* Левая колонка — текст */
+.title-text {
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 30px;
+    font-weight: bold;
+    color: white;
+    text-align: left;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+    margin: 0;
+    flex: 1;
+}
+
+/* Правая колонка — кнопки вертикально */
+.nav-button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.nav-button {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+    min-width: 180px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.carousel-btn {
+    transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.carousel-btn.moving-left {
+    animation: moveLeft 0.4s forwards;
+}
+
+.carousel-btn.moving-right {
+    animation: moveRight 0.4s forwards;
+}
+
+@keyframes moveLeft {
+    0% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(-20px);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes moveRight {
+    0% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(20px);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.button-text {
+    display: inline-block;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+/* <<<--- АДАПТИВНОСТЬ: Мобильные устройства (≤768px) --->>> */
+@media (max-width: 768px) {
+    .favorite-card-full-width {
+        padding: 20px 20px;
+        border-radius: 12px 12px 36px 36px;
+        background: linear-gradient(to right, #ffb703 0%, #8b5cf6 100%);
+    }
+
+    .content-area {
+        max-width: 640px;
+    }
+
+    .carousel-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 24px;
+    }
+
+    .title-text {
+        font-size: 26px;
+        text-align: center;
+        flex: none;
+    }
+
+    .nav-button-container {
+        flex-direction: row;
+        justify-content: center;
+        gap: 16px;
+    }
+
+    .nav-button {
+        padding: 14px 20px;
+        font-size: 22px;
+        height: 64px;
+        min-width: 160px;
+    }
+}
+
+/* <<<--- Очень маленькие экраны (≤480px) --->>> */
+@media (max-width: 480px) {
+    .favorite-card-full-width {
+        padding: 16px 16px;
+        border-radius: 10px 10px 32px 32px;
+        background: linear-gradient(to right, #ffb703 0%, #8b5cf6 100%);
+    }
+
+    .content-area {
+        max-width: 90%;
+    }
+
+    .carousel-row {
+        gap: 16px;
+    }
+
+    .title-text {
+        font-size: 22px;
+        text-align: center;
+    }
+
+    .nav-button-container {
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .nav-button {
+        padding: 12px 16px;
+        font-size: 20px;
+        height: 60px;
+        min-width: 140px;
+    }
+}
+
+/* <<<--- Десктоп (≥1200px) — оставляем как есть --->>> */
+@media (min-width: 1200px) {
+    .favorite-card-full-width {
+        background: radial-gradient(
+                circle at 50% 20%,
+                #ffb703 0%,
+                #8b5cf6 35%,
+                #222 65%
+        );
+    }
+
+    .favorite-card-full-width::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+                circle at 50% 30%,
+                rgba(255, 255, 255, 0.15),
+                transparent 60%
+        );
+        opacity: 0;
+        animation: combinedPulse 6s ease-in-out infinite;
+    }
+
+    .carousel-row {
+        display: flex;
+        align-items: center;
+        gap: 40px;
+    }
+
+    .title-text {
+        font-size: 30px;
+        text-align: left;
+    }
+
+    .nav-button-container {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .nav-button {
+        padding: 16px 24px;
+        font-size: 24px;
+        height: 72px;
+        min-width: 180px;
+    }
+}

@@ -1,0 +1,242 @@
+/* Стилизация скролла */
+div::-webkit-scrollbar {
+    width: 12px;
+}
+
+div::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 6px;
+}
+
+div::-webkit-scrollbar-thumb {
+    background: rgba(200, 200, 200, 0.3);
+    border-radius: 6px;
+    transition: background 0.3s ease;
+}
+
+div::-webkit-scrollbar-thumb:hover {
+    background: rgba(200, 200, 200, 0.7);
+}
+
+/* Основной контейнер — без отступа сверху */
+.home-page-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0; /* ← убран отступ */
+}
+
+.main-content {
+    flex: 0 0 auto;
+}
+
+.section-title {
+    font-family: 'Roboto Condensed', sans-serif;
+    text-align: center;
+    color: #e6e6e6;
+    font-size: 25px;
+    margin: 16px 0;
+    padding: 0 16px;
+}
+
+.bottom-section {
+    background-color: #2a2a2a;
+    max-width: 800px;
+    margin: 5px auto;
+    padding: 0 16px;
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+/* Мобильные устройства */
+@media (max-width: 767px) {
+    .home-page-container {
+        height: 100vh;
+        padding: 0;
+    }
+
+    .main-content {
+        flex: 0 0 auto;
+        padding: 0;
+    }
+
+    .section-title {
+        font-size: 18px;
+        margin: 12px 0;
+        padding: 0 8px;
+    }
+
+    .bottom-section {
+        margin: 0;
+        padding: 0 8px;
+        border-radius: 8px;
+        width: 100%;
+        max-width: none;
+    }
+
+
+    .scrollable-grid-container {
+        max-height: 300px;
+    }
+
+    .grid-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .color-tile {
+        padding: 16px;
+        font-size: 12px;
+    }
+
+    .track-card {
+        padding: 16px;
+        font-size: 16px;
+    }
+
+    .search-bar {
+        padding: 8px;
+    }
+
+    .search-bar input {
+        font-size: 14px;
+    }
+}
+
+/* Планшеты */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .home-page-container {
+        padding: 0;
+    }
+
+    .main-content {
+        flex: 0 0 auto;
+        padding: 0;
+    }
+
+    .section-title {
+        font-size: 20px;
+        margin: 14px 0;
+        padding: 0 12px;
+    }
+
+    .bottom-section {
+        margin: 0 12px 12px 12px;
+        padding: 0 12px;
+        border-radius: 10px;
+    }
+
+    .scrollable-grid-container {
+        max-height: 350px;
+    }
+
+    .grid-container {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+
+    .color-tile {
+        padding: 20px;
+        font-size: 14px;
+    }
+
+    .track-card {
+        padding: 20px;
+        font-size: 18px;
+    }
+
+    .search-bar {
+        padding: 10px;
+    }
+
+    .search-bar input {
+        font-size: 16px;
+    }
+}
+
+/* Небольшие ноутбуки */
+@media (min-width: 1024px) and (max-width: 1199px) {
+    .home-page-container {
+        padding: 0;
+    }
+
+    .main-content {
+        flex: 0 0 auto;
+        padding: 0;
+    }
+
+    .section-title {
+        font-size: 22px;
+        margin: 16px 0;
+        padding: 0 16px;
+    }
+
+    .bottom-section {
+        max-width: 700px;
+        margin: 0 auto 16px auto;
+        padding: 0 16px;
+        border-radius: 12px;
+    }
+
+    .scrollable-grid-container {
+        max-height: 400px;
+    }
+
+    .grid-container {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+
+    .color-tile {
+        padding: 24px;
+        font-size: 16px;
+    }
+
+    .track-card {
+        padding: 24px;
+        font-size: 20px;
+    }
+
+    .search-bar {
+        padding: 12px;
+    }
+
+    .search-bar input {
+        font-size: 16px;
+    }
+}
+
+/* Десктоп */
+@media (min-width: 1200px) {
+    .home-page-container {
+        padding: 0; /* ← убран отступ */
+    }
+
+    .main-content {
+        flex: 0 0 auto;
+        padding: 0; /* ← убран отступ */
+    }
+
+    .section-title {
+        font-size: 25px;
+        margin: 16px 0;
+        padding: 0 16px;
+    }
+
+    .bottom-section {
+        max-width: 800px;
+        margin: 5px auto;
+        padding: 0 16px;
+        border-radius: 12px;
+    }
+
+    .grid-container {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 24px;
+    }
+}

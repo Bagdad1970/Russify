@@ -1,0 +1,419 @@
+.pml-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1400;
+    backdrop-filter: blur(4px);
+}
+
+.pml-container {
+    position: absolute;
+    width: 640px;
+    max-height: calc(100vh - 112px);
+    background: linear-gradient(135deg, #1e1e24 0%, #16161e 100%);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #f1f1f1;
+}
+
+/* ──────────────────────────────
+   Десктоп 1200+
+─────────────────────────────── */
+@media (min-width: 1200px) {
+    .pml-container {
+        width: 680px;
+        border-radius: 20px;
+    }
+    .pml-playlist-cover {
+        width: 168px;
+        height: 168px;
+    }
+    .pml-title {
+        font-size: 28px;
+    }
+}
+
+/* ──────────────────────────────
+   Ноутбуки 1024–1199
+─────────────────────────────── */
+@media (min-width: 1024px) and (max-width: 1199px) {
+    .pml-container {
+        width: 580px;
+    }
+    .pml-playlist-cover {
+        width: 140px;
+        height: 140px;
+    }
+}
+
+/* ──────────────────────────────
+   Планшеты 768–1023
+─────────────────────────────── */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .pml-container {
+        width: calc(100% - 48px);
+        max-width: 720px;
+        max-height: calc(100vh - 80px);
+    }
+    .pml-playlist-cover {
+        width: 120px;
+        height: 120px;
+    }
+    .pml-title {
+        font-size: 22px;
+    }
+}
+
+/* ──────────────────────────────
+   Мобильные ≤ 767px
+─────────────────────────────── */
+@media (max-width: 767px) {
+    .pml-container {
+        width: calc(100% - 24px);
+        max-height: calc(100vh - 32px);
+        border-radius: 16px 16px 0 0;
+        bottom: 0;
+        top: auto;
+        left: 12px;
+        right: 12px;
+        transform: none !important;
+    }
+
+    .pml-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        padding: 48px 0 24px;
+        gap: 16px;
+    }
+
+    .pml-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+    }
+
+    .pml-playlist-cover-wrapper {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .pml-playlist-cover {
+        width: 140px;
+        height: 140px;
+        border-radius: 12px;
+    }
+
+    .pml-playlist-info {
+        width: 100%;
+        text-align: center;
+    }
+
+    .pml-title {
+        font-size: 20px;
+        line-height: 1.3;
+    }
+
+    .pml-meta {
+        font-size: 13px;
+    }
+
+    .pml-playlist-actions-inline {
+        width: 100%;
+        justify-content: center;
+        gap: 24px;
+        margin-top: 16px;
+    }
+
+    .pml-playlist-actions-inline .pml-btn {
+        width: 48px;
+        height: 48px;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #aaa;
+        transition: color 0.2s;
+    }
+
+    .pml-playlist-actions-inline .pml-btn:hover {
+        color: white;
+    }
+
+    .pml-track-list {
+        padding: 0 8px;
+    }
+
+    .pml-track-item.mobile {
+        gap: 12px;
+        padding: 12px 0;
+        align-items: center;
+    }
+
+    .pml-track-item.mobile .pml-track-album {
+        display: none;
+    }
+
+    .pml-track-item.mobile .pml-track-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .pml-track-item.mobile .pml-track-duration {
+        font-size: 13px;
+        min-width: 48px;
+        text-align: right;
+    }
+
+    .pml-track-item.mobile .pml-track-actions {
+        margin-left: auto;
+    }
+
+    .pml-track-item.mobile .pml-btn {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Общие стили */
+.pml-header {
+    display: flex;
+    align-items: flex-end;
+    gap: 32px;
+    margin-bottom: 24px;
+    position: relative;
+}
+
+.pml-playlist-cover {
+    width: 156px;
+    height: 156px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+}
+
+.pml-playlist-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pml-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+.pml-meta {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.pml-close {
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #ffffff;
+    transition: all 0.2s;
+}
+
+.pml-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.pml-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 16px 0;
+}
+
+.pml-track-list {
+    overflow-y: auto;
+    padding-bottom: 16px;
+}
+
+.pml-track-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    gap: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    transition: background 0.18s;
+}
+
+.pml-track-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.pml-track-item:last-child {
+    border-bottom: none;
+}
+
+.pml-track-index {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    width: 32px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.pml-track-cover-wrapper {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+}
+
+.pml-track-cover {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pml-track-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.pml-track-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pml-track-artist {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pml-track-album {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    white-space: nowrap;
+}
+
+.pml-track-duration {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    width: 60px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.pml-track-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.pml-btn {
+    background: none;
+    border: none;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.18s;
+}
+
+.pml-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.pml-btn-heart.active svg {
+    fill: #ff2d55;
+    stroke: #ff2d55;
+}
+
+.pml-playlist-actions-inline {
+    display: flex;
+    gap: 12px;
+}
+
+
+
+/* ──────────────────────────────────────────────
+   Контекстное меню троеточия (мобильное)
+─────────────────────────────────────────────── */
+.pml-context-menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);           /* чуть темнее, чтобы выделять меню */
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1500;
+}
+
+.pml-context-menu {
+    background: #1e1e24;                        /* ← основной цвет окна */
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px 16px 0 0;
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.pml-context-menu.active {
+    transform: translateY(0);
+}
+
+.pml-context-item {
+    padding: 17px 24px;
+    color: #e0e0e0;
+    font-size: 16px;
+    font-weight: 400;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.16s;
+}
+
+.pml-context-item:hover,
+.pml-context-item:active {
+    background: rgba(255, 255, 255, 0.06);      /* лёгкий ховер, как в остальном интерфейсе */
+}
+
+.pml-context-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.07);
+    margin: 0 24px;
+}

@@ -1,0 +1,218 @@
+.profile-page-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+
+.profile-bottom-section {
+    background-color: #2a2a2a;
+    max-width: 800px;
+    margin: 5px auto 10px auto;
+    padding: 0 16px;
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.profile-albums-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+}
+
+.profile-albums-title {
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 25px;
+    color: #e6e6e6;
+    margin: 0;
+}
+
+.profile-add-album-btn {
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #aaa;
+    transition: all 0.2s;
+}
+
+.profile-add-album-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.profile-albums-grid {
+    height: 400px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 24px;
+    padding: 16px 0;
+    margin-bottom: 16px;
+}
+
+/* Стили альбомов (копия из FavoritesPage) */
+.profile-album-card {
+    position: relative;
+    background: #444;
+    padding: 4px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 180px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.profile-album-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.album-cover {
+    height: 120px;
+    width: 100%;
+    position: relative;
+    cursor: pointer;
+}
+
+.album-cover-hover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.album-cover:hover .album-cover-hover-overlay {
+    opacity: 1;
+}
+
+.album-cover-play-icon {
+    width: 16px;
+    height: 16px;
+    fill: white;
+    transition: transform 0.2s;
+}
+
+.album-cover:hover .album-cover-play-icon {
+    transform: scale(1.1);
+}
+
+.album-cover-play-button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.album-cover:hover .album-cover-play-button {
+    opacity: 1;
+}
+
+.album-cover-play-button:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.album-info-layer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #444;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+.album-info-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.album-title {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.album-meta {
+    display: flex;
+    flex-direction: column;
+    margin-top: 4px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.album-meta span {
+    margin-bottom: 2px;
+    font-size: 11px;
+}
+
+.album-trash-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.album-trash-icon:hover {
+    opacity: 1;
+}
+
+/* Стилизация скролла */
+.profile-albums-grid::-webkit-scrollbar {
+    width: 12px;
+}
+
+.profile-albums-grid::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 6px;
+}
+
+.profile-albums-grid::-webkit-scrollbar-thumb {
+    background: rgba(200, 200, 200, 0.3);
+    border-radius: 6px;
+    transition: background 0.3s ease;
+}
+
+.profile-albums-grid::-webkit-scrollbar-thumb:hover {
+    background: rgba(200, 200, 200, 0.7);
+}

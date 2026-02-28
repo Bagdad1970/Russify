@@ -1,0 +1,315 @@
+.caotm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.caotm-container {
+    position: absolute;
+    width: 600px; /* ← увеличили с 520px */
+    max-height: calc(100vh - 120px);
+    background: linear-gradient(135deg, #22222a 0%, #1e1e2a 100%);
+    border-radius: 12px;
+    overflow: hidden;
+    font-family: 'Roboto', sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
+    cursor: move;
+}
+
+.caotm-header {
+    display: flex;
+    align-items: flex-end;
+    gap: 32px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.caotm-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+    text-align: center;
+    flex: 1;
+}
+
+.caotm-close-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #ffffff;
+    transition: all 0.2s;
+}
+
+.caotm-close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.caotm-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 16px 0;
+}
+
+.caotm-type-selector {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px 0;
+}
+
+.caotm-type-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    padding: 8px 24px;
+    border-radius: 20px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+}
+
+.caotm-type-btn.active {
+    background: #007AFF;
+    color: white;
+}
+
+.caotm-type-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.caotm-cover-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+}
+
+.caotm-cover-wrapper {
+    cursor: pointer;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.caotm-cover-placeholder {
+    width: 156px;
+    height: 156px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+}
+
+.caotm-cover-img {
+    width: 156px;
+    height: 156px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.caotm-file-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.caotm-file-btn-bordered {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 16px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+}
+
+.caotm-file-btn-bordered:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.caotm-file-format {
+    font-family: 'Roboto', sans-serif;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.caotm-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 0;
+}
+
+.caotm-input {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    color: white;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+}
+
+.caotm-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.caotm-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* <<<--- НОВОЕ: Разделитель перед кнопкой загрузки --->>> */
+.caotm-before-submit-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 16px 0;
+}
+
+.caotm-submit-section-centered {
+    padding: 16px 0;
+    display: flex;
+    justify-content: center;
+}
+
+.caotm-submit-btn-no-arrow {
+    background: #007AFF;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    min-width: 160px;
+}
+
+.caotm-submit-btn-no-arrow:hover {
+    background: #0062CC;
+}
+
+.caotm-add-track-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+}
+
+.caotm-add-track-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.caotm-add-track-section {
+    display: flex;
+    justify-content: center;
+    padding: 16px 0;
+}
+
+.caotm-tracks-list-container {
+    max-height: 200px; /* ← ограничение высоты */
+    overflow-y: auto; /* ← скролл */
+    padding: 0 8px;
+    margin: 16px 0;
+}
+
+.caotm-tracks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.caotm-track-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    cursor: move;
+}
+
+.caotm-track-number {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    width: 24px;
+    text-align: center;
+}
+
+.caotm-track-input {
+    flex: 1;
+    margin: 0;
+}
+
+.caotm-trash-btn {
+    background: none;
+    border: none;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #aaa;
+    transition: all 0.2s;
+}
+
+.caotm-trash-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+/* Стилизация скролла */
+.caotm-tracks-list-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.caotm-tracks-list-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.caotm-tracks-list-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.caotm-tracks-list-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.caotm-cover-section-centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px 0;
+}

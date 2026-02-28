@@ -1,0 +1,106 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.app {
+  font-family: sans-serif;
+  background-color: #222;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 0 0 auto;
+}
+
+.section-title {
+  font-family: 'Roboto Condensed', sans-serif;
+  text-align: center;
+  color: #e6e6e6;
+  font-size: 25px;
+  margin: 16px 0;
+  padding: 0 16px;
+}
+
+.bottom-section {
+  background-color: #2a2a2a;
+  max-width: 800px;
+  margin: 5px auto;
+  padding: 0 16px;
+  width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  border-radius: 12px;
+}
+
+
+/* ... (все предыдущие стили остаются) ... */
+
+/* Мобильные устройства */
+@media (max-width: 767px) {
+  .app {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    overflow-x: hidden;
+  }
+}
+
+/* Планшеты */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .app {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-size: 15px;
+    overflow-x: hidden;
+  }
+}
+
+/* Небольшие ноутбуки */
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .app {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+    overflow-x: hidden;
+  }
+}
+
+/* Десктоп */
+@media (min-width: 1200px) {
+  .app {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+    overflow-x: hidden;
+  }
+}

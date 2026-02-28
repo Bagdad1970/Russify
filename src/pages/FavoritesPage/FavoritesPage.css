@@ -1,0 +1,726 @@
+/* Стилизация скролла */
+.favorites-track-list::-webkit-scrollbar,
+.favorites-playlist-grid::-webkit-scrollbar,
+.favorites-album-grid::-webkit-scrollbar {
+    width: 12px;
+}
+
+.favorites-track-list::-webkit-scrollbar-track,
+.favorites-playlist-grid::-webkit-scrollbar-track,
+.favorites-album-grid::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 6px;
+}
+
+.favorites-track-list::-webkit-scrollbar-thumb,
+.favorites-playlist-grid::-webkit-scrollbar-thumb,
+.favorites-album-grid::-webkit-scrollbar-thumb {
+    background: rgba(200, 200, 200, 0.3);
+    border-radius: 6px;
+    transition: background 0.3s ease;
+}
+
+.favorites-track-list::-webkit-scrollbar-thumb:hover,
+.favorites-playlist-grid::-webkit-scrollbar-thumb:hover,
+.favorites-album-grid::-webkit-scrollbar-thumb:hover {
+    background: rgba(200, 200, 200, 0.7);
+}
+
+/* Основной контейнер */
+.favorites-page-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.favorites-main-content {
+    flex: 0 0 auto;
+}
+
+.favorites-section-title {
+    font-family: 'Roboto Condensed', sans-serif;
+    text-align: center;
+    color: #e6e6e6;
+    font-size: 25px;
+    margin: 16px 0;
+    padding: 0 16px;
+}
+
+.favorites-bottom-section {
+    background-color: #2a2a2a;
+    max-width: 800px;
+    margin: 5px auto 10px auto;
+    padding: 0 16px;
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+/* --- Треки --- */
+.favorites-track-list {
+    max-height: 400px;
+    min-height: 100px;
+    overflow-y: auto;
+    padding-right: 4px;
+    padding-bottom: 200px;
+}
+
+/* --- Плейлисты --- */
+.favorites-playlist-grid {
+    height: 400px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 24px;
+    padding: 16px 0;
+    margin-bottom: 16px;
+}
+
+.favorites-playlist-card {
+    position: relative;
+    background: #444;
+    padding: 4px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 180px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.favorites-playlist-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.playlist-cover {
+    height: 120px;
+    width: 100%;
+    position: relative;
+    cursor: pointer;
+}
+
+.playlist-cover-play-button {
+    position: absolute;
+    bottom: 25px;
+    right: 5px;
+    width: 32px;
+    height: 32px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.playlist-cover:hover .playlist-cover-play-button {
+    opacity: 1;
+}
+
+.playlist-cover-play-button:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.playlist-cover-play-icon {
+    width: 16px;
+    height: 16px;
+    fill: white;
+    transition: transform 0.2s;
+}
+
+.playlist-cover:hover .playlist-cover-play-icon {
+    transform: scale(1.1);
+}
+
+.playlist-info-layer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #444;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+.playlist-info-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.playlist-title {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.playlist-meta {
+    display: flex;
+    flex-direction: column;
+    margin-top: 4px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.playlist-meta span {
+    margin-bottom: 2px;
+    font-size: 11px;
+}
+
+.playlist-trash-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.playlist-trash-icon:hover {
+    opacity: 1;
+}
+
+.add-placeholder {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.add-placeholder:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.add-plus-svg {
+    width: 48px;
+    height: 48px;
+    fill: rgba(255, 255, 255, 0.6);
+    transition: fill 0.2s;
+}
+
+.add-placeholder:hover .add-plus-svg {
+    fill: rgba(255, 255, 255, 0.9);
+}
+
+/* <<<--- АЛЬБОМЫ --->>> */
+.favorites-album-grid {
+    height: 400px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 24px;
+    padding: 16px 0;
+    margin-bottom: 16px;
+}
+
+.favorites-album-card {
+    position: relative;
+    background: #444;
+    padding: 4px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 180px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.favorites-album-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.album-cover {
+    height: 120px;
+    width: 100%;
+    position: relative;
+    cursor: pointer;
+}
+
+.album-fav-cover-play-button {
+    position: absolute;
+    bottom: 25px;
+    right: 5px;
+    width: 32px;
+    height: 32px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.album-cover:hover .album-fav-cover-play-button {
+    opacity: 1;
+}
+
+.album-fav-cover-play-button:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.album-cover-play-icon {
+    width: 16px;
+    height: 16px;
+    fill: white;
+}
+
+.album-cover:hover .album-cover-play-icon {
+    transform: scale(1.1);
+}
+
+.album-info-layer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #444;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+.album-info-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.album-title {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.album-meta {
+    display: flex;
+    flex-direction: column;
+    margin-top: 4px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.album-meta span {
+    margin-bottom: 2px;
+    font-size: 11px;
+}
+
+.album-trash-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.album-trash-icon:hover {
+    opacity: 1;
+}
+
+/* <<<--- ТРЕКИ (ОСНОВНОЙ СТИЛЬ) --->>> */
+.favorites-track-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background 0.2s ease;
+}
+
+.favorites-track-row:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+}
+
+.favorites-track-row:last-child {
+    border-bottom: none;
+}
+
+.favorites-track-number {
+    width: 30px;
+    text-align: center;
+    color: #aaa;
+    font-size: 14px;
+}
+
+.favorites-track-cover {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+.favorites-track-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.favorites-track-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.favorites-track-artist {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.favorites-track-duration {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    width: 56px;
+    text-align: right;
+}
+
+.favorites-track-actions-desktop {
+    display: flex;
+    gap: 8px;
+}
+
+.favorites-track-actions-mobile {
+    display: none;
+}
+
+.favorites-action-btn {
+    background: none;
+    border: none;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #aaa;
+    transition: all 0.2s;
+}
+
+.favorites-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.favorites-dots-btn {
+    background: none;
+    border: none;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #aaa;
+    transition: all 0.2s;
+}
+
+.favorites-dots-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.favorites-track-favorite,
+.favorites-track-add-to-playlist {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.favorites-track-favorite:hover,
+.favorites-track-add-to-playlist:hover {
+    opacity: 0.7;
+}
+
+/* <<<--- МЕНЮ ТРОЕТОЧИЯ (МОБИЛЬНОЕ) --->>> */
+.favorites-context-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.favorites-context-menu {
+    background: #2a2a2a;
+    border-radius: 12px 12px 0 0;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.favorites-context-menu.active {
+    transform: translateY(0);
+}
+
+.favorites-context-item {
+    padding: 16px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-align: center;
+}
+
+.favorites-context-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.favorites-context-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0 16px;
+}
+
+/* ──────────────────────────────────────────────
+   АДАПТИВНОСТЬ: МОБИЛЬНЫЕ УСТРОЙСТВА (≤767px)
+─────────────────────────────────────────────── */
+@media (max-width: 767px) {
+    .favorites-bottom-section {
+        margin: 0;
+        padding: 0 8px;
+        border-radius: 0;
+        width: 100vw;
+        max-width: none;
+        box-sizing: border-box;
+    }
+
+    .favorites-section-title {
+        font-size: 20px;
+        margin: 12px 0;
+        padding: 0 8px;
+    }
+
+    .favorites-track-list,
+    .favorites-playlist-grid,
+    .favorites-album-grid {
+        padding: 0 4px;
+    }
+
+    /* Треки */
+    .favorites-track-actions-desktop {
+        display: none;
+    }
+
+    .favorites-track-actions-mobile {
+        display: flex;
+        gap: 6px;
+    }
+
+    .favorites-track-favorite,
+    .favorites-track-add-to-playlist {
+        display: none;
+    }
+
+    .favorites-track-row {
+        padding: 6px 0;
+        gap: 8px;
+    }
+
+    .favorites-track-number {
+        width: 24px;
+        font-size: 12px;
+    }
+
+    .favorites-track-cover {
+        width: 28px;
+        height: 28px;
+    }
+
+    .favorites-track-info {
+        gap: 2px;
+    }
+
+    .favorites-track-title {
+        font-size: 13px;
+    }
+
+    .favorites-track-artist {
+        font-size: 11px;
+    }
+
+    .favorites-track-duration {
+        font-size: 11px;
+        width: 48px;
+    }
+
+    .favorites-action-btn,
+    .favorites-dots-btn {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* Контекстное меню */
+    .favorites-context-menu {
+        width: 100%;
+        max-width: none;
+        margin: 0 auto;
+    }
+
+    .favorites-context-item {
+        padding: 14px;
+        font-size: 15px;
+    }
+}
+
+/* ──────────────────────────────────────────────
+   Очень маленькие экраны (≤480px)
+─────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .favorites-bottom-section {
+        padding: 0 6px;
+    }
+
+    .favorites-section-title {
+        font-size: 18px;
+        margin: 10px 0;
+    }
+
+    .favorites-track-row {
+        padding: 4px 0;
+        gap: 6px;
+    }
+
+    .favorites-track-number {
+        width: 20px;
+        font-size: 11px;
+    }
+
+    .favorites-track-cover {
+        width: 24px;
+        height: 24px;
+    }
+
+    .favorites-track-title {
+        font-size: 12px;
+    }
+
+    .favorites-track-artist {
+        font-size: 10px;
+    }
+
+    .favorites-track-duration {
+        font-size: 10px;
+        width: 40px;
+    }
+
+    .favorites-action-btn,
+    .favorites-dots-btn {
+        width: 20px;
+        height: 20px;
+    }
+
+    .favorites-context-item {
+        padding: 12px;
+        font-size: 14px;
+    }
+}
+
+/* ──────────────────────────────────────────────
+   Десктоп (≥1200px)
+─────────────────────────────────────────────── */
+@media (min-width: 1200px) {
+    .favorites-track-row {
+        padding: 8px 0;
+        gap: 12px;
+    }
+
+    .favorites-track-number {
+        width: 30px;
+        font-size: 14px;
+    }
+
+    .favorites-track-cover {
+        width: 32px;
+        height: 32px;
+    }
+
+    .favorites-track-info {
+        gap: 4px;
+    }
+
+    .favorites-track-title {
+        font-size: 14px;
+    }
+
+    .favorites-track-artist {
+        font-size: 12px;
+    }
+
+    .favorites-track-duration {
+        font-size: 12px;
+        width: 56px;
+    }
+
+    .favorites-track-actions-desktop {
+        gap: 8px;
+    }
+
+    .favorites-action-btn,
+    .favorites-dots-btn {
+        width: 24px;
+        height: 24px;
+    }
+
+    .favorites-context-menu {
+        width: 250px;
+        max-width: none;
+    }
+
+    .favorites-context-item {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+}

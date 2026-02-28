@@ -1,0 +1,217 @@
+.track-card-full-width {
+    width: 100%;
+    /* <<<--- ИСПРАВЛЕНО: Обычный градиент на мобильных, радиальный на десктопе --->>> */
+    background: linear-gradient(to right, #ffb703 0%, #8b5cf6 100%); /* ← мобильные */
+    padding: 14px 16px;
+    border-radius: 16px 16px 44px 44px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+/* <<<--- ДЕСКТОП: Радиальный градиент --->>> */
+@media (min-width: 1200px) {
+    .track-card-full-width {
+        background: radial-gradient(
+                circle at 50% 20%,
+                #ffb703 0%,
+                #8b5cf6 35%,
+                #222 65%
+        );
+    }
+}
+/* <<<--- КОНЕЦ ДЕСКТОП --->>> */
+
+/* <<<--- УБРАНО: Анимация на мобильных --->>> */
+.track-card-full-width::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* background: радиальный градиент на мобильных не нужен */
+    opacity: 0;
+    animation: combinedPulse 6s ease-in-out infinite;
+}
+
+/* <<<--- ДЕСКТОП: Анимация --->>> */
+@media (min-width: 1200px) {
+    .track-card-full-width::before {
+        background: radial-gradient(
+                circle at 50% 30%,
+                rgba(255, 255, 255, 0.15),
+                transparent 60%
+        );
+        opacity: 0;
+        animation: combinedPulse 6s ease-in-out infinite;
+    }
+}
+/* <<<--- КОНЕЦ ДЕСКТОП --->>> */
+
+@keyframes combinedPulse {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 0.5; }
+}
+
+.track-card-inner {
+    max-width: 840px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #e6e6e6;
+    position: relative;
+    text-align: center;
+}
+
+.content-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.track-title {
+    font-weight: bold;
+    font-size: 30px;
+    text-align: center;
+    letter-spacing: 0.5px;
+    font-family: 'Roboto Condensed', sans-serif;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    margin: 0;
+}
+
+.track-image {
+    width: 140px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+}
+
+.track-image .placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.track-image .placeholder svg {
+    fill: rgba(255, 255, 255, 0.4);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.listen-btn {
+    background: rgba(255, 183, 3, 0.9);
+    border: none;
+    color: white;
+    padding: 10px 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: 500;
+    font-family: 'Roboto', sans-serif;
+    transition: background 0.2s;
+}
+
+.listen-btn:hover {
+    background: rgba(255, 183, 3, 1);
+}
+
+/* <<<--- АДАПТИВНОСТЬ: Мобильные устройства --->>> */
+@media (max-width: 767px) {
+    .track-card-full-width {
+        padding: 12px 12px;
+        border-radius: 12px 12px 36px 36px;
+        background: linear-gradient(to right, #ffb703 0%, #8b5cf6 100%); /* ← обычный градиент */
+    }
+
+    .track-card-full-width::before {
+        display: none; /* ← убираем анимацию */
+    }
+
+    .track-card-inner {
+        max-width: 95%;
+    }
+
+    .track-title {
+        font-size: 24px;
+    }
+
+    .track-image {
+        width: 120px;
+        height: 120px;
+    }
+
+    .listen-btn {
+        padding: 8px 28px;
+        font-size: 18px;
+    }
+
+    .content-area {
+        gap: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .track-card-full-width {
+        padding: 8px 8px;
+        border-radius: 10px 10px 32px 32px;
+    }
+
+    .track-card-inner {
+        max-width: 90%;
+    }
+
+    .track-title {
+        font-size: 20px;
+    }
+
+    .track-image {
+        width: 100px;
+        height: 100px;
+    }
+
+    .listen-btn {
+        padding: 6px 24px;
+        font-size: 16px;
+    }
+
+    .content-area {
+        gap: 10px;
+    }
+}
+
+/* <<<--- ДЕСКТОПНЫЙ СТИЛЬ: Радиальный градиент и анимация --->>> */
+@media (min-width: 1200px) {
+    .track-card-full-width {
+        background: radial-gradient(
+                circle at 50% 20%,
+                #ffb703 0%,
+                #8b5cf6 35%,
+                #222 65%
+        );
+    }
+
+    .track-card-full-width::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+                circle at 50% 30%,
+                rgba(255, 255, 255, 0.15),
+                transparent 60%
+        );
+        opacity: 0;
+        animation: combinedPulse 6s ease-in-out infinite;
+    }
+}
+/* <<<--- КОНЕЦ ДЕСКТОПНОГО СТИЛЯ --->>> */
