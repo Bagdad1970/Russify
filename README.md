@@ -20,7 +20,7 @@ cd MusicPlayer
 ### 2. Start database in Docker
 
 ```bash
-docker-compose.yml -up
+docker-compose.yml -up -d
 ```
 
 This should start PostgreSQL:
@@ -30,7 +30,6 @@ This should start PostgreSQL:
 - **db_name**: `postgres`. 
 
 ## Functional
-- **You can start migrations by using `Migrator.java`**
 - **You can start server by using `App.java`**
 
 ### Server
