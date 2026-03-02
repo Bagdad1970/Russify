@@ -6,6 +6,7 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [playlistCover, setPlaylistCover] = useState(null);
     const [playlistName, setPlaylistName] = useState("Новый плейлист");
     const [playlistTracks, setPlaylistTracks] = useState([]);
@@ -22,6 +23,8 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
         { id: 10, title: "Трек 10", artist: "Исполнитель J", duration: 180 },
     ]);
 
+    const [draggedIndex, setDraggedIndex] = useState(null);
+
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
@@ -29,17 +32,30 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
     };
 
     useEffect(() => {
-        if (isOpen) {
-            const appBarHeight = 56;
-            const modalWidth = 800;
-            const modalHeight = Math.min(640, window.innerHeight - appBarHeight - 60);
+        if (!isOpen) return;
+
+        const updateLayout = () => {
+            const w = window.innerWidth;
+            setIsMobile(w < 768);
+
+            let modalWidth = 800;
+            if (w < 1024) modalWidth = Math.min(760, w - 32);
+            if (w < 768) modalWidth = w - 24;
+
+            const modalHeight = Math.min(640, window.innerHeight - 112);
             const left = (window.innerWidth - modalWidth) / 2;
-            const top = appBarHeight + (window.innerHeight - appBarHeight - modalHeight) / 2;
+            const top = Math.max(40, (window.innerHeight - modalHeight) / 2 - 40);
+
             setPosition({ x: left, y: top });
-        }
+        };
+
+        updateLayout();
+        window.addEventListener('resize', updateLayout);
+        return () => window.removeEventListener('resize', updateLayout);
     }, [isOpen]);
 
     const handleMouseDown = (e) => {
+        if (window.innerWidth < 1024) return;
         if (e.target.closest('.cpl-header') && !e.target.closest('.cpl-close')) {
             setIsDragging(true);
             const rect = modalRef.current.getBoundingClientRect();
@@ -51,25 +67,22 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
     };
 
     const handleMouseMove = (e) => {
-        if (!isDragging) return;
+        if (!isDragging || window.innerWidth < 1024) return;
 
-        const newX = e.clientX - dragOffset.x;
-        const newY = e.clientY - dragOffset.y;
+        let newX = e.clientX - dragOffset.x;
+        let newY = e.clientY - dragOffset.y;
 
-        const modalRect = modalRef.current.getBoundingClientRect();
-        const w = modalRect.width;
-        const h = modalRect.height;
+        const r = modalRef.current.getBoundingClientRect();
+        newX = Math.max(0, Math.min(newX, window.innerWidth - r.width));
+        newY = Math.max(40, Math.min(newY, window.innerHeight - r.height));
 
-        const clampedX = Math.max(0, Math.min(newX, window.innerWidth - w));
-        const clampedY = Math.max(56, Math.min(newY, window.innerHeight - h));
-
-        setPosition({ x: clampedX, y: clampedY });
+        setPosition({ x: newX, y: newY });
     };
 
     const handleMouseUp = () => setIsDragging(false);
 
     useEffect(() => {
-        if (isDragging) {
+        if (isDragging && window.innerWidth >= 1024) {
             document.addEventListener('mousemove', handleMouseMove);
             document.addEventListener('mouseup', handleMouseUp);
             return () => {
@@ -77,9 +90,36 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
                 document.removeEventListener('mouseup', handleMouseUp);
             };
         }
-    }, [isDragging, dragOffset]);
+    }, [isDragging]);
 
     if (!isOpen) return null;
+
+    const handleDragStart = (e, index) => {
+        setDraggedIndex(index);
+        e.dataTransfer.effectAllowed = 'move';
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        if (draggedIndex === null) return;
+
+        const targetElement = e.target.closest('.cpl-track-item');
+        if (!targetElement) return;
+
+        const targetIndex = Array.from(targetElement.parentNode.children).indexOf(targetElement);
+        if (targetIndex === draggedIndex) return;
+
+        const newTracks = [...playlistTracks];
+        const [movedTrack] = newTracks.splice(draggedIndex, 1);
+        newTracks.splice(targetIndex, 0, movedTrack);
+
+        setPlaylistTracks(newTracks);
+        setDraggedIndex(null);
+    };
 
     const playlistCount = playlistTracks.length;
     const totalDuration = playlistTracks.reduce((sum, t) => sum + t.duration, 0);
@@ -126,29 +166,26 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
     };
 
     return (
-        <div className="cpl-overlay">
+        <div className="cpl-overlay" onClick={onClose}>
             <div
                 ref={modalRef}
-                className="cpl-container"
+                className={`cpl-container ${isMobile ? 'mobile' : ''}`}
                 style={{ left: `${position.x}px`, top: `${position.y}px` }}
                 onMouseDown={handleMouseDown}
+                onClick={(e) => e.stopPropagation()}
             >
-                {/* Шапка */}
-                <div className="cpl-header">
+                <div className={`cpl-header ${isMobile ? 'mobile-centered' : ''}`}>
                     <div className="cpl-playlist-cover" onClick={handleCoverClick}>
                         {playlistCover ? (
                             <img src={playlistCover} alt="Обложка плейлиста" style={{ width: '156px', height: '156px', borderRadius: '12px' }} />
                         ) : (
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 156 156" width="156" height="156" fill="none" stroke="#f1f1f1" strokeWidth="5">
                                 <rect x="28" y="28" width="100" height="100" rx="10" />
-                                <path d="M52 52v64" />
-                                <path d="M78 52v64" />
-                                <path d="M104 52v64" />
+                                <path d="M52 52v64 M78 52v64 M104 52v64" />
                             </svg>
                         )}
                     </div>
 
-                    {/* Информация */}
                     <div className="cpl-playlist-info">
                         <div className="cpl-title" onClick={() => {
                             const newName = prompt("Введите новое название:", playlistName);
@@ -164,7 +201,6 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
                         </div>
                     </div>
 
-                    {/* Кнопка закрытия */}
                     <button className="cpl-close" onClick={(e) => {
                         e.stopPropagation();
                         onClose();
@@ -181,9 +217,18 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
                 <div className="cpl-main-content">
                     <div className="cpl-column cpl-playlist-column">
                         <h3 className="cpl-column-title">Плейлист</h3>
-                        <div className="cpl-track-list">
-                            {playlistTracks.map((track) => (
-                                <div key={track.id} className="cpl-track-item">
+                        <div
+                            className="cpl-track-list"
+                            onDragOver={handleDragOver}
+                            onDrop={handleDrop}
+                        >
+                            {playlistTracks.map((track, index) => (
+                                <div
+                                    key={track.id}
+                                    className={`cpl-track-item ${draggedIndex === index ? 'dragging' : ''}`}
+                                    draggable
+                                    onDragStart={(e) => handleDragStart(e, index)}
+                                >
                                     <div className="cpl-track-cover">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="#f1f1f1" strokeWidth="1.2">
                                             <rect x="4" y="4" width="24" height="24" rx="2" />
@@ -227,7 +272,7 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
                                     </div>
                                     <div className="cpl-track-duration">{formatTime(track.duration)}</div>
                                     <button className="cpl-add-btn" onClick={() => addTrackToPlaylist(track.id)}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#aaa" strokeWidth="2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#aaa" strokeWidth="2">
                                             <path d="M12 5v14M5 12h14" />
                                         </svg>
                                     </button>
@@ -237,7 +282,7 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
                     </div>
                 </div>
 
-                <div className="cpl-buttons">
+                <div className={`cpl-buttons ${isMobile ? 'mobile-center' : ''}`}>
                     <button className="cpl-btn-cancel" onClick={handleCancel}>Отменить</button>
                     <button className="cpl-btn-save" onClick={handleSave}>Сохранить</button>
                 </div>
