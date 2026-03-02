@@ -1,0 +1,156 @@
+.logm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.logm-container {
+    position: absolute;
+    width: 400px;
+    max-height: calc(100vh - 120px);
+    background: linear-gradient(135deg, #22222a 0%, #1e1e2a 100%);
+    border-radius: 12px;
+    overflow: hidden;
+    font-family: 'Roboto', sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
+    cursor: move;
+}
+
+.logm-header {
+    display: flex;
+    align-items: flex-end;
+    gap: 32px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.logm-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+    text-align: center;
+    flex: 1;
+}
+
+.logm-close-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #ffffff;
+    transition: all 0.2s;
+}
+
+.logm-close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.logm-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 16px 0;
+}
+
+.logm-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.logm-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.logm-input {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    color: white;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.logm-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.logm-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.logm-input.error {
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+}
+
+.logm-error {
+    font-size: 12px;
+    color: #ff6b6b;
+    margin-top: 4px;
+}
+
+.logm-login-btn {
+    background: #007AFF;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 8px;
+}
+
+.logm-login-btn:hover:not(:disabled) {
+    background: #0062CC;
+}
+
+.logm-login-btn:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.logm-register-link {
+    text-align: center;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 16px;
+}
+
+.logm-switch-btn {
+    background: none;
+    border: none;
+    color: #007AFF;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.logm-switch-btn:hover {
+    color: #0062CC;
+}

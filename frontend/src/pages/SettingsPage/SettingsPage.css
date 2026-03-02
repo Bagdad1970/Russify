@@ -1,0 +1,152 @@
+.settings-page-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: #222;
+    position: relative;
+}
+
+.settings-bottom-section {
+    background-color: #2a2a2a;
+    max-width: 800px;
+    margin: 5px auto 10px auto;
+    padding: 0 16px;
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.settings-section {
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.settings-section:last-child {
+    border-bottom: none;
+}
+
+.settings-section-title {
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 20px;
+    color: #e6e6e6;
+    margin: 0 0 16px 0;
+    padding: 0 8px;
+}
+
+.settings-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 8px;
+    margin-bottom: 8px;
+}
+
+.settings-option:last-child {
+    margin-bottom: 0;
+}
+
+.settings-option-label {
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    flex: 1;
+}
+
+.settings-toggle-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    min-width: 120px;
+    text-align: center;
+}
+
+.settings-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.settings-select-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    min-width: 120px;
+    text-align: center;
+}
+
+.settings-select-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.settings-avatar-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    min-width: 120px;
+    text-align: center;
+}
+
+.settings-avatar-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* <<<--- ИСПРАВЛЕНО: Сменить аккаунт - кнопка как "Выйти" --->>> */
+.settings-account-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    min-width: 120px;
+    text-align: center;
+    align-self: flex-start; /* ← выравнивание по левому краю */
+}
+
+.settings-account-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+/* <<<--- КОНЕЦ ИСПРАВЛЕНИЯ --->>> */
+
+.settings-logout-btn {
+    background: rgba(255, 0, 0, 0.2);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    color: #ff4d4d;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    min-width: 120px;
+    text-align: center;
+    align-self: flex-start;
+}
+
+.settings-logout-btn:hover {
+    background: rgba(255, 0, 0, 0.3);
+    color: #ff6666;
+}

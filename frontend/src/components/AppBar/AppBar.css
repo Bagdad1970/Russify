@@ -1,0 +1,380 @@
+.app-bar {
+    font-family: 'Roboto', sans-serif;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background-color: #22222a;
+    color: #f1f1f1;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.left-section,
+.right-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 0 0 auto;
+}
+
+.icon-user,
+.tab,
+.settings-icon {
+    cursor: pointer;
+}
+
+.icon-user:hover,
+.tab:hover,
+.settings-icon:hover {
+    opacity: 0.8;
+}
+
+.icon-user svg,
+.settings-icon svg {
+    fill: #f1f1f1;
+}
+
+.icon-user:hover svg,
+.settings-icon:hover svg {
+    fill: #ffffff;
+}
+
+.center-section {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    flex: 1;
+    text-align: center;
+    padding-right: 10%;
+}
+
+.track-and-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.track-and-controls:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.track-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 200px;
+    overflow: hidden;
+}
+
+.track-info h3,
+.track-info p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+
+.track-info h3 {
+    font-size: 14px;
+}
+
+.track-info p {
+    font-size: 12px;
+    opacity: 0.75;
+}
+
+.track-cover {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+}
+
+.cover-placeholder {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.controls {
+    display: flex;
+    gap: 8px;
+}
+
+.progress-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.time {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.progress-slider {
+    width: 80px;
+    height: 4px;
+    -webkit-appearance: none;
+    background: #444;
+    border-radius: 2px;
+    outline: none;
+}
+
+.progress-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #f1f1f1;
+    cursor: pointer;
+}
+
+.extra-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2em;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.btn.active {
+    color: #ffb703;
+}
+
+.btn.shuffle.active svg,
+.btn.repeat.active svg {
+    fill: #ffb703;
+}
+
+.btn.favorite.active svg {
+    fill: #ff2d55;
+}
+
+/* <<<--- АДАПТИВНОСТЬ: Мобильные устройства (до 767px) --->>> */
+@media (max-width: 767px) {
+    .app-bar {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    .left-section,
+    .right-section {
+        gap: 8px;
+    }
+
+    .center-section {
+        padding-right: 0;
+        gap: 2px; /* ← уменьшаем отступ между элементами */
+    }
+
+    .track-and-controls {
+        gap: 2px; /* ← критично: убираем отступ между обложкой и кнопками */
+        padding: 4px 6px; /* ← меньше паддинг */
+    }
+
+    .track-info {
+        gap: 4px; /* ← только 4px между обложкой и текстом */
+        max-width: 100px;
+    }
+
+    .track-info h3 {
+        font-size: 11px;
+    }
+
+    .track-info p {
+        font-size: 9px;
+        opacity: 0.6;
+    }
+
+    .track-cover {
+        width: 28px;
+        height: 28px;
+        margin-right: 2px; /* ← минимальный отступ */
+    }
+
+    .cover-placeholder {
+        width: 28px;
+        height: 28px;
+    }
+
+    /* <<<--- СКРЫВАЕМ НЕНОЖНЫЕ ЭЛЕМЕНТЫ НА МОБИЛЕ --->>> */
+    .controls,
+    .progress-section,
+    .extra-controls {
+        display: none;
+    }
+
+    /* <<<--- КНОПКИ: УМЕНЬШАЕМ ТОЛЬКО НА МОБИЛЕ --->>> */
+    .btn {
+        width: 24px;
+        height: 24px;
+        font-size: 0.9em;
+    }
+}
+
+/* <<<--- Планшеты (768px–1023px) --->>> */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .app-bar {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .center-section {
+        gap: 2px;
+    }
+
+    .track-and-controls {
+        gap: 4px;
+        padding: 6px 12px;
+    }
+
+    .track-info {
+        gap: 6px;
+        max-width: 140px;
+    }
+
+    .track-info h3 {
+        font-size: 12px;
+    }
+
+    .track-info p {
+        font-size: 10px;
+    }
+
+    .track-cover {
+        width: 32px;
+        height: 32px;
+        margin-right: 4px;
+    }
+
+    .cover-placeholder {
+        width: 32px;
+        height: 32px;
+    }
+
+    /* <<<--- ПОКАЗЫВАЕМ ТОЛЬКО ВОСПРОИЗВЕДЕНИЕ И ИЗБРАННОЕ --->>> */
+    .controls {
+        display: flex;
+        gap: 2px;
+    }
+
+    .controls .btn.play-pause,
+    .controls .btn.next,
+    .controls .btn.prev {
+        width: 26px;
+        height: 26px;
+        font-size: 0.9em;
+    }
+
+    .progress-section,
+    .extra-controls {
+        display: none;
+    }
+
+    .btn {
+        width: 26px;
+        height: 26px;
+        font-size: 0.9em;
+    }
+}
+
+/* <<<--- Ноутбуки (1024px–1199px) --->>> */
+@media (min-width: 1024px) and (max-width: 1199px) {
+    .app-bar {
+        padding: 8px 14px;
+        font-size: 14px;
+    }
+
+    .center-section {
+        gap: 4px;
+    }
+
+    .track-and-controls {
+        gap: 12px;
+        padding: 8px 16px;
+    }
+
+    .track-info {
+        gap: 8px;
+        max-width: 160px;
+    }
+
+    .track-info h3 {
+        font-size: 13px;
+    }
+
+    .track-info p {
+        font-size: 11px;
+    }
+
+    .track-cover {
+        width: 36px;
+        height: 36px;
+        margin-right: 6px;
+    }
+
+    .cover-placeholder {
+        width: 36px;
+        height: 36px;
+    }
+
+    .controls {
+        gap: 6px;
+    }
+
+    .progress-section {
+        gap: 6px;
+    }
+
+    .time {
+        font-size: 11px;
+    }
+
+    .progress-slider {
+        width: 70px;
+    }
+
+    .progress-slider::-webkit-slider-thumb {
+        width: 11px;
+        height: 11px;
+    }
+
+    .extra-controls {
+        gap: 6px;
+    }
+
+    .btn {
+        width: 28px;
+        height: 28px;
+        font-size: 1em;
+    }
+}
+
+/* <<<--- Десктоп (1200px+) --->>> */
+@media (min-width: 1200px) {
+    /* Оставляем как в исходнике — всё работает */
+}

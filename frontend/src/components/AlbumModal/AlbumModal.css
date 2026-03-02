@@ -1,0 +1,534 @@
+.alm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.alm-container {
+    position: absolute;
+    width: 640px;
+    max-height: calc(100vh - 120px);
+    background: linear-gradient(135deg, #22222a 0%, #1e1e2a 100%);
+    border-radius: 12px;
+    overflow: hidden;
+    font-family: 'Roboto', sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.alm-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+    position: relative;
+    padding: 16px;
+
+}
+
+.alm-album-cover {
+    width: 156px;
+    height: 156px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+}
+
+
+.alm-album-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    margin: auto;
+}
+
+.alm-album-actions {
+    display: flex;
+    gap: 8px;
+    align-self: flex-end;
+    margin-bottom: 4px;
+}
+
+.alm-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+.alm-author {
+    font-size: 16px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+.alm-meta {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.alm-favorite-btn {
+    background: none;
+    border: none;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #ffffff;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    align-self: flex-end;
+}
+
+.alm-favorite-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.alm-favorite-btn.active svg {
+    fill: #ff2d55;
+    stroke: #ff2d55;
+}
+
+.alm-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #ffffff;
+    transition: all 0.2s;
+}
+
+.alm-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+/* Разделитель */
+.alm-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 16px 0;
+}
+
+/* Треки */
+.alm-track-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.alm-track-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    gap: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background 0.2s;
+}
+
+.alm-track-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.alm-track-item:last-child {
+    border-bottom: none;
+}
+
+/* Номер */
+.alm-track-index {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* Обложка трека + overlay */
+.alm-track-cover-wrapper {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.alm-track-cover {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.alm-play-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    transition: all 0.1s ease;
+    pointer-events: none;
+}
+
+.alm-play-overlay.visible {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.alm-play-overlay svg {
+    stroke: currentColor;
+    fill: none;
+}
+
+/* Текст */
+.alm-track-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.alm-track-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.alm-track-artist {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Длительность */
+.alm-track-duration {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    width: 56px;
+    text-align: right;
+}
+
+/* Действия */
+.alm-track-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.alm-btn {
+    background: none;
+    border: none;
+    width: 32px; /* увеличенный размер */
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* круглая обводка */
+    cursor: pointer;
+    color: #aaa;
+    transition: all 0.2s;
+    border: 1px solid transparent; /* чтобы при наведении не прыгал размер */
+}
+
+.alm-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-radius: 12px;
+}
+
+.alm-btn-heart.active svg {
+    fill: #ff2d55;
+    stroke: #ff2d55;
+}
+
+.alm-track-album {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+}
+
+.alm-track-play-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* ──────────────────────────────────────────────
+   МОБИЛЬНЫЕ УСТРОЙСТВА (≤767px)
+─────────────────────────────────────────────── */
+@media (max-width: 767px) {
+    .alm-container {
+        width: calc(100% - 24px);
+        max-height: calc(100vh - 32px);
+        border-radius: 16px 16px 0 0;
+        bottom: 0;
+        top: auto;
+        left: 12px;
+        right: 12px;
+        transform: none !important;
+    }
+
+    .alm-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        padding: 48px 0 24px;
+        gap: 16px;
+    }
+
+    .alm-album-cover-wrapper {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .alm-album-cover {
+        width: 140px;
+        height: 140px;
+        border-radius: 12px;
+    }
+
+    .alm-album-info {
+        width: 100%;
+        text-align: center;
+    }
+
+    .alm-title {
+        font-size: 20px;
+        line-height: 1.3;
+    }
+
+    .alm-author {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .alm-meta {
+        font-size: 13px;
+    }
+
+    .alm-album-actions {
+        width: 100%;
+        justify-content: center;
+        gap: 24px;
+        margin-top: 16px;
+    }
+
+    .alm-album-actions .alm-btn {
+        width: 48px;
+        height: 48px;
+        background: transparent; /* ← убрана обводка */
+        border: none;
+        border-radius: 0; /* ← обводка отключена */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #aaa;
+        transition: color 0.2s;
+    }
+
+    .alm-album-actions .alm-btn:hover {
+        color: white;
+    }
+
+    .alm-album-actions .alm-btn-heart.active svg {
+        fill: #ff2d55;
+        stroke: #ff2d55;
+    }
+
+    .alm-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        cursor: pointer;
+    }
+
+    .alm-close:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .alm-track-list {
+        padding: 0 8px;
+    }
+
+    .alm-track-item.mobile {
+        gap: 12px;
+        padding: 12px 0;
+        align-items: center;
+    }
+
+    .alm-track-item.mobile .alm-track-album {
+        display: none;
+    }
+
+    .alm-track-item.mobile .alm-track-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .alm-track-item.mobile .alm-track-duration {
+        font-size: 13px;
+        min-width: 48px;
+        text-align: right;
+    }
+
+    .alm-track-item.mobile .alm-track-actions {
+        margin-left: auto;
+    }
+
+    .alm-track-item.mobile .alm-btn {
+        width: 40px;
+        height: 40px;
+        background: transparent; /* ← убрана обводка */
+        border: none;
+        border-radius: 0; /* ← обводка отключена */
+        color: #aaa;
+    }
+
+    .alm-track-item.mobile .alm-btn:hover {
+        color: white;
+    }
+
+    /* Контекстное меню */
+    .alm-context-menu-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        z-index: 1500;
+    }
+
+    .alm-context-menu {
+        background: #2a2a2a;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px 16px 0 0;
+        width: 100%;
+        max-width: 400px;
+        display: flex;
+        flex-direction: column;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+    }
+
+    .alm-context-menu.active {
+        transform: translateY(0);
+    }
+
+    .alm-context-item {
+        padding: 16px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        text-align: center;
+        transition: background 0.2s;
+    }
+
+    .alm-context-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .alm-context-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        margin: 0 16px;
+    }
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+    .alm-container {
+        width: 95%;
+        padding: 16px;
+    }
+
+    .alm-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .alm-album-cover {
+        width: 120px;
+        height: 120px;
+    }
+
+    .alm-favorite-btn {
+        align-self: flex-start;
+        margin-top: 4px;
+    }
+
+    .alm-track-item {
+        gap: 16px;
+        padding: 8px 0;
+    }
+
+    .alm-track-index {
+        width: 24px;
+        font-size: 13px;
+    }
+
+    .alm-track-cover {
+        width: 28px;
+        height: 28px;
+    }
+
+    .alm-track-title {
+        font-size: 15px;
+    }
+
+    .alm-track-artist {
+        font-size: 13px;
+    }
+
+    .alm-track-album {
+        margin-left: 6px;
+    }
+}

@@ -1,0 +1,522 @@
+.pml-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.pml-container {
+    position: absolute;
+    width: 640px;
+    max-height: calc(100vh - 120px);
+    background: linear-gradient(135deg, #22222a 0%, #1e1e2a 100%);
+    border-radius: 12px;
+    overflow: hidden;
+    font-family: 'Roboto', sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.pml-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    position: relative;
+}
+
+.pml-playlist-cover {
+    width: 156px;
+    height: 156px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(228, 0, 0, 0.08);
+    border-radius: 12px;
+}
+
+.pml-playlist-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+}
+
+.pml-playlist-actions-inline {
+    display: flex;
+    gap: 8px; /* ← ближе к тексту */
+    align-self: flex-end; /* ←  по нижнему краю */
+    margin-top: auto; /* ← прижать к низу */
+}
+.pml-playlist-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.pml-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+.pml-author {
+    font-size: 16px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+.pml-meta {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/*.pml-favorite-btn {*/
+/*    background: none;*/
+/*    border: none;*/
+/*    width: 32px;*/
+/*    height: 32px;*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*    border-radius: 6px;*/
+/*    cursor: pointer;*/
+/*    color: #ffffff;*/
+/*    transition: all 0.2s;*/
+/*    flex-shrink: 0;*/
+/*    align-self: flex-end;*/
+/*}*/
+
+.pml-favorite-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.pml-favorite-btn.active svg {
+    fill: #ff2d55;
+    stroke: #ff2d55;
+}
+
+.pml-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #ffffff;
+    transition: all 0.2s;
+}
+
+.pml-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+/* Разделитель */
+.pml-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 16px 0;
+}
+
+/* Треки */
+.pml-track-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.pml-track-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    gap: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background 0.2s;
+}
+
+.pml-track-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.pml-track-item:last-child {
+    border-bottom: none;
+}
+
+/* Номер */
+.pml-track-index {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* Обложка трека + overlay */
+.pml-track-cover-wrapper {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.pml-track-cover {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.pml-play-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    transition: all 0.1s ease;
+    pointer-events: none;
+}
+
+.pml-play-overlay.visible {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.pml-play-overlay svg {
+    stroke: currentColor;
+    fill: none;
+}
+
+/* Текст */
+.pml-track-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.pml-track-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pml-track-artist {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Альбом  */
+.pml-track-album {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-left: 8px;
+    white-space: nowrap;
+}
+
+/* Длительность */
+.pml-track-duration {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    width: 56px;
+    text-align: right;
+}
+
+/* Действия */
+.pml-track-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.pml-btn {
+    background: none;
+    border: none;
+    width: 32px; /* ← увеличенный размер */
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* ← круглая обводка */
+    cursor: pointer;
+    color: #aaa;
+    transition: all 0.2s;
+    border: 1px solid transparent; /* ← чтобы при наведении не прыгал размер */
+}
+
+.pml-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3); /* ← круглая обводка при наведении */
+}
+
+.pml-btn-heart.active svg {
+    fill: #ff2d55;
+    stroke: #ff2d55;
+}
+
+.pml-track-play-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* ... остальные стили остаются как в исходном файле ... */
+
+/* ──────────────────────────────────────────────
+   Мобильное контекстное меню (только для ≤767px)
+─────────────────────────────────────────────── */
+@media (max-width: 767px) {
+    .pml-container {
+        width: calc(100% - 24px);
+        max-height: calc(100vh - 32px);
+        border-radius: 16px 16px 0 0;
+        bottom: 0;
+        top: auto;
+        left: 12px;
+        right: 12px;
+        transform: none !important;
+    }
+
+    .pml-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 48px 0 24px;
+        gap: 16px;
+    }
+
+    .pml-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        cursor: pointer;
+    }
+    .pml-favorite-btn {
+        display: none;
+    }
+    .pml-close:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .pml-playlist-cover-wrapper {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .pml-playlist-cover {
+        width: 140px;
+        height: 140px;
+        border-radius: 12px;
+    }
+
+    .pml-playlist-info {
+        width: 100%;
+        text-align: center;
+    }
+
+    .pml-title {
+        font-size: 20px;
+        line-height: 1.3;
+    }
+
+    .pml-author {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .pml-playlist-actions {
+        display: flex;
+        gap: 24px;
+        margin-top: 16px;
+        justify-content: center; /* ← выравнивание по центру */
+        width: 100%; /* ← занимает всю ширину */
+    }
+
+    .pml-playlist-actions .pml-btn {
+        width: 48px;
+        height: 48px;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #aaa;
+        transition: color 0.2s;
+    }
+
+    .pml-playlist-actions .pml-btn:hover {
+        color: white;
+    }
+
+    .pml-playlist-actions .pml-btn-heart.active svg {
+        fill: #ff2d55;
+        stroke: #ff2d55;
+    }
+
+    .pml-meta {
+        font-size: 13px;
+    }
+
+    .pml-playlist-actions-inline {
+        width: 100%;
+        justify-content: center;
+        gap: 32px;
+        margin-top: 8px;
+    }
+
+    .pml-playlist-actions-inline .pml-btn {
+        width: 48px;
+        height: 48px;
+        background: rgba(255,255,255,0.06);
+        border-radius: 12px;
+    }
+
+    .pml-track-list {
+        padding: 0 8px;
+    }
+
+    .pml-track-item.mobile {
+        gap: 12px;
+        padding: 12px 0;
+        align-items: center;
+    }
+
+    .pml-track-item.mobile .pml-track-album {
+        display: none;
+    }
+
+    .pml-track-item.mobile .pml-track-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .pml-track-item.mobile .pml-track-duration {
+        font-size: 13px;
+        min-width: 48px;
+        text-align: right;
+    }
+
+    .pml-track-item.mobile .pml-track-actions {
+        margin-left: auto;
+    }
+
+    .pml-track-item.mobile .pml-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .pml-playlist-actions-inline-mobile {
+        display: flex;
+        gap: 24px;
+        margin-top: 16px;
+        justify-content: center;
+    }
+
+    .pml-playlist-actions-inline-mobile .pml-btn {
+        width: 48px;
+        height: 48px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #aaa;
+    }
+
+    .pml-playlist-actions-inline-mobile .pml-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    .pml-playlist-actions-inline-mobile .pml-btn-heart.active svg {
+        fill: #ff2d55;
+        stroke: #ff2d55;
+    }
+
+
+    /* Контекстное меню */
+    .pml-context-menu-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        z-index: 1500;
+    }
+
+    .pml-context-menu {
+        background: #2a2a2a;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px 16px 0 0;
+        width: 100%;
+        max-width: 400px;
+        display: flex;
+        flex-direction: column;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+    }
+
+    .pml-context-menu.active {
+        transform: translateY(0);
+    }
+
+    .pml-context-item {
+        padding: 16px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        text-align: center;
+        transition: background 0.2s;
+    }
+
+    .pml-context-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .pml-context-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        margin: 0 16px;
+    }
+}
