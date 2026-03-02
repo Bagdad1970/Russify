@@ -13,8 +13,8 @@ This music player created by students of `KUBGU FI42/2`
 ### 1. Clone repository
 
 ```bash
-git clone https://github.com/Bagdad1970/MusicPlayer.git
-cd MusicPlayer
+git clone https://github.com/Bagdad1970/russify.git
+cd Russify
 ```
 
 ### 2. Start database in Docker
@@ -30,7 +30,7 @@ This should start PostgreSQL:
 - **db_name**: `postgres`. 
 
 ## Functional
-- **You can start server by using `App.java`**
+- **You can start server by using `RussifyApplication.java`**
 
 ### Server
 - While App.java is running our server is available on `localhost:8080`
