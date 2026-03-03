@@ -14,6 +14,8 @@ import AlbumModal from './components/AlbumModal/AlbumModal';
 import CreatePlaylistModal from './components/CreatePlaylistModal/CreatePlaylistModal';
 import RegistrationModal from "./components/RegistrationModal/RegistrationModal";
 import LoginModal from "./components/LoginModal/LoginModal";
+import AdminLogin from "./pages/AdminLogin/AdminLogin";
+import ModerationPage from "./pages/ModerationPage/ModerationPage.tsx";
 
 function App() {
     const [selectedPlaylist, setSelectedPlaylist] = useState(null);
@@ -147,6 +149,21 @@ function App() {
                         path="/settings"
                         element={
                             <SettingsPage />
+                        }
+                    />
+                    <Route
+                        path="/admin"
+                        element={
+                            <AdminLogin />
+                        }
+                    />
+                    <Route
+                        path="/moderation"
+                        element={
+                            <ModerationPage
+                                onOpenAlbumModal={openAlbumModal}
+                                onModerateAlbum={(album) => console.log('Модерировать:', album)}
+                            />
                         }
                     />
                 </Routes>
