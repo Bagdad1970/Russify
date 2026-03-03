@@ -1,0 +1,253 @@
+.tpm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1500;
+    backdrop-filter: blur(4px);
+}
+
+.tpm-container {
+    position: relative;
+    width: 90%;
+    max-width: 400px;
+    background: linear-gradient(135deg, #22222a 0%, #1e1e2a 100%);
+    border-radius: 20px;
+    padding: 24px;
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #f1f1f1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.tpm-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #ffffff;
+    transition: all 0.2s;
+}
+
+.tpm-close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.tpm-cover-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.tpm-cover {
+    width: 300px;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+}
+
+.tpm-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 16px;
+}
+
+.tpm-btn-playlist,
+.tpm-btn-favorite {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tpm-btn-playlist:hover,
+.tpm-btn-favorite:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.tpm-btn-favorite.active svg {
+    fill: #ff2d55;
+    stroke: #ff2d55;
+}
+
+.tpm-track-info-centered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    text-align: center;
+}
+
+.tpm-track-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.tpm-track-artist {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.tpm-progress-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.tpm-time-current,
+.tpm-time-total {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    width: 40px;
+    text-align: center;
+}
+
+.tpm-progress-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+}
+
+.tpm-progress-bar-fill {
+    height: 100%;
+    background: #007AFF;
+    border-radius: 3px;
+    transition: width 0.1s linear;
+}
+
+.tpm-controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    width: 100%;
+    padding: 0 16px;
+}
+
+.tpm-btn {
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #aaa;
+    transition: all 0.2s;
+}
+
+.tpm-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.tpm-btn.active {
+    color: #ffb703;
+}
+
+.tpm-btn-shuffle.active svg,
+.tpm-btn-repeat.active svg {
+    stroke: #ffb703;
+}
+
+.tpm-btn-play-pause {
+    width: 60px;
+    height: 60px;
+    background: #007AFF;
+    border-radius: 50%;
+}
+
+.tpm-btn-play-pause:hover {
+    background: #0062cc;
+    transform: scale(1.05);
+}
+
+/* ──────────────────────────────────────────────
+   Очень маленькие экраны (≤480px)
+─────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .tpm-container {
+        width: calc(100% - 24px);
+        padding: 20px;
+        border-radius: 16px;
+    }
+
+    .tpm-cover {
+        width: 260px;
+        height: 260px;
+        border-radius: 16px;
+    }
+
+    .tpm-track-title {
+        font-size: 18px;
+    }
+
+    .tpm-track-artist {
+        font-size: 14px;
+    }
+
+    .tpm-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    .tpm-btn-play-pause {
+        width: 52px;
+        height: 52px;
+    }
+
+    .tpm-controls-row {
+        gap: 16px;
+    }
+
+    .tpm-time-current,
+    .tpm-time-total {
+        font-size: 11px;
+        width: 32px;
+    }
+}

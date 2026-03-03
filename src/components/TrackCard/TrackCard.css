@@ -73,7 +73,7 @@
     gap: 16px;
 }
 
-.track-title {
+.trackCard-title {
     font-weight: bold;
     font-size: 30px;
     text-align: center;
@@ -139,7 +139,7 @@
         max-width: 95%;
     }
 
-    .track-title {
+    .trackCard-title {
         font-size: 24px;
     }
 
@@ -168,7 +168,7 @@
         max-width: 90%;
     }
 
-    .track-title {
+    .trackCard-title {
         font-size: 20px;
     }
 
