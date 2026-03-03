@@ -16,6 +16,8 @@ const AppBar = ({ activeTab = 'Главная', onFavoritesClick }) => {
     const [isFavorite, setIsFavorite] = useState(false);
     const [progress, setProgress] = useState(30);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const trackRef = useRef(null);
+    const [trackPosition, setTrackPosition] = useState(null);
 
     const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 
@@ -31,12 +33,19 @@ const AppBar = ({ activeTab = 'Главная', onFavoritesClick }) => {
     }, []);
 
     const handleTrackClick = (e) => {
-        if (isMobile) {
-            e.stopPropagation();
-            setIsPlayerOpen(true);
-        } else {
-            console.log("Клик по треку (десктоп):", title, "—", artist);
+        e.stopPropagation();
+
+        if (trackRef.current) {
+            const rect = trackRef.current.getBoundingClientRect();
+            setTrackPosition({
+                top: rect.top,
+                left: rect.left,
+                width: rect.width,
+                height: rect.height
+            });
         }
+
+        setIsPlayerOpen(true);
     };
 
     const closePlayer = () => {
@@ -98,7 +107,11 @@ const AppBar = ({ activeTab = 'Главная', onFavoritesClick }) => {
             </div>
 
             <div className="center-section">
-                <div className="track-and-controls" onClick={handleTrackClick}>
+                <div
+                    className="track-and-controls"
+                    onClick={handleTrackClick}
+                    ref={trackRef}
+                >
                     <div className="track-info">
                         <div className="track-cover">
                             <div className="cover-placeholder"></div>
@@ -205,13 +218,14 @@ const AppBar = ({ activeTab = 'Главная', onFavoritesClick }) => {
                 </span>
             </div>
 
-            {isMobile && (
-                <TrackPlayerModal
-                    isOpen={isPlayerOpen}
-                    onClose={closePlayer}
-                    track={{ title, artist, duration }}
-                />
-            )}
+            {/* Модальное окно плеера */}
+            <TrackPlayerModal
+                isOpen={isPlayerOpen}
+                onClose={closePlayer}
+                track={{ title, artist, duration }}
+                anchorPosition={trackPosition}
+                isMobile={isMobile}
+            />
         </div>
     );
 };

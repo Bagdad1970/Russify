@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './TrackPlayerModal.css';
 
-const TrackPlayerModal = ({ isOpen, onClose, track = null }) => {
+const TrackPlayerModal = ({ isOpen, onClose, track = null, anchorPosition = null, isMobile = false }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(30);
     const [isShuffle, setIsShuffle] = useState(false);
     const [isRepeat, setIsRepeat] = useState(false);
     const [isFavorite, setIsFavorite] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
+    const modalRef = useRef(null);
+
+    useEffect(() => {
+        if (isOpen) {
+            setTimeout(() => setIsVisible(true), 10);
+        } else {
+            setIsVisible(false);
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         let interval;
@@ -24,6 +34,24 @@ const TrackPlayerModal = ({ isOpen, onClose, track = null }) => {
         }
         return () => clearInterval(interval);
     }, [isPlaying]);
+
+    useEffect(() => {
+        if (!isMobile && isOpen) {
+            const handleClickOutside = (event) => {
+                if (modalRef.current && !modalRef.current.contains(event.target)) {
+                    onClose();
+                }
+            };
+
+            setTimeout(() => {
+                document.addEventListener('click', handleClickOutside);
+            }, 100);
+
+            return () => {
+                document.removeEventListener('click', handleClickOutside);
+            };
+        }
+    }, [isMobile, isOpen, onClose]);
 
     if (!isOpen || !track) return null;
 
@@ -48,19 +76,43 @@ const TrackPlayerModal = ({ isOpen, onClose, track = null }) => {
         setProgress(Math.min(100, Math.max(0, pos * 100)));
     };
 
+    const getModalStyle = () => {
+        if (isMobile || !anchorPosition) return {};
+
+        return {
+            top: anchorPosition.top + anchorPosition.height + 8,
+            left: anchorPosition.left + (anchorPosition.width / 2),
+            transform: 'translateX(-50%)',
+            position: 'fixed',
+            width: Math.min(400, anchorPosition.width * 1.5),
+            maxWidth: '450px'
+        };
+    };
+
     return (
-        <div className="tpm-overlay" onClick={onClose}>
-            <div className="tpm-container" onClick={(e) => e.stopPropagation()}>
-                <button className="tpm-close-btn" onClick={onClose}>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#ffffff" strokeWidth="2">
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
-                </button>
+        <>
+            {isMobile && (
+                <div className="tpm-overlay" onClick={onClose} />
+            )}
+
+            <div
+                ref={modalRef}
+                className={`tpm-container ${isMobile ? 'tpm-container-mobile' : 'tpm-container-desktop'} ${isVisible ? 'tpm-visible' : ''}`}
+                style={getModalStyle()}
+                onClick={(e) => e.stopPropagation()}
+            >
+                {isMobile && (
+                    <button className="tpm-close-btn" onClick={onClose}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#ffffff" strokeWidth="2">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                )}
 
                 <div className="tpm-cover-wrapper">
                     <div className="tpm-cover">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300" fill="none" stroke="#f1f1f1" strokeWidth="10">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" fill="none" stroke="#f1f1f1" strokeWidth="10">
                             <rect x="40" y="40" width="220" height="220" rx="20" />
                             <path d="M100 100v100 M150 100v100 M200 100v100" />
                         </svg>
@@ -168,7 +220,7 @@ const TrackPlayerModal = ({ isOpen, onClose, track = null }) => {
                     </button>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 
