@@ -9,6 +9,7 @@
     <name>Russify</name>
     <modules>
         <module>RussifyService</module>
+        <module>Models</module>
     </modules>
 
 

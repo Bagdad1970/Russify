@@ -19,7 +19,7 @@ public class Playlist {
     @Column(name = "playlist_id")
     private Long id;
 
-    @Column(name = "playlist_name", nullable = false, length = 255)
+    @Column(name = "name", nullable = false, length = 255)
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)

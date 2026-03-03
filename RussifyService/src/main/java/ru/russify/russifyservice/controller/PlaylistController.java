@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.russify.russifyservice.dto.PlaylistDto;
+import ru.russify.models.PlaylistDto;
 import ru.russify.russifyservice.service.implementation.PlaylistServiceImpl;
 
 import java.util.List;

@@ -2,8 +2,8 @@ package ru.russify.russifyservice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import ru.russify.russifyservice.dto.AlbumDto;
-import ru.russify.russifyservice.dto.projection.AlbumFlatDto;
+import ru.russify.models.AlbumDto;
+import ru.russify.models.projection.AlbumFlatDto;
 import ru.russify.russifyservice.model.Album;
 
 import java.util.List;
@@ -19,10 +19,12 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
      * @return
      */
     @Query("""
-            select new ru.russify.russifyservice.dto.AlbumDto(
+            select new ru.russify.models.AlbumDto(
                 a.id,
                 a.title,
                 at.name,
+                a.status,
+                a.coverHash,
                 a.releasedAt
             )
             from Album a
@@ -31,13 +33,15 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
     List<AlbumDto> findAllAlbumsDto();
 
     @Query("""
-            select new ru.russify.russifyservice.dto.projection.AlbumFlatDto(
+            select new ru.russify.models.projection.AlbumFlatDto(
                 a.id,
+                ta.track.id,
+                aa.author.id,
                 a.title,
                 at.name,
                 a.releasedAt,
-                ta.track.id,
-                aa.author.id
+                a.coverHash,
+                a.status
             )
             from Album a
             join a.albumType at

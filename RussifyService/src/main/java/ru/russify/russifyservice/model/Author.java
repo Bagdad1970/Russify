@@ -19,11 +19,11 @@ public class Author {
     @Column(name = "author_id")
     private Long id;
 
-    @Column(name = "author_name", nullable = false, length = 255)
+    @Column(name = "name", nullable = false, length = 255)
     private String name;
 
-    @Column(name = "photo_filepath", nullable = true, length = 255)
-    private String photoFilepath;
+    @Column(name = "photo_hash", nullable = true, length = 64)
+    private String photoHash;
 
     @Column(name = "description", nullable = true, length = 500)
     private String description;

@@ -1,15 +1,19 @@
-package ru.russify.russifyservice.dto;
+package ru.russify.models;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Set;
 
 @Data
 @AllArgsConstructor
+@Builder
+@NoArgsConstructor
 public class TrackDto {
 
     private Long id;
@@ -20,16 +24,15 @@ public class TrackDto {
     @NotEmpty
     private Set<Long> authorIds;
 
+    private String coverHash;
+
+    @NotNull
+    private String audioHash;
+
     @NotBlank(message = "Track name cannot be empty")
     private String name;
 
     @NotNull(message = "Genre id is required")
     private Long genreId;
-
-    @NotBlank(message = "Filepath to cover is required")
-    private String coverFilepath;
-
-    @NotBlank(message = "Filepath to audio is required")
-    private String audioFilepath;
 
 }

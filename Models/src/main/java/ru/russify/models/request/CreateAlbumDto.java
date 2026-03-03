@@ -1,14 +1,21 @@
-package ru.russify.russifyservice.dto.request;
+package ru.russify.models.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 import java.util.Set;
 
 @Data
-public class UpdateAlbumDto {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class CreateAlbumDto {
 
     @NotBlank
     private String title;
@@ -16,12 +23,15 @@ public class UpdateAlbumDto {
     @NotNull
     private Long albumTypeId;
 
-    @NotBlank
+    @NotNull
     private OffsetDateTime releasedAt;
 
-    @NotNull
+    private String coverHash;
+
+    @NotEmpty
     private Set<Long> trackIds;
 
-    @NotNull
+    @NotEmpty
     private Set<Long> authorIds;
+
 }

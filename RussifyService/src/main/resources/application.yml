@@ -20,5 +20,8 @@ spring:
     default-schema: public
     enabled: true
 
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
 app:
   schemas: liquibase, app

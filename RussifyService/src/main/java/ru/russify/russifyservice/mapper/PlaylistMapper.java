@@ -3,7 +3,7 @@ package ru.russify.russifyservice.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import ru.russify.russifyservice.dto.PlaylistDto;
+import ru.russify.models.PlaylistDto;
 import ru.russify.russifyservice.model.Playlist;
 
 @Mapper(componentModel = "spring")

@@ -3,7 +3,7 @@ package ru.russify.russifyservice.service.implementation;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.russify.russifyservice.dto.PlaylistDto;
+import ru.russify.models.PlaylistDto;
 import ru.russify.russifyservice.exception.PlaylistNotFoundException;
 import ru.russify.russifyservice.mapper.PlaylistMapper;
 import ru.russify.russifyservice.model.Playlist;

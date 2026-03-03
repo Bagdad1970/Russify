@@ -1,4 +1,4 @@
-package ru.russify.russifyservice.dto.error;
+package ru.russify.models.error;
 
 import java.time.Instant;
 import java.util.Map;

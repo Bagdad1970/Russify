@@ -2,9 +2,9 @@ package ru.russify.russifyservice.service.implementation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.russify.russifyservice.dto.AuthorDto;
-import ru.russify.russifyservice.dto.request.CreateAuthorDto;
-import ru.russify.russifyservice.dto.request.UpdateAuthorDto;
+import ru.russify.models.AuthorDto;
+import ru.russify.models.request.CreateAuthorDto;
+import ru.russify.models.request.UpdateAuthorDto;
 import ru.russify.russifyservice.exception.AuthorNotFoundException;
 import ru.russify.russifyservice.mapper.AuthorMapper;
 import ru.russify.russifyservice.model.Author;
@@ -59,7 +59,7 @@ public class AuthorServiceImpl implements AuthorService {
                 .orElseThrow(() -> new AuthorNotFoundException(author.getId()));
 
         if (author.getName() != null) existing.setName(author.getName());
-        if (author.getPhotoFilepath() != null) existing.setPhotoFilepath(author.getPhotoFilepath());
+        if (author.getPhotoHash() != null) existing.setPhotoHash(author.getPhotoHash());
         if (author.getDescription() != null) existing.setDescription(author.getDescription());
 
         return repository.save(existing);

@@ -3,6 +3,8 @@ package ru.russify.russifyservice.model;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,6 +18,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.russify.models.AlbumStatus;
 
 import java.time.OffsetDateTime;
 import java.util.Set;
@@ -46,8 +49,15 @@ public class Album {
     @JoinColumn(name = "album_type_id", nullable = false)
     private AlbumType albumType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private AlbumStatus status;
+
     @Column(name = "released_at", nullable = false)
     private OffsetDateTime releasedAt;
+
+    @Column(name = "cover_hash", nullable = true, length = 64)
+    private String coverHash;
 
     @OneToMany(mappedBy = "album", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TrackAlbum> trackAlbums;

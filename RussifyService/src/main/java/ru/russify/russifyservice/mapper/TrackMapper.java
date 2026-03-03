@@ -3,7 +3,7 @@ package ru.russify.russifyservice.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import ru.russify.russifyservice.dto.TrackDto;
+import ru.russify.models.TrackDto;
 import ru.russify.russifyservice.model.Track;
 
 @Mapper(componentModel = "spring")

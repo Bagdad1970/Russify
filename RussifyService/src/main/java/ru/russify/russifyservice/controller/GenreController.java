@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.russify.russifyservice.dto.GenreDto;
+import ru.russify.models.GenreDto;
 import ru.russify.russifyservice.service.implementation.GenreServiceImpl;
 
 import java.util.List;

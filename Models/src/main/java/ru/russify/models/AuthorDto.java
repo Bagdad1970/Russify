@@ -1,4 +1,4 @@
-package ru.russify.russifyservice.dto;
+package ru.russify.models;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -11,7 +11,7 @@ public class AuthorDto {
     @NotBlank(message = "Author name cannot be empty")
     private String name;
 
-    private String photoFilepath;
+    private String photoHash;
 
     private String description;
 

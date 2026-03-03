@@ -2,7 +2,7 @@ package ru.russify.russifyservice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import ru.russify.russifyservice.dto.projection.TrackFlatDto;
+import ru.russify.models.projection.TrackFlatDto;
 import ru.russify.russifyservice.model.Track;
 
 import java.util.List;
@@ -18,12 +18,12 @@ public interface TrackRepository extends JpaRepository<Track, Long> {
      * @return
      */
     @Query("""
-            select new ru.russify.russifyservice.dto.projection.TrackFlatDto(
+            select new ru.russify.models.projection.TrackFlatDto(
                 t.id,
                 t.name,
                 g.id,
-                t.coverFilepath,
-                t.audioFilepath,
+                t.coverHash,
+                t.audioHash,
                 ta.album.id,
                 at.author.id
             )
@@ -33,4 +33,5 @@ public interface TrackRepository extends JpaRepository<Track, Long> {
             left join t.authorTracks at
         """)
     List<TrackFlatDto> findAllFlat();
+
 }

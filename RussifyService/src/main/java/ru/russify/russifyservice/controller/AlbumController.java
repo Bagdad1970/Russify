@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.russify.russifyservice.dto.AlbumDto;
-import ru.russify.russifyservice.dto.request.CreateAlbumDto;
-import ru.russify.russifyservice.dto.request.UpdateAlbumDto;
+import ru.russify.models.AlbumDto;
+import ru.russify.models.request.CreateAlbumDto;
+import ru.russify.models.request.UpdateAlbumDto;
 import ru.russify.russifyservice.mapper.AlbumMapper;
 import ru.russify.russifyservice.service.implementation.AlbumServiceImpl;
 

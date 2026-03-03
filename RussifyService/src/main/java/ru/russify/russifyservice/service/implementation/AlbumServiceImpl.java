@@ -3,10 +3,10 @@ package ru.russify.russifyservice.service.implementation;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.russify.russifyservice.dto.AlbumDto;
-import ru.russify.russifyservice.dto.projection.AlbumFlatDto;
-import ru.russify.russifyservice.dto.request.CreateAlbumDto;
-import ru.russify.russifyservice.dto.request.UpdateAlbumDto;
+import ru.russify.models.AlbumDto;
+import ru.russify.models.projection.AlbumFlatDto;
+import ru.russify.models.request.CreateAlbumDto;
+import ru.russify.models.request.UpdateAlbumDto;
 import ru.russify.russifyservice.exception.AlbumNotFoundException;
 import ru.russify.russifyservice.mapper.AlbumMapper;
 import ru.russify.russifyservice.model.Album;
@@ -130,22 +130,24 @@ public class AlbumServiceImpl implements AlbumService {
         AlbumFlatDto first = flatRows.get(0);
 
         AlbumDto dto = new AlbumDto(
-                first.id(),
-                first.title(),
-                first.typeName(),
-                first.releasedAt()
+                first.getId(),
+                first.getTitle(),
+                first.getTypeName(),
+                first.getStatus(),
+                first.getCoverHash(),
+                first.getReleasedAt()
         );
 
         dto.setTrackIds(new HashSet<>());
         dto.setAuthorIds(new HashSet<>());
 
         for (AlbumFlatDto row : flatRows){
-            if (row.trackId() != null){
-                dto.getTrackIds().add(row.trackId());
+            if (row.getTrackId() != null) {
+                dto.getTrackIds().add(row.getTrackId());
             }
 
-            if (row.authorId() != null){
-                dto.getAuthorIds().add(row.authorId());
+            if (row.getAuthorId() != null) {
+                dto.getAuthorIds().add(row.getAuthorId());
             }
         }
 

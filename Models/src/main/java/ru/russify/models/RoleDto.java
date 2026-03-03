@@ -1,14 +1,14 @@
-package ru.russify.russifyservice.dto;
+package ru.russify.models;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class GenreDto {
+public class RoleDto {
 
     private Long id;
 
-    @NotBlank(message = "The genre name cannot be empty")
+    @NotBlank(message = "Role name cannot be empty")
     private String name;
 
 }

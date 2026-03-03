@@ -3,7 +3,7 @@ package ru.russify.russifyservice.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import ru.russify.russifyservice.dto.GenreDto;
+import ru.russify.models.GenreDto;
 import ru.russify.russifyservice.model.Genre;
 
 @Mapper(componentModel = "spring")

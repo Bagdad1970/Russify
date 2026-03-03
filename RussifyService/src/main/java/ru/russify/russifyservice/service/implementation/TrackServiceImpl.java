@@ -3,8 +3,8 @@ package ru.russify.russifyservice.service.implementation;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.russify.russifyservice.dto.TrackDto;
-import ru.russify.russifyservice.dto.projection.TrackFlatDto;
+import ru.russify.models.TrackDto;
+import ru.russify.models.projection.TrackFlatDto;
 import ru.russify.russifyservice.exception.TrackNotFoundException;
 import ru.russify.russifyservice.mapper.TrackMapper;
 import ru.russify.russifyservice.model.AuthorTrack;
@@ -121,27 +121,26 @@ public class TrackServiceImpl implements TrackService {
         Map<Long, TrackDto> grouped = new LinkedHashMap<>();
 
         for (TrackFlatDto row : flat) {
-
             grouped.putIfAbsent(
-                    row.id(),
-                    new TrackDto(
-                            row.id(),
-                            new HashSet<>(),
-                            new HashSet<>(),
-                            row.name(),
-                            row.genreId(),
-                            row.coverFilepath(),
-                            row.audioFilepath()
-                    )
+                    row.getId(),
+                    TrackDto.builder()
+                            .id(row.getId())
+                            .genreId(row.getGenreId())
+                            .albumIds(new HashSet<>())
+                            .authorIds(new HashSet<>())
+                            .name(row.getName())
+                            .coverHash(row.getCoverHash())
+                            .audioHash(row.getAudioHash())
+                            .build()
             );
 
-            TrackDto dto = grouped.get(row.id());
+            TrackDto dto = grouped.get(row.getId());
 
-            if (row.albumId() != null)
-                dto.getAlbumIds().add(row.albumId());
+            if (row.getAlbumId() != null)
+                dto.getAlbumIds().add(row.getAlbumId());
 
-            if (row.authorId() != null)
-                dto.getAuthorIds().add(row.authorId());
+            if (row.getAuthorId() != null)
+                dto.getAuthorIds().add(row.getAuthorId());
         }
 
         return new ArrayList<>(grouped.values());
@@ -164,9 +163,9 @@ public class TrackServiceImpl implements TrackService {
                 .orElseThrow(() -> new TrackNotFoundException(track.getId()));
 
         if (track.getName() != null) existing.setName(track.getName());
-        if (track.getAudioFilepath() != null) existing.setAudioFilepath(track.getAudioFilepath());
+        if (track.getAudioHash() != null) existing.setAudioHash(track.getAudioHash());
         if (track.getGenre() != null) existing.setGenre(track.getGenre());
-        if (track.getCoverFilepath() != null) existing.setCoverFilepath(track.getCoverFilepath());
+        if (track.getCoverHash() != null) existing.setCoverHash(track.getCoverHash());
 
         return repository.save(existing);
     }

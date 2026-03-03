@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.russify.russifyservice.dto.AuthorDto;
-import ru.russify.russifyservice.dto.request.CreateAuthorDto;
-import ru.russify.russifyservice.dto.request.UpdateAuthorDto;
+import ru.russify.models.AuthorDto;
+import ru.russify.models.request.CreateAuthorDto;
+import ru.russify.models.request.UpdateAuthorDto;
 import ru.russify.russifyservice.service.implementation.AuthorServiceImpl;
 
 import java.util.List;

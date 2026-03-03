@@ -2,16 +2,19 @@ package ru.russify.russifyservice.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ru.russify.russifyservice.dto.AlbumDto;
-import ru.russify.russifyservice.dto.request.CreateAlbumDto;
+import ru.russify.models.AlbumDto;
+import ru.russify.models.request.CreateAlbumDto;
 import ru.russify.russifyservice.model.Album;
 
 @Mapper(componentModel = "spring",
         builder = @org.mapstruct.Builder(disableBuilder = true))
 public interface AlbumMapper {
 
-    @Mapping(source = "title", target = "name")
+    @Mapping(source = "title", target = "title")
     @Mapping(source = "albumType", target = "type")
+    @Mapping(source = "status", target = "status")
+    @Mapping(source = "releasedAt", target = "releasedAt")
+    @Mapping(source = "coverHash", target = "coverHash")
     @Mapping(target = "trackIds",
             expression = "java(entity.getTrackAlbums() == null ? null : " +
                     "entity.getTrackAlbums().stream()" +
@@ -27,6 +30,8 @@ public interface AlbumMapper {
 
     @Mapping(source = "title", target = "title")
     @Mapping(source = "releasedAt", target = "releasedAt")
+    @Mapping(source = "coverHash", target = "coverHash")
+    @Mapping(target = "status", ignore = true)
     @Mapping(target = "albumType", ignore = true)
     @Mapping(target = "trackAlbums", ignore = true)
     @Mapping(target = "authorAlbums", ignore = true)

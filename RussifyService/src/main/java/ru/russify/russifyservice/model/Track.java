@@ -26,11 +26,11 @@ public class Track {
     @JoinColumn(name = "genre_id", nullable = false)
     private Genre genre;
 
-    @Column(name = "cover_filepath", nullable = false)
-    private String coverFilepath;
+    @Column(name = "cover_hash", nullable = true, length = 64)
+    private String coverHash;
 
-    @Column(name = "audio_filepath", nullable = false)
-    private String audioFilepath;
+    @Column(name = "audio_hash", nullable = false, length = 64)
+    private String audioHash;
 
     @OneToMany(mappedBy = "track", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TrackPlaylist> trackPlaylists;

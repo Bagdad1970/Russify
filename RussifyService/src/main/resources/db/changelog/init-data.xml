@@ -65,17 +65,17 @@
     <changeSet id="22" author="LittleBlBb">
         <insert tableName="playlists" schemaName="app">
             <column name="user_id" value="3"/>
-            <column name="playlist_name" value="first_system_playlist"/>
+            <column name="name" value="first_system_playlist"/>
             <column name="is_system" value="true"/>
         </insert>
         <insert tableName="playlists" schemaName="app">
             <column name="user_id" value="3"/>
-            <column name="playlist_name" value="second_system_playlist"/>
+            <column name="name" value="second_system_playlist"/>
             <column name="is_system" value="true"/>
         </insert>
         <insert tableName="playlists" schemaName="app">
             <column name="user_id" value="3"/>
-            <column name="playlist_name" value="third_non_system_playlist"/>
+            <column name="name" value="third_non_system_playlist"/>
             <column name="is_system" value="false"/>
         </insert>
     </changeSet>
@@ -84,32 +84,38 @@
         <insert tableName="albums" schemaName="app">
             <column name="album_type_id" value="1"/>
             <column name="title" value="Most valuable pirate"/>
-            <column name="cover_filepath" value="cover1"/>
+            <column name="cover_hash" value="cover1"/>
+            <column name="status" value="IN_PROGRESS" />
             <column name="released_at" valueComputed="NOW()"/>
         </insert>
         <insert tableName="albums" schemaName="app">
             <column name="album_type_id" value="1"/>
             <column name="title" value="Cruiser Aurora"/>
-            <column name="cover_filepath" value="cover2"/>
+            <column name="cover_hash" value="cover2"/>
+            <column name="status" value="APPROVED" />
             <column name="released_at" valueComputed="NOW()"/>
         </insert>
         <insert tableName="albums" schemaName="app">
             <column name="album_type_id" value="2"/>
             <column name="title" value="2 Goyard"/>
-            <column name="cover_filepath" value="cover3"/>
+            <column name="cover_hash" value="cover3"/>
+            <column name="status" value="DENIED" />
             <column name="released_at" valueComputed="NOW()"/>
         </insert>
     </changeSet>
 
     <changeSet id="24" author="LittleBlBb">
         <insert tableName="authors" schemaName="app">
-            <column name="author_name" value="Friendly Thug 52 NGG"></column>
+            <column name="name" value="Friendly Thug 52 NGG" />
+            <column name="photo_hash" value="photo1" />
         </insert>
         <insert tableName="authors" schemaName="app">
-            <column name="author_name" value="Alblak 52"></column>
+            <column name="name" value="Alblak 52" />
+            <column name="photo_hash" value="photo2" />
         </insert>
         <insert tableName="authors" schemaName="app">
-            <column name="author_name" value="Whole lotta swag"></column>
+            <column name="name" value="Whole lotta swag" />
+            <column name="photo_hash" value="photo3" />
         </insert>
     </changeSet>
 
@@ -117,20 +123,20 @@
         <insert tableName="tracks" schemaName="app">
             <column name="track_name" value="2 Goyard"></column>
             <column name="genre_id" value="1"></column>
-            <column name="audio_filepath" value="audio_filepath1"></column>
-            <column name="cover_filepath" value="cover_filepath1"></column>
+            <column name="audio_hash" value="audio1"></column>
+            <column name="cover_hash" value="cover1"></column>
         </insert>
         <insert tableName="tracks" schemaName="app">
             <column name="track_name" value="2 Goyard"></column>
             <column name="genre_id" value="2"></column>
-            <column name="audio_filepath" value="audio_filepath2"></column>
-            <column name="cover_filepath" value="cover_filepath2"></column>
+            <column name="audio_hash" value="audio2"></column>
+            <column name="cover_hash" value="cover2"></column>
         </insert>
         <insert tableName="tracks" schemaName="app">
             <column name="track_name" value="2 Goyard"></column>
             <column name="genre_id" value="3"></column>
-            <column name="audio_filepath" value="audio_filepath3"></column>
-            <column name="cover_filepath" value="cover_filepath3"></column>
+            <column name="audio_hash" value="audio3"></column>
+            <column name="cover_hash" value="cover3"></column>
         </insert>
     </changeSet>
 

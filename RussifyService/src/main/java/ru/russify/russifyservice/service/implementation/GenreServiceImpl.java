@@ -2,7 +2,7 @@ package ru.russify.russifyservice.service.implementation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.russify.russifyservice.dto.GenreDto;
+import ru.russify.models.GenreDto;
 import ru.russify.russifyservice.exception.GenreNotFoundException;
 import ru.russify.russifyservice.mapper.GenreMapper;
 import ru.russify.russifyservice.model.Genre;

@@ -1,4 +1,4 @@
-package ru.russify.russifyservice.dto;
+package ru.russify.models;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
