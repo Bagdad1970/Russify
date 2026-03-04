@@ -21,7 +21,7 @@ import ru.russify.russifyservice.service.implementation.AlbumServiceImpl;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/albums")
+@RequestMapping("/api/albums")
 @RequiredArgsConstructor
 public class AlbumController {
 

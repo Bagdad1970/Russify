@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.4</version>
+        <version>3.5.11</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.russify</groupId>
@@ -33,12 +33,23 @@
         <java.version>17</java.version>
         <maven.compile.source>17</maven.compile.source>
         <maven.compile.target>17</maven.compile.target>
-        <springdoc.version>2.5.0</springdoc.version>
+        <springdoc.version>2.7.0</springdoc.version>
         <mapstruct.version>1.6.0</mapstruct.version>
         <lombok.version>1.18.42</lombok.version>
     </properties>
 
     <dependencies>
+
+        <!-- Other modules -->
+
+        <dependency>
+            <groupId>ru.russify</groupId>
+            <artifactId>Models</artifactId>
+            <version>0.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!--      mapstruct -->
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -46,7 +57,6 @@
             <version>0.2.0</version>
         </dependency>
 
-        <!--      mapstruct -->
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
@@ -61,6 +71,11 @@
         </dependency>
 
         <!-- Spring -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -87,40 +102,38 @@
         <!-- Testing -->
 
         <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.21.4</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-testcontainers</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -136,7 +149,6 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
         </dependency>
 
 
@@ -155,12 +167,6 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ru.russify</groupId>
-            <artifactId>Models</artifactId>
-            <version>0.0.1</version>
-            <scope>compile</scope>
         </dependency>
 
     </dependencies>
