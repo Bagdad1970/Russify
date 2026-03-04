@@ -123,9 +123,7 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
                 <SearchBar
                     placeholder="Поиск по названию, исполнителю или году..."
                     value={globalFilter}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setGlobalFilter(e.target.value)
-                    }
+                    onChange={(value: string) => setGlobalFilter(value)}
                     onClick={() => {}}
                 />
 
