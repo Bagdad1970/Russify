@@ -6,6 +6,7 @@ import AlbumModal from '../../components/AlbumModal/AlbumModal';
 import CreateAlbumOrTrackModal from '../../components/CreateAlbumOrTrackModal/CreateAlbumOrTrackModal';
 
 const ProfilePage = () => {
+    // Данные альбомов
     const albums = [
         { id: 1, title: "Альбом 1", date: "2025-01-15", color: "#00f0ff", tracks: [
                 { title: "Трек 1", artist: "Исполнитель A", duration: 180 },

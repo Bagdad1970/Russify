@@ -1,0 +1,222 @@
+.tpm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    pointer-events: all;
+}
+
+.tpm-container-mobile {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 90%;
+    max-width: 400px;
+    background-color: #22222a;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tpm-container-desktop {
+    position: fixed;
+    background-color: #22222a;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    z-index: 1001;
+    opacity: 0;
+    transform-origin: top center;
+    transition: opacity 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    pointer-events: auto;
+}
+
+.tpm-visible {
+    opacity: 1;
+}
+
+.tpm-container-mobile.tpm-visible {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.tpm-container-desktop.tpm-visible {
+    opacity: 1;
+}
+
+.tpm-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: background-color 0.2s;
+}
+
+.tpm-close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.tpm-cover-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.tpm-cover {
+    width: 100%;
+    max-width: 280px;
+    aspect-ratio: 1/1;
+}
+
+.tpm-cover svg {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.tpm-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.tpm-track-info-centered {
+    text-align: center;
+    flex: 1;
+    padding: 0 12px;
+}
+
+.tpm-track-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #f1f1f1;
+    margin-bottom: 4px;
+}
+
+.tpm-track-artist {
+    font-size: 14px;
+    color: #aaa;
+}
+
+.tpm-progress-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.tpm-time-current,
+.tpm-time-total {
+    font-size: 12px;
+    color: #aaa;
+    min-width: 40px;
+}
+
+.tpm-progress-bar-bg {
+    flex: 1;
+    height: 4px;
+    background-color: #444;
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+}
+
+.tpm-progress-bar-fill {
+    height: 100%;
+    background-color: #ffb703;
+    border-radius: 2px;
+    transition: width 0.1s ease;
+}
+
+.tpm-controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.tpm-btn {
+    background: none;
+    border: none;
+    color: #f1f1f1;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.tpm-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.tpm-btn.active {
+    color: #ffb703;
+}
+
+.tpm-btn.active svg {
+    fill: #ffb703;
+}
+
+.tpm-btn-shuffle.active svg,
+.tpm-btn-repeat.active svg {
+    fill: #ffb703;
+}
+
+.tpm-btn-favorite.active svg {
+    fill: #ff2d55;
+}
+
+.tpm-btn-play-pause {
+    width: 56px;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.tpm-btn-play-pause:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 480px) {
+    .tpm-container-mobile {
+        width: 95%;
+        padding: 16px;
+    }
+
+    .tpm-cover {
+        max-width: 240px;
+    }
+
+    .tpm-btn-play-pause {
+        width: 48px;
+        height: 48px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    .tpm-container-desktop {
+        max-width: 400px;
+    }
+}

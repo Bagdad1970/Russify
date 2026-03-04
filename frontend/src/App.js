@@ -14,6 +14,9 @@ import AlbumModal from './components/AlbumModal/AlbumModal';
 import CreatePlaylistModal from './components/CreatePlaylistModal/CreatePlaylistModal';
 import RegistrationModal from "./components/RegistrationModal/RegistrationModal";
 import LoginModal from "./components/LoginModal/LoginModal";
+import AdminLogin from "./pages/AdminLogin/AdminLogin";
+import ModerationPage from "./pages/ModerationPage/ModerationPage.tsx";
+import SystemPlaylistsPage from "./pages/SystemPlaylistPage/SystemPlaylistPage.tsx";
 
 function App() {
     const [selectedPlaylist, setSelectedPlaylist] = useState(null);
@@ -99,6 +102,21 @@ function App() {
         setSelectedPlaylist(null);
     };
 
+    const handlePlaylistUpdate = (playlist: any) => {
+        console.log('Плейлист обновлён:', playlist);
+        // Здесь можно добавить API-вызов или обновление состояния
+    };
+
+    const handlePlaylistDelete = (id: number) => {
+        console.log('Плейлист удалён:', id);
+        // Здесь можно добавить API-вызов
+    };
+
+    const handlePlaylistCreate = (playlist: any) => {
+        console.log('Плейлист создан:', playlist);
+        // Здесь можно добавить API-вызов
+    };
+
     useEffect(() => {
     }, []);
 
@@ -147,6 +165,31 @@ function App() {
                         path="/settings"
                         element={
                             <SettingsPage />
+                        }
+                    />
+                    <Route
+                        path="/admin"
+                        element={
+                            <AdminLogin />
+                        }
+                    />
+                    <Route
+                        path="/moderation"
+                        element={
+                            <ModerationPage
+                                onOpenAlbumModal={openAlbumModal}
+                                onModerateAlbum={(album) => console.log('Модерировать:', album)}
+                            />
+                        }
+                    />
+                    <Route
+                        path="/system-playlists"
+                        element={
+                            <SystemPlaylistsPage
+                                onPlaylistUpdate={handlePlaylistUpdate}
+                                onPlaylistDelete={handlePlaylistDelete}
+                                onPlaylistCreate={handlePlaylistCreate}
+                            />
                         }
                     />
                 </Routes>

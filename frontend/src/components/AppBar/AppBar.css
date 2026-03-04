@@ -62,6 +62,7 @@
     background: rgba(255, 255, 255, 0.08);
 }
 
+/* <<<--- ОБЛОЖКА + ТЕКСТ В ОДНОЙ СТРОКЕ (всегда) --->>> */
 .track-info {
     display: flex;
     align-items: center;
@@ -70,29 +71,13 @@
     overflow: hidden;
 }
 
-.track-info h3,
-.track-info p {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin: 0;
-}
-
-.track-info h3 {
-    font-size: 14px;
-}
-
-.track-info p {
-    font-size: 12px;
-    opacity: 0.75;
-}
-
 .track-cover {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
     margin-right: 12px;
 }
 
@@ -101,7 +86,29 @@
     height: 40px;
     background: rgba(255, 255, 255, 0.15);
     border-radius: 4px;
-    flex-shrink: 0;
+}
+
+.track-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0; /* ← критично для обрезки */
+}
+
+.track-title,
+.track-artist {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+
+.track-title {
+    font-size: 14px;
+}
+
+.track-artist {
+    font-size: 12px;
+    opacity: 0.75;
 }
 
 .controls {
@@ -174,7 +181,9 @@
     fill: #ff2d55;
 }
 
-/* <<<--- АДАПТИВНОСТЬ: Мобильные устройства (до 767px) --->>> */
+/* ──────────────────────────────────────────────
+   Мобильные устройства (≤767px)
+─────────────────────────────────────────────── */
 @media (max-width: 767px) {
     .app-bar {
         padding: 4px 8px;
@@ -187,33 +196,25 @@
     }
 
     .center-section {
+        gap: 2px;
         padding-right: 0;
-        gap: 2px; /* ← уменьшаем отступ между элементами */
     }
 
     .track-and-controls {
-        gap: 2px; /* ← критично: убираем отступ между обложкой и кнопками */
-        padding: 4px 6px; /* ← меньше паддинг */
+        gap: 2px;
+        padding: 4px 6px;
     }
 
+    /* <<<--- МОБИЛЬНАЯ ВЕРСИЯ: Обложка + текст в строке, компактно, фикс. шрифт --->>> */
     .track-info {
-        gap: 4px; /* ← только 4px между обложкой и текстом */
-        max-width: 100px;
-    }
-
-    .track-info h3 {
-        font-size: 11px;
-    }
-
-    .track-info p {
-        font-size: 9px;
-        opacity: 0.6;
+        gap: 6px; /* ← уменьшен отступ между обложкой и текстом */
+        max-width: 100px; /* ← ширина всего блока */
     }
 
     .track-cover {
         width: 28px;
         height: 28px;
-        margin-right: 2px; /* ← минимальный отступ */
+        margin-right: 4px; /* ← уменьшен отступ */
     }
 
     .cover-placeholder {
@@ -221,14 +222,40 @@
         height: 28px;
     }
 
-    /* <<<--- СКРЫВАЕМ НЕНОЖНЫЕ ЭЛЕМЕНТЫ НА МОБИЛЕ --->>> */
+    .track-text {
+        display: flex;
+        flex-direction: column;
+        min-width: 0; /* ← критично для обрезки */
+        gap: 1px; /* ← минимальный отступ между треком и автором */
+    }
+
+    .track-title,
+    .track-artist {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin: 0;
+    }
+
+    .track-title {
+        font-size: 11px; /* ← фикс. шрифт */
+        max-width: 66px; /* ← фикс. ширина — если текст длиннее — ... */
+    }
+
+    .track-artist {
+        font-size: 9px; /* ← фикс. шрифт */
+        opacity: 0.6;
+        max-width: 66px; /* ← фикс. ширина — если текст длиннее — ... */
+    }
+    /* <<<--- КОНЕЦ МОБИЛЬНОЙ ВЕРСИИ --->>> */
+
+    /* Скрываем лишние элементы */
     .controls,
     .progress-section,
     .extra-controls {
         display: none;
     }
 
-    /* <<<--- КНОПКИ: УМЕНЬШАЕМ ТОЛЬКО НА МОБИЛЕ --->>> */
     .btn {
         width: 24px;
         height: 24px;
@@ -236,7 +263,9 @@
     }
 }
 
-/* <<<--- Планшеты (768px–1023px) --->>> */
+/* ──────────────────────────────────────────────
+   Планшеты (768px–1023px)
+─────────────────────────────────────────────── */
 @media (min-width: 768px) and (max-width: 1023px) {
     .app-bar {
         padding: 6px 12px;
@@ -253,22 +282,14 @@
     }
 
     .track-info {
-        gap: 6px;
+        gap: 10px;
         max-width: 140px;
-    }
-
-    .track-info h3 {
-        font-size: 12px;
-    }
-
-    .track-info p {
-        font-size: 10px;
     }
 
     .track-cover {
         width: 32px;
         height: 32px;
-        margin-right: 4px;
+        margin-right: 8px;
     }
 
     .cover-placeholder {
@@ -276,7 +297,16 @@
         height: 32px;
     }
 
-    /* <<<--- ПОКАЗЫВАЕМ ТОЛЬКО ВОСПРОИЗВЕДЕНИЕ И ИЗБРАННОЕ --->>> */
+    .track-title {
+        font-size: 12px;
+        max-width: 100px; /* ← обрезка */
+    }
+
+    .track-artist {
+        font-size: 10px;
+        max-width: 100px; /* ← обрезка */
+    }
+
     .controls {
         display: flex;
         gap: 2px;
@@ -302,7 +332,9 @@
     }
 }
 
-/* <<<--- Ноутбуки (1024px–1199px) --->>> */
+/* ──────────────────────────────────────────────
+   Ноутбуки (1024px–1199px)
+─────────────────────────────────────────────── */
 @media (min-width: 1024px) and (max-width: 1199px) {
     .app-bar {
         padding: 8px 14px;
@@ -319,27 +351,29 @@
     }
 
     .track-info {
-        gap: 8px;
+        gap: 10px;
         max-width: 160px;
-    }
-
-    .track-info h3 {
-        font-size: 13px;
-    }
-
-    .track-info p {
-        font-size: 11px;
     }
 
     .track-cover {
         width: 36px;
         height: 36px;
-        margin-right: 6px;
+        margin-right: 8px;
     }
 
     .cover-placeholder {
         width: 36px;
         height: 36px;
+    }
+
+    .track-title {
+        font-size: 13px;
+        max-width: 120px;
+    }
+
+    .track-artist {
+        font-size: 11px;
+        max-width: 120px;
     }
 
     .controls {
@@ -374,7 +408,79 @@
     }
 }
 
-/* <<<--- Десктоп (1200px+) --->>> */
+/* ──────────────────────────────────────────────
+   Десктоп (≥1200px)
+─────────────────────────────────────────────── */
 @media (min-width: 1200px) {
-    /* Оставляем как в исходнике — всё работает */
+    .app-bar {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .center-section {
+        gap: 4px;
+        padding-right: 10%;
+    }
+
+    .track-and-controls {
+        gap: 20px;
+        padding: 10px 20px;
+    }
+
+    .track-info {
+        gap: 12px;
+        max-width: 200px;
+    }
+
+    .track-cover {
+        width: 40px;
+        height: 40px;
+        margin-right: 12px;
+    }
+
+    .cover-placeholder {
+        width: 40px;
+        height: 40px;
+    }
+
+    .track-title {
+        font-size: 14px;
+        max-width: 160px;
+    }
+
+    .track-artist {
+        font-size: 12px;
+        max-width: 160px;
+    }
+
+    .controls {
+        gap: 8px;
+    }
+
+    .progress-section {
+        gap: 8px;
+    }
+
+    .time {
+        font-size: 12px;
+    }
+
+    .progress-slider {
+        width: 80px;
+    }
+
+    .progress-slider::-webkit-slider-thumb {
+        width: 12px;
+        height: 12px;
+    }
+
+    .extra-controls {
+        gap: 8px;
+    }
+
+    .btn {
+        width: 32px;
+        height: 32px;
+        font-size: 1.2em;
+    }
 }

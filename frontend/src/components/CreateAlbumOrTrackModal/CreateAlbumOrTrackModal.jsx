@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './CreateAlbumOrTrackModal.css';
 
 const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
+    const navigate = useNavigate();
     const modalRef = useRef(null);
     const fileInputRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
