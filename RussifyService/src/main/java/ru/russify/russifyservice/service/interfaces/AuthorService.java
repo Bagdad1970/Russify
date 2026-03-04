@@ -1,19 +1,20 @@
 package ru.russify.russifyservice.service.interfaces;
 
-import ru.russify.russifyservice.model.Author;
+import ru.russify.models.AuthorDto;
+import ru.russify.models.request.CreateAuthorDto;
+import ru.russify.models.request.UpdateAuthorDto;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface AuthorService {
 
-    Author save(Author album);
+    AuthorDto create(CreateAuthorDto album);
 
-    Author update(Author album);
+    AuthorDto update(Long id, UpdateAuthorDto album);
 
-    List<Author> findAll();
+    List<AuthorDto> findAll();
 
-    Optional<Author> findById(Long id);
+    AuthorDto findById(Long id);
 
     void deleteById(Long id);
 

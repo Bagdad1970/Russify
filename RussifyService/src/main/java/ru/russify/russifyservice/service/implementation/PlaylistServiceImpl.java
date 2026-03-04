@@ -15,7 +15,6 @@ import ru.russify.russifyservice.repository.UserRepository;
 import ru.russify.russifyservice.service.interfaces.PlaylistService;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,6 +28,7 @@ public class PlaylistServiceImpl implements PlaylistService {
     private final TrackRepository trackRepository;
     private final PlaylistMapper mapper;
 
+    @Override
     public PlaylistDto create(PlaylistDto dto) {
 
         Playlist playlist = mapper.toEntity(dto);
@@ -52,6 +52,7 @@ public class PlaylistServiceImpl implements PlaylistService {
         return mapper.toDto(repository.save(playlist));
     }
 
+    @Override
     public PlaylistDto update(Long id, PlaylistDto dto) {
 
         Playlist playlist = repository.findById(id)
@@ -81,43 +82,19 @@ public class PlaylistServiceImpl implements PlaylistService {
         return mapper.toDto(repository.save(playlist));
     }
 
-    public List<PlaylistDto> findAllDto() {
+    @Override
+    public List<PlaylistDto> findAll() {
         return repository.findAll()
                 .stream()
                 .map(mapper::toDto)
                 .toList();
     }
 
-    public PlaylistDto findByIdDto(Long id) {
+    @Override
+    public PlaylistDto findById(Long id) {
         return repository.findById(id)
                 .map(mapper::toDto)
                 .orElseThrow(() -> new PlaylistNotFoundException(id));
-    }
-
-    @Override
-    public Playlist save(Playlist playlist) {
-        return repository.save(playlist);
-    }
-
-    @Override
-    public Playlist update(Playlist playlist) {
-        Playlist existing = repository.findById(playlist.getId())
-                .orElseThrow(() -> new PlaylistNotFoundException(playlist.getId()));
-
-        if (playlist.getName() != null) existing.setName(playlist.getName());
-        if (playlist.getIsSystem() != null) existing.setIsSystem(playlist.getIsSystem());
-
-        return repository.save(existing);
-    }
-
-    @Override
-    public List<Playlist> findAll() {
-        return repository.findAll();
-    }
-
-    @Override
-    public Optional<Playlist> findById(Long id) {
-        return repository.findById(id);
     }
 
     @Override

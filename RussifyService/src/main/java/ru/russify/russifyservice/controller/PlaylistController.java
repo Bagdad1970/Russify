@@ -25,13 +25,13 @@ public class PlaylistController {
     private final PlaylistServiceImpl service;
 
     @GetMapping
-    public List<PlaylistDto> getAll() {
-        return service.findAllDto();
+    public List<PlaylistDto> findAll() {
+        return service.findAll();
     }
 
     @GetMapping("/{id}")
-    public PlaylistDto getById(@PathVariable Long id) {
-        return service.findByIdDto(id);
+    public PlaylistDto findById(@PathVariable Long id) {
+        return service.findById(id);
     }
 
     @PostMapping
@@ -50,7 +50,7 @@ public class PlaylistController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public void deleteById(@PathVariable Long id) {
         service.deleteById(id);
     }
 }

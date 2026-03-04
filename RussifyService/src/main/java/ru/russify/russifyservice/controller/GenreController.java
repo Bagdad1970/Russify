@@ -25,13 +25,13 @@ public class GenreController {
     private final GenreServiceImpl service;
 
     @GetMapping
-    public List<GenreDto> getAll() {
-        return service.findAllDto();
+    public List<GenreDto> findAll() {
+        return service.findAll();
     }
 
     @GetMapping("/{id}")
-    public GenreDto getById(@PathVariable Long id) {
-        return service.findByIdDto(id);
+    public GenreDto findById(@PathVariable Long id) {
+        return service.findById(id);
     }
 
     @PostMapping
@@ -50,7 +50,7 @@ public class GenreController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public void deleteById(@PathVariable Long id) {
         service.deleteById(id);
     }
 }

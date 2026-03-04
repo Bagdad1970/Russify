@@ -25,13 +25,13 @@ public class TrackController {
     private final TrackServiceImpl service;
 
     @GetMapping
-    public List<TrackDto> getAll() {
-        return service.findAllDto();
+    public List<TrackDto> findAll() {
+        return service.findAll();
     }
 
     @GetMapping("/{id}")
-    public TrackDto getById(@PathVariable Long id) {
-        return service.findByIdDto(id);
+    public TrackDto findById(@PathVariable Long id) {
+        return service.findById(id);
     }
 
     @PostMapping
@@ -50,7 +50,7 @@ public class TrackController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public void deleteById(@PathVariable Long id) {
         service.deleteById(id);
     }
 }

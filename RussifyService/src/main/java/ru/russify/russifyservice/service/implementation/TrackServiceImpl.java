@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,8 +37,8 @@ public class TrackServiceImpl implements TrackService {
     private final AuthorRepository authorRepository;
     private final TrackMapper mapper;
 
+    @Override
     public TrackDto create(TrackDto dto) {
-
         Track track = mapper.toEntity(dto);
 
         track.setGenre(
@@ -73,6 +72,7 @@ public class TrackServiceImpl implements TrackService {
         return mapper.toDto(repository.save(track));
     }
 
+    @Override
     public TrackDto update(Long id, TrackDto dto) {
 
         Track track = repository.findById(id)
@@ -115,7 +115,8 @@ public class TrackServiceImpl implements TrackService {
         return mapper.toDto(repository.save(track));
     }
 
-    public List<TrackDto> findAllDto() {
+    @Override
+    public List<TrackDto> findAll() {
         List<TrackFlatDto> flat = repository.findAllFlat();
 
         Map<Long, TrackDto> grouped = new LinkedHashMap<>();
@@ -146,38 +147,11 @@ public class TrackServiceImpl implements TrackService {
         return new ArrayList<>(grouped.values());
     }
 
-    public TrackDto findByIdDto(Long id) {
+    @Override
+    public TrackDto findById(Long id) {
         return repository.findById(id)
                 .map(mapper::toDto)
                 .orElseThrow(() -> new TrackNotFoundException(id));
-    }
-
-    @Override
-    public Track save(Track track) {
-        return repository.save(track);
-    }
-
-    @Override
-    public Track update(Track track) {
-        Track existing = repository.findById(track.getId())
-                .orElseThrow(() -> new TrackNotFoundException(track.getId()));
-
-        if (track.getName() != null) existing.setName(track.getName());
-        if (track.getAudioHash() != null) existing.setAudioHash(track.getAudioHash());
-        if (track.getGenre() != null) existing.setGenre(track.getGenre());
-        if (track.getCoverHash() != null) existing.setCoverHash(track.getCoverHash());
-
-        return repository.save(existing);
-    }
-
-    @Override
-    public List<Track> findAll() {
-        return repository.findAll();
-    }
-
-    @Override
-    public Optional<Track> findById(Long id) {
-        return repository.findById(id);
     }
 
     @Override

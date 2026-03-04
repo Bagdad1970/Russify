@@ -1,19 +1,18 @@
 package ru.russify.russifyservice.service.interfaces;
 
-import ru.russify.russifyservice.model.Track;
+import ru.russify.models.TrackDto;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface TrackService {
 
-    Track save(Track album);
+    TrackDto create(TrackDto album);
 
-    Track update(Track album);
+    TrackDto update(Long id, TrackDto album);
 
-    List<Track> findAll();
+    List<TrackDto> findAll();
 
-    Optional<Track> findById(Long id);
+    TrackDto findById(Long id);
 
     void deleteById(Long id);
     

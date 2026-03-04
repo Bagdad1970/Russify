@@ -27,16 +27,17 @@ public class AuthorController {
     private final AuthorServiceImpl service;
 
     @GetMapping
-    public List<AuthorDto> getAll() {
-        return service.findAllDto();
+    public List<AuthorDto> findAll() {
+        return service.findAll();
     }
 
     @GetMapping("/{id}")
-    public AuthorDto getById(@PathVariable Long id) {
-        return service.findByIdDto(id);
+    public AuthorDto findById(@PathVariable Long id) {
+        return service.findById(id);
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public AuthorDto create(@RequestBody @Valid CreateAuthorDto dto) {
         return service.create(dto);
     }
@@ -51,7 +52,7 @@ public class AuthorController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public void deleteById(@PathVariable Long id) {
         service.deleteById(id);
     }
 }

@@ -1,20 +1,19 @@
 package ru.russify.russifyservice.service.interfaces;
 
-import ru.russify.russifyservice.model.Playlist;
+import ru.russify.models.PlaylistDto;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface PlaylistService {
 
-    Playlist save(Playlist album);
+    PlaylistDto create(PlaylistDto playlist);
 
-    Playlist update(Playlist album);
+    PlaylistDto update(Long id, PlaylistDto playlist);
 
-    List<Playlist> findAll();
+    List<PlaylistDto> findAll();
 
-    Optional<Playlist> findById(Long id);
+    PlaylistDto findById(Long id);
 
     void deleteById(Long id);
-    
+
 }

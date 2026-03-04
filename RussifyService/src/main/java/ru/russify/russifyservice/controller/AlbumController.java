@@ -29,12 +29,12 @@ public class AlbumController {
     private final AlbumMapper mapper;
 
     @GetMapping
-    public List<AlbumDto> getAll() {
+    public List<AlbumDto> findAll() {
         return service.findAllWithRelations();
     }
 
     @GetMapping("/{id}")
-    public AlbumDto getById(@PathVariable Long id) {
+    public AlbumDto findById(@PathVariable Long id) {
         return service.findDtoById(id);
     }
 
@@ -45,7 +45,7 @@ public class AlbumController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public void deleteById(@PathVariable Long id) {
         service.delete(id);
     }
 

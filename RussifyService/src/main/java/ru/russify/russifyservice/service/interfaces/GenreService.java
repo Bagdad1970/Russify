@@ -1,19 +1,18 @@
 package ru.russify.russifyservice.service.interfaces;
 
-import ru.russify.russifyservice.model.Genre;
+import ru.russify.models.GenreDto;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface GenreService {
 
-    Genre save(Genre album);
+    GenreDto create(GenreDto album);
 
-    Genre update(Genre album);
+    GenreDto update(Long id, GenreDto album);
 
-    List<Genre> findAll();
+    List<GenreDto> findAll();
 
-    Optional<Genre> findById(Long id);
+    GenreDto findById(Long id);
 
     void deleteById(Long id);
     
