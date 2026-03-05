@@ -1,6 +1,9 @@
 export type Track = {
     id: bigint,
-    title: string,
-    artist: string,
-    duration: number
+    name: string,
+    genreId: bigint,
+    authorIds: Set<bigint>,
+    albumIds: Set<bigint>,
+    coverHash: string,
+    audioHash: string
 }

@@ -7,16 +7,12 @@ import ru.russify.models.PlaylistDto;
 import ru.russify.russifyservice.exception.PlaylistNotFoundException;
 import ru.russify.russifyservice.mapper.PlaylistMapper;
 import ru.russify.russifyservice.model.Playlist;
-import ru.russify.russifyservice.model.TrackPlaylist;
-import ru.russify.russifyservice.model.compositekey.TrackPlaylistPK;
 import ru.russify.russifyservice.repository.PlaylistRepository;
 import ru.russify.russifyservice.repository.TrackRepository;
 import ru.russify.russifyservice.repository.UserRepository;
 import ru.russify.russifyservice.service.interfaces.PlaylistService;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,17 +33,17 @@ public class PlaylistServiceImpl implements PlaylistService {
                 userRepository.getReferenceById(dto.getUserId())
         );
 
-        if (dto.getTrackIds() != null) {
-            playlist.setTrackPlaylists(
-                    dto.getTrackIds().stream()
-                            .map(trackId -> new TrackPlaylist(
-                                    new TrackPlaylistPK(null, trackId),
-                                    playlist,
-                                    trackRepository.getReferenceById(trackId)
-                            ))
-                            .collect(Collectors.toSet())
-            );
-        }
+//        if (dto.getTrackIds() != null) {
+//            playlist.setTrackPlaylists(
+//                    dto.getTrackIds().stream()
+//                            .map(trackId -> new TrackPlaylist(
+//                                    new TrackPlaylistPK(null, trackId),
+//                                    playlist,
+//                                    trackRepository.getReferenceById(trackId)
+//                            ))
+//                            .collect(Collectors.toSet())
+//            );
+//        }
 
         return mapper.toDto(repository.save(playlist));
     }
@@ -64,20 +60,20 @@ public class PlaylistServiceImpl implements PlaylistService {
             playlist.setUser(userRepository.getReferenceById(dto.getUserId()));
         }
 
-        if (dto.getTrackIds() != null) {
-
-            playlist.getTrackPlaylists().clear();
-
-            Set<TrackPlaylist> tracks = dto.getTrackIds().stream()
-                    .map(trackId -> new TrackPlaylist(
-                            new TrackPlaylistPK(id, trackId),
-                            playlist,
-                            trackRepository.getReferenceById(trackId)
-                    ))
-                    .collect(Collectors.toSet());
-
-            playlist.getTrackPlaylists().addAll(tracks);
-        }
+//        if (dto.getTrackIds() != null) {
+//
+//            playlist.getTrackPlaylists().clear();
+//
+//            Set<TrackPlaylist> tracks = dto.getTrackIds().stream()
+//                    .map(trackId -> new TrackPlaylist(
+//                            new TrackPlaylistPK(id, trackId),
+//                            playlist,
+//                            trackRepository.getReferenceById(trackId)
+//                    ))
+//                    .collect(Collectors.toSet());
+//
+//            playlist.getTrackPlaylists().addAll(tracks);
+//        }
 
         return mapper.toDto(repository.save(playlist));
     }

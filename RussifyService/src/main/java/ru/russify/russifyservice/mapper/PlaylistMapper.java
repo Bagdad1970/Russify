@@ -10,11 +10,11 @@ import ru.russify.russifyservice.model.Playlist;
 public interface PlaylistMapper {
 
     @Mapping(source = "user.id", target = "userId")
-    @Mapping(target = "trackIds",
-            expression = "java(entity.getTrackPlaylists() == null ? null : " +
-                    "entity.getTrackPlaylists().stream()" +
-                    ".map(tp -> tp.getTrack().getId())" +
-                    ".collect(java.util.stream.Collectors.toSet()))")
+//    @Mapping(target = "trackIds",
+//            expression = "java(entity.getTrackPlaylists() == null ? null : " +
+//                    "entity.getTrackPlaylists().stream()" +
+//                    ".map(tp -> tp.getTrack().getId())" +
+//                    ".collect(java.util.stream.Collectors.toSet()))")
     PlaylistDto toDto(Playlist entity);
 
     @Mapping(target = "id", ignore = true)

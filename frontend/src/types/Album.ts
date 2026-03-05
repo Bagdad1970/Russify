@@ -1,10 +1,9 @@
-import {Track} from "./Track";
+import {Track} from "./Track.ts";
 
 export type Album = {
     id: bigint,
+    albumTypeId: bigint,
     title: number,
-    date: string,
-
-
+    releasedAt: Date,
     tracks: Track[]
 }

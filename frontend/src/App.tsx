@@ -1,0 +1,229 @@
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import './App.css';
+
+import HomePage from './pages/HomePage.tsx';
+import FavoritesPage from './pages/FavoritesPage.tsx';
+import ProfilePage from './pages/ProfilePage.tsx';
+import SettingsPage from './pages/SettingsPage.tsx';
+
+import AppBar from './components/AppBar.tsx';
+import PlaylistModal from './components/PlaylistModal.tsx';
+import SystemPlaylistModal from './components/SystemPlaylistModal.tsx';
+import AlbumModal from './components/AlbumModal';
+import CreatePlaylistModal from './components/CreatePlaylistModal';
+import RegistrationModal from "./components/RegistrationModal.tsx";
+import LoginModal from "./components/LoginModal.tsx";
+import AdminLogin from "./pages/AdminLogin.tsx";
+import ModerationPage from "./pages/ModerationPage.tsx";
+import SystemPlaylistsPage from "./pages/SystemPlaylistPage.tsx";
+
+function App() {
+    const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isSystemModalOpen, setIsSystemModalOpen] = useState(false);
+    const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
+    const [isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen] = useState(false);
+
+    const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(true);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+    const albums = [
+        {
+            name: "Альбом",
+            author: "Автор",
+            tracks: [
+                { title: "Трек 1", artist: "Автор" },
+                { title: "Трек 2", artist: "Автор" },
+            ]
+        }
+    ];
+
+    const openPlaylistModal = (playlist) => {
+        setSelectedPlaylist(playlist);
+        setIsModalOpen(true);
+    };
+
+    const openSystemModal = (playlist) => {
+        setSelectedPlaylist(playlist);
+        setIsSystemModalOpen(true);
+    };
+
+    const openAlbumModal = () => {
+        setIsAlbumModalOpen(true);
+    };
+
+    const openCreatePlaylistModal = () => {
+        setIsCreatePlaylistModalOpen(true);
+    };
+
+    const openRegistrationModal = () => {
+        setIsRegistrationModalOpen(true);
+    };
+
+    const openLoginModal = () => {
+        setIsLoginModalOpen(true);
+    };
+
+    const closeRegistrationModal = () => {
+        setIsRegistrationModalOpen(false);
+    };
+
+    const closeLoginModal = () => {
+        setIsLoginModalOpen(false);
+    };
+
+    const switchToLogin = () => {
+        setIsRegistrationModalOpen(false);
+        setIsLoginModalOpen(true);
+    };
+
+    const switchToRegistration = () => {
+        setIsLoginModalOpen(false);
+        setIsRegistrationModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setIsSystemModalOpen(false);
+        setIsAlbumModalOpen(false);
+        setIsCreatePlaylistModalOpen(false);
+        setSelectedPlaylist(null);
+    };
+
+    const handlePlaylistUpdate = (playlist: any) => {
+        console.log('Плейлист обновлён:', playlist);
+        // Здесь можно добавить API-вызов или обновление состояния
+    };
+
+    const handlePlaylistDelete = (id: number) => {
+        console.log('Плейлист удалён:', id);
+        // Здесь можно добавить API-вызов
+    };
+
+    const handlePlaylistCreate = (playlist: any) => {
+        console.log('Плейлист создан:', playlist);
+        // Здесь можно добавить API-вызов
+    };
+
+    useEffect(() => {
+    }, []);
+
+    return (
+        <Router>
+            <div className="app">
+                <AppBar
+                    activeTab="Главная"
+                    trackTitle="Трек дня"
+                    artistName="Исполнитель"
+                    onFavoritesClick={openCreatePlaylistModal}
+                    onRegistrationClick={openRegistrationModal}
+                    onLoginClick={openLoginModal}
+                />
+
+                <Routes>
+                    <Route
+                        path="/"
+                        element={
+                            <HomePage
+                                onOpenPlaylistModal={openPlaylistModal}
+                                onOpenSystemModal={openSystemModal}
+                                onOpenAlbumModal={openAlbumModal}
+                                onOpenCreatePlaylistModal={openCreatePlaylistModal}
+                            />
+                        }
+                    />
+                    <Route
+                        path="/favorites"
+                        element={
+                            <FavoritesPage
+                                onOpenAlbumModal={openAlbumModal}
+                                onOpenPlaylistModal={openPlaylistModal}
+                            />
+                        }
+                    />
+                    <Route
+                        path="/profile"
+                        element={
+                            <ProfilePage />
+                        }
+                    />
+                    <Route
+                        path="/settings"
+                        element={
+                            <SettingsPage />
+                        }
+                    />
+                    <Route
+                        path="/admin"
+                        element={
+                            <AdminLogin />
+                        }
+                    />
+                    <Route
+                        path="/moderation"
+                        element={
+                            <ModerationPage
+                                onOpenAlbumModal={openAlbumModal}
+                                onModerateAlbum={(album) => console.log('Модерировать:', album)}
+                            />
+                        }
+                    />
+                    <Route
+                        path="/system-playlists"
+                        element={
+                            <SystemPlaylistsPage
+                                onPlaylistUpdate={handlePlaylistUpdate}
+                                onPlaylistDelete={handlePlaylistDelete}
+                                onPlaylistCreate={handlePlaylistCreate}
+                            />
+                        }
+                    />
+                </Routes>
+
+                {/* Модальные окна */}
+                <PlaylistModal
+                    isOpen={isModalOpen}
+                    onClose={closeModal}
+                    playlistName={selectedPlaylist?.title || "Плейлист"}
+                    authorName={selectedPlaylist?.author || "Автор"}
+                    tracks={selectedPlaylist?.tracks || []}
+                />
+
+                <SystemPlaylistModal
+                    isOpen={isSystemModalOpen}
+                    onClose={closeModal}
+                    playlistName={selectedPlaylist?.title || "Плейлист"}
+                    tracks={selectedPlaylist?.tracks || []}
+                />
+
+                <AlbumModal
+                    isOpen={isAlbumModalOpen}
+                    onClose={closeModal}
+                    albumName={albums[0]?.name || "Альбом"}
+                    authorName={albums[0]?.author || "Автор"}
+                    tracks={albums[0]?.tracks || []}
+                />
+
+                <CreatePlaylistModal
+                    isOpen={isCreatePlaylistModalOpen}
+                    onClose={closeModal}
+                />
+
+                <RegistrationModal
+                    isOpen={isRegistrationModalOpen}
+                    onClose={closeRegistrationModal}
+                    onSwitchToLogin={switchToLogin}
+                />
+
+                <LoginModal
+                    isOpen={isLoginModalOpen}
+                    onClose={closeLoginModal}
+                    onSwitchToRegistration={switchToRegistration}
+                />
+            </div>
+        </Router>
+    );
+}
+
+export default App;
