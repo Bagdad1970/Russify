@@ -1,6 +1,7 @@
 package ru.russify.russifyservice.service.implementation;
 
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.patterns.IToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.russify.models.request.CreateUserDto;
@@ -12,6 +13,7 @@ import ru.russify.russifyservice.model.Role;
 import ru.russify.russifyservice.model.User;
 import ru.russify.russifyservice.repository.RoleRepository;
 import ru.russify.russifyservice.repository.UserRepository;
+import ru.russify.russifyservice.security.JwtBlacklistService;
 import ru.russify.russifyservice.security.JwtService;
 import ru.russify.russifyservice.service.interfaces.AuthService;
 
@@ -23,6 +25,7 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final JwtBlacklistService jwtBlacklistService;
 
     public AuthResponse register(CreateUserDto dto) {
 
@@ -76,5 +79,15 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .token(token)
                 .build();
+    }
+
+    @Override
+    public void logout(String token){
+
+        if (jwtBlacklistService.isBlacklisted(token)){
+            throw new AuthException("Token already invalidated");
+        }
+
+        jwtBlacklistService.blacklistToken(token);
     }
 }

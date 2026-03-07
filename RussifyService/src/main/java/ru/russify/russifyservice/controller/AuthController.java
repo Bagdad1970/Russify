@@ -1,8 +1,10 @@
 package ru.russify.russifyservice.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +18,7 @@ import ru.russify.russifyservice.service.implementation.AuthServiceImpl;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class AuthController {
 
     private final AuthServiceImpl authService;
@@ -29,5 +32,14 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginUserDto request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.OK)
+    public void logout(Authentication authentication) {
+
+        String token = (String) authentication.getCredentials();
+
+        authService.logout(token);
     }
 }

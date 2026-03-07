@@ -1,5 +1,6 @@
 package ru.russify.russifyservice.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/playlists")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class PlaylistController {
 
     private final PlaylistServiceImpl service;
