@@ -25,3 +25,6 @@ spring:
 
 app:
   schemas: liquibase, app
+
+jwt:
+  secret: my-super-secret-key-my-super-secret-key-my-super-secret-key

@@ -43,7 +43,14 @@
         <condition column="album_id" operator="=" value="1" active="true" />
       </filter>
     </filter-actions>
+    <filter-actions connection-id="e2a8ec6f-ae61-4ce1-9efe-cde7e9ab6e11" dataset="app.roles" active-filter-id="d41e1435-e151-47e5-bfa9-5200434db589">
+      <filter id="d41e1435-e151-47e5-bfa9-5200434db589" name="Filter" temporary="false" custom-name="false" type="basic" join-type="AND" />
+    </filter-actions>
     <filter-actions connection-id="e2a8ec6f-ae61-4ce1-9efe-cde7e9ab6e11" dataset="app.album" active-filter-id="" />
+    <filter-actions connection-id="e2a8ec6f-ae61-4ce1-9efe-cde7e9ab6e11" dataset="app.tracks" active-filter-id="" />
+    <filter-actions connection-id="e2a8ec6f-ae61-4ce1-9efe-cde7e9ab6e11" dataset="app.users" active-filter-id="a60c6802-1ecc-43ea-a751-70b26e87690a">
+      <filter id="a60c6802-1ecc-43ea-a751-70b26e87690a" name="Filter" temporary="false" custom-name="false" type="basic" join-type="AND" />
+    </filter-actions>
     <filter-actions connection-id="e2a8ec6f-ae61-4ce1-9efe-cde7e9ab6e11" dataset="app.albums" active-filter-id="EMPTY_FILTER" />
   </component>
   <component name="DBNavigator.Project.ObjectQuickFilterManager">
@@ -58,7 +65,7 @@
           <description value="" />
           <database-type value="POSTGRES" />
           <config-type value="BASIC" />
-          <database-version value="16.11" />
+          <database-version value="16.12" />
           <driver-source value="BUNDLED" />
           <driver-library value="" />
           <driver value="" />
@@ -581,5 +588,9 @@
         </visibility-settings>
       </environment>
     </general-settings>
+  </component>
+  <component name="DBNavigator.Project.StatementExecutionManager">
+    <execution-variables />
+    <execution-variable-types />
   </component>
 </project>
