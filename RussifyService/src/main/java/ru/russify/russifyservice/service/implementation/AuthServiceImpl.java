@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.russify.models.request.CreateUserDto;
+import ru.russify.models.request.LoginUserDto;
 import ru.russify.models.response.AuthResponse;
 import ru.russify.russifyservice.exception.AlreadyExistsException;
+import ru.russify.russifyservice.exception.AuthException;
 import ru.russify.russifyservice.model.Role;
 import ru.russify.russifyservice.model.User;
 import ru.russify.russifyservice.repository.RoleRepository;
@@ -43,6 +45,28 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         userRepository.save(user);
+
+        String token = jwtService.generateToken(user.getId(), user.getEmail());
+
+        return AuthResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .token(token)
+                .build();
+    }
+
+    @Override
+    public AuthResponse login(LoginUserDto dto) {
+
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() ->
+                        new AuthException("Invalid email or password")
+                );
+
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+            throw new AuthException("Invalid email or password");
+        }
 
         String token = jwtService.generateToken(user.getId(), user.getEmail());
 

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.russify.models.request.CreateUserDto;
+import ru.russify.models.request.LoginUserDto;
 import ru.russify.models.response.AuthResponse;
 import ru.russify.russifyservice.service.implementation.AuthServiceImpl;
 
@@ -25,4 +26,8 @@ public class AuthController {
         return authService.register(request);
     }
 
+    @PostMapping("/login")
+    public AuthResponse login(@Valid @RequestBody LoginUserDto request) {
+        return authService.login(request);
+    }
 }
