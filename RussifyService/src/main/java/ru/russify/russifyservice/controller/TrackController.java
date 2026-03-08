@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.russify.models.TrackDto;
+import ru.russify.models.projection.TrackFlatDto;
+import ru.russify.models.request.TrackSearchRequest;
 import ru.russify.russifyservice.service.implementation.TrackServiceImpl;
 
 import java.util.List;
@@ -25,11 +27,6 @@ import java.util.List;
 public class TrackController {
 
     private final TrackServiceImpl service;
-
-    @GetMapping
-    public List<TrackDto> findAll() {
-        return service.findAll();
-    }
 
     @GetMapping("/{id}")
     public TrackDto findById(@PathVariable Long id) {
@@ -54,5 +51,11 @@ public class TrackController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable Long id) {
         service.deleteById(id);
+    }
+
+    @PostMapping("/search")
+    public List<TrackFlatDto> search(@RequestBody TrackSearchRequest request) {
+
+        return service.searchTracks(request);
     }
 }

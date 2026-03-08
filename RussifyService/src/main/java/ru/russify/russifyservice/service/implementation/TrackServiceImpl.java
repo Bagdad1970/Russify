@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.russify.models.TrackDto;
 import ru.russify.models.projection.TrackFlatDto;
+import ru.russify.models.request.TrackSearchRequest;
 import ru.russify.russifyservice.exception.TrackNotFoundException;
 import ru.russify.russifyservice.mapper.TrackMapper;
 import ru.russify.russifyservice.model.AuthorTrack;
@@ -17,6 +18,7 @@ import ru.russify.russifyservice.repository.AuthorRepository;
 import ru.russify.russifyservice.repository.GenreRepository;
 import ru.russify.russifyservice.repository.TrackRepository;
 import ru.russify.russifyservice.service.interfaces.TrackService;
+import ru.russify.russifyservice.specification.TrackSpecification;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -116,38 +118,6 @@ public class TrackServiceImpl implements TrackService {
     }
 
     @Override
-    public List<TrackDto> findAll() {
-        List<TrackFlatDto> flat = repository.findAllFlat();
-
-        Map<Long, TrackDto> grouped = new LinkedHashMap<>();
-
-        for (TrackFlatDto row : flat) {
-            grouped.putIfAbsent(
-                    row.getId(),
-                    TrackDto.builder()
-                            .id(row.getId())
-                            .genreId(row.getGenreId())
-                            .albumIds(new HashSet<>())
-                            .authorIds(new HashSet<>())
-                            .name(row.getName())
-                            .coverHash(row.getCoverHash())
-                            .audioHash(row.getAudioHash())
-                            .build()
-            );
-
-            TrackDto dto = grouped.get(row.getId());
-
-            if (row.getAlbumId() != null)
-                dto.getAlbumIds().add(row.getAlbumId());
-
-            if (row.getAuthorId() != null)
-                dto.getAuthorIds().add(row.getAuthorId());
-        }
-
-        return new ArrayList<>(grouped.values());
-    }
-
-    @Override
     public TrackDto findById(Long id) {
         return repository.findById(id)
                 .map(mapper::toDto)
@@ -159,4 +129,26 @@ public class TrackServiceImpl implements TrackService {
         repository.deleteById(id);
     }
 
+    @Override
+    public List<TrackFlatDto> searchTracks(TrackSearchRequest request) {
+
+        System.out.println(request.genreIds());
+
+        var spec = TrackSpecification.filter(
+                request.name(),
+                request.genreIds()
+        );
+
+        return repository.findAll(spec)
+                .stream()
+                .map(track -> new TrackFlatDto(
+                        track.getId(),
+                        track.getName(),
+                        track.getGenre().getId(),
+                        track.getGenre().getName(),
+                        track.getCoverHash(),
+                        track.getAudioHash()
+                ))
+                .toList();
+    }
 }
