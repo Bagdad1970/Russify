@@ -7,8 +7,11 @@ import org.springframework.stereotype.Service;
 import ru.russify.models.request.CreateUserDto;
 import ru.russify.models.request.LoginUserDto;
 import ru.russify.models.response.AuthResponse;
+import ru.russify.models.response.MeResponse;
 import ru.russify.russifyservice.exception.AlreadyExistsException;
 import ru.russify.russifyservice.exception.AuthException;
+import ru.russify.russifyservice.exception.NotFoundException;
+import ru.russify.russifyservice.exception.UserNotFoundException;
 import ru.russify.russifyservice.model.Role;
 import ru.russify.russifyservice.model.User;
 import ru.russify.russifyservice.repository.RoleRepository;
@@ -89,5 +92,19 @@ public class AuthServiceImpl implements AuthService {
         }
 
         jwtBlacklistService.blacklistToken(token);
+    }
+
+    @Override
+    public MeResponse getCurrentUser(String email){
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException());
+
+        return new MeResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRole().getId()
+        );
     }
 }

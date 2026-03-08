@@ -43,6 +43,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/playlists/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/genres/**").authenticated()
 
+                        //GET
+                        .requestMatchers(HttpMethod.GET, "/auth/me").authenticated()
+
                         // остальные endpoints защищены
                         .anyRequest().permitAll()
                 )
