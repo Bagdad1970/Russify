@@ -29,6 +29,9 @@ public class Playlist {
     @Column(name = "is_system", nullable = false)
     private Boolean isSystem;
 
+    @Column(name = "cover_hash")
+    private String coverHash;
+
     @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TrackPlaylist> trackPlaylists;
 

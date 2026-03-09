@@ -68,6 +68,10 @@
             <column name="is_system" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
+            <column name="cover_hash" type="varchar(64)">
+                <constraints nullable="true"/>
+            </column>
+
         </createTable>
     </changeSet>
 

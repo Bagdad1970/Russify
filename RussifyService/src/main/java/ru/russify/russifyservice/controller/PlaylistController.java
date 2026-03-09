@@ -4,8 +4,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.russify.models.PlaylistDto;
 import ru.russify.models.PlaylistWithTracks;
+import ru.russify.models.request.PlaylistCreateRequest;
+import ru.russify.models.response.PlaylistResponse;
 import ru.russify.russifyservice.service.implementation.PlaylistServiceImpl;
 
 import java.util.List;
@@ -42,10 +46,11 @@ public class PlaylistController {
         return service.getPlaylistWithTracks(id);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public PlaylistDto create(@RequestBody @Valid PlaylistDto dto) {
-        return service.create(dto);
+    public PlaylistResponse createPlaylist(
+            @ModelAttribute PlaylistCreateRequest request) {
+        return service.createPlaylist(request);
     }
 
     @PutMapping("/{id}")

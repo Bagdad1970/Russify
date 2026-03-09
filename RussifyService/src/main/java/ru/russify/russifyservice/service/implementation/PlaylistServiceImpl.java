@@ -7,9 +7,13 @@ import ru.russify.models.PlaylistDto;
 import ru.russify.models.PlaylistTrackDto;
 import ru.russify.models.PlaylistWithTracks;
 import ru.russify.models.projection.PlaylistTrackFlatDto;
+import ru.russify.models.request.PlaylistCreateRequest;
+import ru.russify.models.response.PlaylistResponse;
 import ru.russify.russifyservice.exception.PlaylistNotFoundException;
+import ru.russify.russifyservice.exception.UserNotFoundException;
 import ru.russify.russifyservice.mapper.PlaylistMapper;
 import ru.russify.russifyservice.model.Playlist;
+import ru.russify.russifyservice.model.User;
 import ru.russify.russifyservice.repository.PlaylistRepository;
 import ru.russify.russifyservice.repository.TrackRepository;
 import ru.russify.russifyservice.repository.UserRepository;
@@ -22,8 +26,9 @@ import java.util.List;
 @Transactional
 public class PlaylistServiceImpl implements PlaylistService {
 
-    private final PlaylistRepository repository;
     private final UserRepository userRepository;
+    private final FileStorageServiceImpl fileStorageService;
+    private final PlaylistRepository playlistRepository;
     private final TrackRepository trackRepository;
     private final PlaylistMapper mapper;
 
@@ -48,13 +53,13 @@ public class PlaylistServiceImpl implements PlaylistService {
 //            );
 //        }
 
-        return mapper.toDto(repository.save(playlist));
+        return mapper.toDto(playlistRepository.save(playlist));
     }
 
     @Override
     public PlaylistDto update(Long id, PlaylistDto dto) {
 
-        Playlist playlist = repository.findById(id)
+        Playlist playlist = playlistRepository.findById(id)
                 .orElseThrow(() -> new PlaylistNotFoundException(id));
 
         mapper.updateEntity(dto, playlist);
@@ -78,12 +83,12 @@ public class PlaylistServiceImpl implements PlaylistService {
 //            playlist.getTrackPlaylists().addAll(tracks);
 //        }
 
-        return mapper.toDto(repository.save(playlist));
+        return mapper.toDto(playlistRepository.save(playlist));
     }
 
     @Override
     public List<PlaylistDto> findAll() {
-        return repository.findAll()
+        return playlistRepository.findAll()
                 .stream()
                 .map(mapper::toDto)
                 .toList();
@@ -91,20 +96,20 @@ public class PlaylistServiceImpl implements PlaylistService {
 
     @Override
     public PlaylistDto findById(Long id) {
-        return repository.findById(id)
+        return playlistRepository.findById(id)
                 .map(mapper::toDto)
                 .orElseThrow(() -> new PlaylistNotFoundException(id));
     }
 
     @Override
     public void deleteById(Long id) {
-        repository.deleteById(id);
+        playlistRepository.deleteById(id);
     }
 
     @Override
     public PlaylistWithTracks getPlaylistWithTracks(Long playlistId){
 
-        List<PlaylistTrackFlatDto> rows = repository.findPlaylistWithTracks(playlistId);
+        List<PlaylistTrackFlatDto> rows = playlistRepository.findPlaylistWithTracks(playlistId);
 
         if (rows.isEmpty()) {
             throw new PlaylistNotFoundException(playlistId);
@@ -132,4 +137,45 @@ public class PlaylistServiceImpl implements PlaylistService {
                 .tracks(tracks)
                 .build();
     }
+
+    @Override
+    @Transactional
+    public PlaylistResponse createPlaylist(PlaylistCreateRequest request) {
+
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new UserNotFoundException(request.getUserId()));
+
+        Playlist playlist = new Playlist();
+        playlist.setName(request.getName());
+        playlist.setUser(user);
+
+        if (Boolean.TRUE.equals(request.getIsSystem()) && user.getRole().getName().equals("ADMIN")) {
+            playlist.setIsSystem(true);
+        } else {
+            playlist.setIsSystem(false);
+        }
+
+        String coverHash;
+
+        if (request.getCoverFile() != null && !request.getCoverFile().isEmpty()) {
+            coverHash = fileStorageService.saveFile(request.getCoverFile());
+        } else {
+            coverHash = "default_playlist_cover";
+        }
+
+        playlist.setCoverHash(coverHash);
+
+        Playlist saved = playlistRepository.save(playlist);
+
+        return PlaylistResponse.builder()
+                .id(saved.getId())
+                .userId(saved.getUser().getId())
+                .name(saved.getName())
+                .isSystem(saved.getIsSystem())
+                .coverHash(saved.getCoverHash())
+                .build();
+
+    }
+
+
 }
