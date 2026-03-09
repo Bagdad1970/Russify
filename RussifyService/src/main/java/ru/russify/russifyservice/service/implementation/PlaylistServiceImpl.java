@@ -4,6 +4,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.russify.models.PlaylistDto;
+import ru.russify.models.PlaylistTrackDto;
+import ru.russify.models.PlaylistWithTracks;
+import ru.russify.models.projection.PlaylistTrackFlatDto;
 import ru.russify.russifyservice.exception.PlaylistNotFoundException;
 import ru.russify.russifyservice.mapper.PlaylistMapper;
 import ru.russify.russifyservice.model.Playlist;
@@ -96,5 +99,37 @@ public class PlaylistServiceImpl implements PlaylistService {
     @Override
     public void deleteById(Long id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    public PlaylistWithTracks getPlaylistWithTracks(Long playlistId){
+
+        List<PlaylistTrackFlatDto> rows = repository.findPlaylistWithTracks(playlistId);
+
+        if (rows.isEmpty()) {
+            throw new PlaylistNotFoundException(playlistId);
+        }
+
+        PlaylistTrackFlatDto first = rows.get(0);
+
+        List<PlaylistTrackDto> tracks = rows.stream()
+                .filter(r -> r.trackId() != null)
+                .map(r -> PlaylistTrackDto.builder()
+                        .id(r.trackId())
+                        .name(r.trackName())
+                        .genreId(r.genreId())
+                        .genreName(r.genreName())
+                        .coverHash(r.coverHash())
+                        .audioHash(r.audioHash())
+                        .build())
+                .toList();
+
+        return PlaylistWithTracks.builder()
+                .id(first.playlistId())
+                .name(first.playlistName())
+                .userId(first.userID())
+                .isSystem(first.isSystem())
+                .tracks(tracks)
+                .build();
     }
 }

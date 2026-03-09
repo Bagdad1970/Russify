@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.russify.models.PlaylistDto;
+import ru.russify.models.PlaylistWithTracks;
 import ru.russify.russifyservice.service.implementation.PlaylistServiceImpl;
 
 import java.util.List;
@@ -34,6 +35,11 @@ public class PlaylistController {
     @GetMapping("/{id}")
     public PlaylistDto findById(@PathVariable Long id) {
         return service.findById(id);
+    }
+
+    @GetMapping("/{playlist_id}/tracks")
+    public PlaylistWithTracks getPlaylist(@PathVariable("playlist_id") Long id) {
+        return service.getPlaylistWithTracks(id);
     }
 
     @PostMapping
