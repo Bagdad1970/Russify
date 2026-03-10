@@ -2,12 +2,14 @@ package ru.russify.russifyservice.service.implementation;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import ru.russify.models.PlaylistDto;
 import ru.russify.models.PlaylistTrackDto;
 import ru.russify.models.PlaylistWithTracks;
 import ru.russify.models.projection.PlaylistTrackFlatDto;
 import ru.russify.models.request.PlaylistCreateRequest;
+import ru.russify.models.request.PlaylistUpdateRequest;
 import ru.russify.models.response.PlaylistResponse;
 import ru.russify.russifyservice.exception.PlaylistNotFoundException;
 import ru.russify.russifyservice.exception.UserNotFoundException;
@@ -31,60 +33,6 @@ public class PlaylistServiceImpl implements PlaylistService {
     private final PlaylistRepository playlistRepository;
     private final TrackRepository trackRepository;
     private final PlaylistMapper mapper;
-
-    @Override
-    public PlaylistDto create(PlaylistDto dto) {
-
-        Playlist playlist = mapper.toEntity(dto);
-
-        playlist.setUser(
-                userRepository.getReferenceById(dto.getUserId())
-        );
-
-//        if (dto.getTrackIds() != null) {
-//            playlist.setTrackPlaylists(
-//                    dto.getTrackIds().stream()
-//                            .map(trackId -> new TrackPlaylist(
-//                                    new TrackPlaylistPK(null, trackId),
-//                                    playlist,
-//                                    trackRepository.getReferenceById(trackId)
-//                            ))
-//                            .collect(Collectors.toSet())
-//            );
-//        }
-
-        return mapper.toDto(playlistRepository.save(playlist));
-    }
-
-    @Override
-    public PlaylistDto update(Long id, PlaylistDto dto) {
-
-        Playlist playlist = playlistRepository.findById(id)
-                .orElseThrow(() -> new PlaylistNotFoundException(id));
-
-        mapper.updateEntity(dto, playlist);
-
-        if (dto.getUserId() != null) {
-            playlist.setUser(userRepository.getReferenceById(dto.getUserId()));
-        }
-
-//        if (dto.getTrackIds() != null) {
-//
-//            playlist.getTrackPlaylists().clear();
-//
-//            Set<TrackPlaylist> tracks = dto.getTrackIds().stream()
-//                    .map(trackId -> new TrackPlaylist(
-//                            new TrackPlaylistPK(id, trackId),
-//                            playlist,
-//                            trackRepository.getReferenceById(trackId)
-//                    ))
-//                    .collect(Collectors.toSet());
-//
-//            playlist.getTrackPlaylists().addAll(tracks);
-//        }
-
-        return mapper.toDto(playlistRepository.save(playlist));
-    }
 
     @Override
     public List<PlaylistDto> findAll() {
@@ -177,5 +125,41 @@ public class PlaylistServiceImpl implements PlaylistService {
 
     }
 
+    @Override
+    public PlaylistDto update(
+            String email,
+            Long playlistId,
+            PlaylistUpdateRequest request
+    ) {
 
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException());
+
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new PlaylistNotFoundException(playlistId));
+
+        boolean isOwner = playlist.getUser().getId().equals(user.getId());
+        boolean isAdmin = user.getRole().getName().equals("ADMIN");
+
+        if (!isOwner && !isAdmin) {
+            throw new AccessDeniedException("Not enough permissions");
+        }
+
+        if (request.getName() != null && !request.getName().isBlank()) {
+            playlist.setName(request.getName());
+        }
+
+        if (request.getIsSystem() != null && user.getRole().getName().equals("ADMIN")) {
+            playlist.setIsSystem(request.getIsSystem());
+        }
+
+        if (request.getCoverFile() != null && !request.getCoverFile().isEmpty()) {
+
+            String hash = fileStorageService.saveFile(request.getCoverFile());
+            playlist.setCoverHash(hash);
+
+        }
+
+        return mapper.toDto(playlistRepository.save(playlist));
+    }
 }

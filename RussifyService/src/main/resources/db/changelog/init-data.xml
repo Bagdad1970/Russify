@@ -28,13 +28,13 @@
 
     <changeSet id="20" author="LittleBlBb">
         <insert tableName="roles" schemaName="app">
-            <column name="role_name" value="admin"></column>
+            <column name="role_name" value="ADMIN"></column>
         </insert>
         <insert tableName="roles" schemaName="app">
-            <column name="role_name" value="author"></column>
+            <column name="role_name" value="AUTHOR"></column>
         </insert>
         <insert tableName="roles" schemaName="app">
-            <column name="role_name" value="users"></column>
+            <column name="role_name" value="USER"></column>
         </insert>
     </changeSet>
 
