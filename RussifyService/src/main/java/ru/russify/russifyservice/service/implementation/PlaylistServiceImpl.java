@@ -226,4 +226,21 @@ public class PlaylistServiceImpl implements PlaylistService {
 
         return userAccess;
     }
+
+    @Override
+    public void removeTrack(String email, Long playlistId, Long trackId) {
+        HashMap userAccess = userAccessToPlaylist(email, playlistId);
+
+        if (!(boolean) userAccess.get("isOwner") && !(boolean) userAccess.get("isAdmin")) {
+            throw new AccessDeniedException("Not enough permissions");
+        }
+
+        boolean exists = trackPlaylistRepository.existsByPlaylistIdAndTrackId(playlistId, trackId);
+
+        if (!exists) {
+            throw new TrackNotFoundException(trackId);
+        }
+
+        trackPlaylistRepository.deleteByPlaylistIdAndTrackId(playlistId, trackId);
+    }
 }

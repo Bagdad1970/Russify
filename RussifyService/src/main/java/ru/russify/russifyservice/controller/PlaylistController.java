@@ -89,4 +89,18 @@ public class PlaylistController {
                 request.trackId()
         );
     }
+
+    @DeleteMapping("/{playlistId}/{trackId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeTrackFromPlaylist(
+            @PathVariable Long playlistId,
+            @PathVariable Long trackId,
+            Authentication authentication
+    ) {
+        service.removeTrack(
+                authentication.getName(),
+                playlistId,
+                trackId
+        );
+    }
 }

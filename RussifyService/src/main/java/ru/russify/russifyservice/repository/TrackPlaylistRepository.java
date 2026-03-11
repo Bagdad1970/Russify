@@ -7,4 +7,6 @@ import ru.russify.russifyservice.model.compositekey.TrackPlaylistPK;
 public interface TrackPlaylistRepository extends JpaRepository<TrackPlaylist, TrackPlaylistPK> {
 
     boolean existsByPlaylistIdAndTrackId(Long playlistId, Long trackId);
+
+    void deleteByPlaylistIdAndTrackId(Long playlistId, Long trackId);
 }

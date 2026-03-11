@@ -31,4 +31,11 @@ public interface PlaylistService {
             Long playlistId,
             Long trackId
     );
+
+    void removeTrack(
+            String email,
+            Long playlistId,
+            Long trackId
+    );
+
 }
