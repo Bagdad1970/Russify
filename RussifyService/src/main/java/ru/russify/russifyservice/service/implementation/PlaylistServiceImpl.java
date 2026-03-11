@@ -21,6 +21,7 @@ import ru.russify.russifyservice.repository.TrackRepository;
 import ru.russify.russifyservice.repository.UserRepository;
 import ru.russify.russifyservice.service.interfaces.PlaylistService;
 
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -132,24 +133,19 @@ public class PlaylistServiceImpl implements PlaylistService {
             PlaylistUpdateRequest request
     ) {
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException());
+       HashMap userAccess = userAccessToPlaylist(email, playlistId);
 
-        Playlist playlist = playlistRepository.findById(playlistId)
-                .orElseThrow(() -> new PlaylistNotFoundException(playlistId));
-
-        boolean isOwner = playlist.getUser().getId().equals(user.getId());
-        boolean isAdmin = user.getRole().getName().equals("ADMIN");
-
-        if (!isOwner && !isAdmin) {
+        if (!(boolean) userAccess.get("isOwner") && !(boolean) userAccess.get("isAdmin")) {
             throw new AccessDeniedException("Not enough permissions");
         }
+
+        Playlist playlist = (Playlist) userAccess.get("playlist");
 
         if (request.getName() != null && !request.getName().isBlank()) {
             playlist.setName(request.getName());
         }
 
-        if (request.getIsSystem() != null && user.getRole().getName().equals("ADMIN")) {
+        if (request.getIsSystem() != null && (boolean) userAccess.get("isAdmin")) {
             playlist.setIsSystem(request.getIsSystem());
         }
 
@@ -161,5 +157,37 @@ public class PlaylistServiceImpl implements PlaylistService {
         }
 
         return mapper.toDto(playlistRepository.save(playlist));
+    }
+    
+    public void deletePlaylist(String email, Long playlistId) {
+
+        HashMap userAccess = userAccessToPlaylist(email, playlistId);
+
+        if (!(boolean) userAccess.get("isOwner") && !(boolean) userAccess.get("isAdmin")) {
+            throw new AccessDeniedException("Not enough permissions");
+        }
+
+        deleteById(playlistId);
+    }
+
+    private HashMap userAccessToPlaylist(String email, Long playlistId) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException());
+
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new PlaylistNotFoundException(playlistId));
+
+        HashMap userAccess = new HashMap();
+
+        userAccess.put("user",  user);
+        userAccess.put("playlist", playlist);
+
+        boolean isOwner = playlist.getUser().getId().equals(user.getId());
+        boolean isAdmin = user.getRole().getName().equals("ADMIN");
+
+        userAccess.put("isAdmin", isAdmin);
+        userAccess.put("isOwner", isOwner);
+
+        return userAccess;
     }
 }

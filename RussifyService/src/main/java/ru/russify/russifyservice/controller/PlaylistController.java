@@ -70,7 +70,8 @@ public class PlaylistController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteById(@PathVariable Long id) {
-        service.deleteById(id);
+    public void deleteById(@PathVariable Long id, Authentication authentication) {
+        String email = authentication.getName();
+        service.deletePlaylist(email, id);
     }
 }
