@@ -12,11 +12,17 @@ import ru.russify.models.request.PlaylistCreateRequest;
 import ru.russify.models.request.PlaylistUpdateRequest;
 import ru.russify.models.response.PlaylistResponse;
 import ru.russify.russifyservice.exception.PlaylistNotFoundException;
+import ru.russify.russifyservice.exception.TrackAlreadyInPlaylistException;
+import ru.russify.russifyservice.exception.TrackNotFoundException;
 import ru.russify.russifyservice.exception.UserNotFoundException;
 import ru.russify.russifyservice.mapper.PlaylistMapper;
 import ru.russify.russifyservice.model.Playlist;
+import ru.russify.russifyservice.model.Track;
+import ru.russify.russifyservice.model.TrackPlaylist;
 import ru.russify.russifyservice.model.User;
+import ru.russify.russifyservice.model.compositekey.TrackPlaylistPK;
 import ru.russify.russifyservice.repository.PlaylistRepository;
+import ru.russify.russifyservice.repository.TrackPlaylistRepository;
 import ru.russify.russifyservice.repository.TrackRepository;
 import ru.russify.russifyservice.repository.UserRepository;
 import ru.russify.russifyservice.service.interfaces.PlaylistService;
@@ -33,6 +39,7 @@ public class PlaylistServiceImpl implements PlaylistService {
     private final FileStorageServiceImpl fileStorageService;
     private final PlaylistRepository playlistRepository;
     private final TrackRepository trackRepository;
+    private final TrackPlaylistRepository trackPlaylistRepository;
     private final PlaylistMapper mapper;
 
     @Override
@@ -168,6 +175,35 @@ public class PlaylistServiceImpl implements PlaylistService {
         }
 
         deleteById(playlistId);
+    }
+
+    @Override
+    public void addTrack(String email, Long playlistId, Long trackId) {
+
+        HashMap userAccess = userAccessToPlaylist(email, playlistId);
+
+        if (!(boolean) userAccess.get("isOwner") && !(boolean) userAccess.get("isAdmin")) {
+            throw new AccessDeniedException("Not enough permissions");
+        }
+
+        Track track = trackRepository.findById(trackId)
+                .orElseThrow(() -> new TrackNotFoundException(trackId));
+
+
+        boolean alreadyExists = trackPlaylistRepository
+                .existsByPlaylistIdAndTrackId(playlistId, trackId);
+
+        if (alreadyExists) {
+            throw new TrackAlreadyInPlaylistException(trackId, playlistId);
+        }
+
+        TrackPlaylist relation = new TrackPlaylist(
+                new TrackPlaylistPK(trackId, playlistId),
+                (Playlist) userAccess.get("playlist"),
+                track
+        );
+
+        trackPlaylistRepository.save(relation);
     }
 
     private HashMap userAccessToPlaylist(String email, Long playlistId) {

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.russify.models.PlaylistDto;
 import ru.russify.models.PlaylistWithTracks;
+import ru.russify.models.request.AddTrackToPlaylistRequest;
 import ru.russify.models.request.PlaylistCreateRequest;
 import ru.russify.models.request.PlaylistUpdateRequest;
 import ru.russify.models.response.PlaylistResponse;
@@ -73,5 +74,19 @@ public class PlaylistController {
     public void deleteById(@PathVariable Long id, Authentication authentication) {
         String email = authentication.getName();
         service.deletePlaylist(email, id);
+    }
+
+    @PostMapping("/{playlistId}/tracks")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void addTrackToPlaylist(
+            @PathVariable Long playlistId,
+            @RequestBody @Valid AddTrackToPlaylistRequest request,
+            Authentication authentication
+    ) {
+        service.addTrack(
+                authentication.getName(),
+                playlistId,
+                request.trackId()
+        );
     }
 }

@@ -25,4 +25,10 @@ public interface PlaylistService {
             Long playlistId,
             PlaylistUpdateRequest request
     );
+
+    void addTrack(
+            String email,
+            Long playlistId,
+            Long trackId
+    );
 }
