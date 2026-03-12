@@ -26,7 +26,7 @@ function App() {
     const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
     const [isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen] = useState(false);
 
-    const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(true);
+    const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
     const albums = [
@@ -67,19 +67,23 @@ function App() {
     };
 
     const closeRegistrationModal = () => {
+        localStorage.removeItem('auth_modal_open');
         setIsRegistrationModalOpen(false);
     };
 
     const closeLoginModal = () => {
+        localStorage.removeItem('auth_modal_open');
         setIsLoginModalOpen(false);
     };
 
     const switchToLogin = () => {
+        localStorage.removeItem('auth_modal_open');
         setIsRegistrationModalOpen(false);
         setIsLoginModalOpen(true);
     };
 
     const switchToRegistration = () => {
+        localStorage.removeItem('auth_modal_open');
         setIsLoginModalOpen(false);
         setIsRegistrationModalOpen(true);
     };
@@ -108,6 +112,21 @@ function App() {
     };
 
     useEffect(() => {
+    }, []);
+
+
+    useEffect(() => {
+        const handleOpenAuthModal = (event: CustomEvent) => {
+            if (event.detail?.type === 'registration') {
+                openRegistrationModal();
+            }
+        };
+
+        window.addEventListener('openAuthModal', handleOpenAuthModal as EventListener);
+
+        return () => {
+            window.removeEventListener('openAuthModal', handleOpenAuthModal as EventListener);
+        };
     }, []);
 
     return (

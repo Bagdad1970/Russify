@@ -30,7 +30,7 @@ const ProfileHeader = () => {
         };
 
         loadUserData()
-    });
+    }, []); // тут перерендеревалось
 
     const formatDate = (dateStr) => {
         const months = [

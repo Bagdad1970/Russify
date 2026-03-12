@@ -24,6 +24,8 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [position, setPosition] = useState({ x: 0, y: 0 });
 
+    const [isPositionCalculated, setIsPositionCalculated] = useState(false);
+
     useEffect(() => {
         if (isOpen) {
             setFormData({
@@ -43,6 +45,10 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
             const left = (window.innerWidth - modalWidth) / 2;
             const top = appBarHeight + (window.innerHeight - appBarHeight - modalHeight) / 2 - 20;
             setPosition({ x: left, y: top });
+
+            setIsPositionCalculated(true);
+        } else {
+            setIsPositionCalculated(false);
         }
     }, [isOpen]);
 
@@ -147,7 +153,6 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
 
     const handleKeyDown = (e) => {
         if (e.ctrlKey || e.metaKey) {
-            // Разрешаем Ctrl+A, Ctrl+Z, Ctrl+C, Ctrl+V, Ctrl+X
             const key = e.key.toLowerCase();
             if (['a', 'z', 'c', 'v', 'x'].includes(key)) {
                 return;
@@ -155,7 +160,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {  // Добавлен async
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitted(true);
 
@@ -185,13 +190,14 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
     const passwordValidation = validatePassword(formData.password);
 
     return (
-        <div className="regm-overlay">
+        <div className="regm-overlay" style={{ opacity: isPositionCalculated ? 1 : 0 }}>
             <div
                 ref={modalRef}
                 className="regm-container"
                 style={{ left: `${position.x}px`, top: `${position.y}px` }}
                 onMouseDown={handleMouseDown}
             >
+
                 {/* Заголовок */}
                 <div className="regm-header">
                     <div className="regm-title">Регистрация</div>
@@ -292,7 +298,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                             placeholder="Повторите пароль"
                             value={formData.passwordConfirm}
                             onChange={handleChange}
-                            onKeyDown={handleKeyDown} // Добавляем обработчик клавиш
+                            onKeyDown={handleKeyDown}
                             autoComplete="new-password"
                         />
                         {errors.passwordConfirm && <div className="regm-error">{errors.passwordConfirm}</div>}
