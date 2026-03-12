@@ -7,34 +7,34 @@
 
     <changeSet id="18" author="Bagdad1970">
         <insert tableName="album_types" schemaName="app">
-            <column name="name" value="album"></column>
+            <column name="name" value="album"/>
         </insert>
         <insert tableName="album_types" schemaName="app">
-            <column name="name" value="single"></column>
+            <column name="name" value="single"/>
         </insert>
     </changeSet>
 
     <changeSet id="19" author="Bagdad1970">
         <insert tableName="genres" schemaName="app">
-            <column name="name" value="pop"></column>
+            <column name="name" value="pop"/>
         </insert>
         <insert tableName="genres" schemaName="app">
-            <column name="name" value="rock"></column>
+            <column name="name" value="rock"/>
         </insert>
         <insert tableName="genres" schemaName="app">
-            <column name="name" value="rap"></column>
+            <column name="name" value="rap"/>
         </insert>
     </changeSet>
 
     <changeSet id="20" author="LittleBlBb">
         <insert tableName="roles" schemaName="app">
-            <column name="role_name" value="ADMIN"></column>
+            <column name="role_name" value="ADMIN"/>
         </insert>
         <insert tableName="roles" schemaName="app">
-            <column name="role_name" value="AUTHOR"></column>
+            <column name="role_name" value="AUTHOR"/>
         </insert>
         <insert tableName="roles" schemaName="app">
-            <column name="role_name" value="USER"></column>
+            <column name="role_name" value="USER"/>
         </insert>
     </changeSet>
 
@@ -51,6 +51,20 @@
             <column name="role_id" value="2"/>
             <column name="password" value="authorPassword1234"/>
             <column name="email" value="coolAuthor@gmail.com"/>
+            <column name="created_at" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="users" schemaName="app">
+            <column name="username" value="Friendly Thug 52 NGG"/>
+            <column name="role_id" value="2"/>
+            <column name="password" value="$2a$10$swytIv9kGClNjGadiUUGO.tuMiTpCltzVmBQvUNLRakTM8CXwj1nO"/>
+            <column name="email" value="friendlyThug@gmail.com"/>
+            <column name="created_at" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="users" schemaName="app">
+            <column name="username" value="Alblak 52"/>
+            <column name="role_id" value="2"/>
+            <column name="password" value="$2a$10$FMEQIl5l33V5CyZ5zROO3ex5eOZwtkGFjCmdjaniCF9uYl6juGZgC"/>
+            <column name="email" value="Alblak@gmail.com"/>
             <column name="created_at" valueComputed="NOW()"/>
         </insert>
         <insert tableName="users" schemaName="app">
@@ -85,37 +99,47 @@
             <column name="album_type_id" value="1"/>
             <column name="title" value="Most valuable pirate"/>
             <column name="cover_hash" value="cover1"/>
-            <column name="status" value="IN_PROGRESS" />
+            <column name="status" value="IN_PROGRESS"/>
             <column name="released_at" valueComputed="NOW()"/>
         </insert>
         <insert tableName="albums" schemaName="app">
             <column name="album_type_id" value="1"/>
             <column name="title" value="Cruiser Aurora"/>
             <column name="cover_hash" value="cover2"/>
-            <column name="status" value="APPROVED" />
+            <column name="status" value="APPROVED"/>
             <column name="released_at" valueComputed="NOW()"/>
         </insert>
         <insert tableName="albums" schemaName="app">
             <column name="album_type_id" value="2"/>
             <column name="title" value="2 Goyard"/>
             <column name="cover_hash" value="cover3"/>
-            <column name="status" value="DENIED" />
+            <column name="status" value="DENIED"/>
+            <column name="released_at" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="albums" schemaName="app">
+            <column name="album_type_id" value="1"/>
+            <column name="title" value="Alblak New Album"/>
+            <column name="cover_hash" value="cover4"/>
+            <column name="status" value="IN_PROGRESS"/>
             <column name="released_at" valueComputed="NOW()"/>
         </insert>
     </changeSet>
 
     <changeSet id="24" author="LittleBlBb">
         <insert tableName="authors" schemaName="app">
-            <column name="name" value="Friendly Thug 52 NGG" />
-            <column name="photo_hash" value="photo1" />
+            <column name="name" value="Friendly Thug 52 NGG"/>
+            <column name="photo_hash" value="photo1"/>
+            <column name="user_id" value="3"/>
         </insert>
         <insert tableName="authors" schemaName="app">
-            <column name="name" value="Alblak 52" />
-            <column name="photo_hash" value="photo2" />
+            <column name="name" value="Alblak 52"/>
+            <column name="photo_hash" value="photo2"/>
+            <column name="user_id" value="4"/>
         </insert>
         <insert tableName="authors" schemaName="app">
-            <column name="name" value="Whole lotta swag" />
-            <column name="photo_hash" value="photo3" />
+            <column name="name" value="Whole lotta swag"/>
+            <column name="photo_hash" value="photo3"/>
+            <column name="user_id" value="2"/>
         </insert>
     </changeSet>
 
@@ -187,16 +211,20 @@
 
     <changeSet id="29" author="LittleBlBb">
         <insert tableName="author_of_album" schemaName="app">
-            <column name="album_id" value="1"></column>
-            <column name="author_id" value="1"></column>
+            <column name="album_id" value="1"/>
+            <column name="author_id" value="1"/>
         </insert>
         <insert tableName="author_of_album" schemaName="app">
-            <column name="album_id" value="2"></column>
-            <column name="author_id" value="2"></column>
+            <column name="album_id" value="2"/>
+            <column name="author_id" value="1"/>
         </insert>
         <insert tableName="author_of_album" schemaName="app">
-            <column name="album_id" value="3"></column>
-            <column name="author_id" value="3"></column>
+            <column name="album_id" value="3"/>
+            <column name="author_id" value="1"/>
+        </insert>
+        <insert tableName="author_of_album" schemaName="app">
+            <column name="album_id" value="4"/>
+            <column name="author_id" value="2"/>
         </insert>
     </changeSet>
 

@@ -50,4 +50,23 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
             where a.id = :id
         """)
     List<AlbumFlatDto> findAlbumFlatById(Long id);
+
+    @Query("""
+                select new ru.russify.models.AlbumDto(
+                    a.id,
+                    a.title,
+                    at.name,
+                    a.status,
+                    a.coverHash,
+                    a.releasedAt
+                )
+                from Album a
+                join a.albumType at
+                join a.authorAlbums aa
+                join aa.author au
+                join au.user u
+                where u.email = :email
+            """)
+    List<AlbumDto> findAlbumsByAuthorEmail(String email);
+
 }

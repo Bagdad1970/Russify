@@ -191,4 +191,8 @@ public class AlbumServiceImpl implements AlbumService {
     public void deleteById(Long id) {
         albumRepository.deleteById(id);
     }
+
+    public List<AlbumDto> findAlbumsByUser(String email){
+        return albumRepository.findAlbumsByAuthorEmail(email);
+    }
 }

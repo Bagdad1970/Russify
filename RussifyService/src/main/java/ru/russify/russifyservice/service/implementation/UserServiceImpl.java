@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
                 user.getEmail(),
                 null,
                 user.getCreatedAt(),
-                null
+                null // заглушка
         );
     }
 }
