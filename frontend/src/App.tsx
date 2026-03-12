@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 
+import ProtectedRoute from './ProtectedRoute.tsx';
 import HomePage from './pages/HomePage.tsx';
 import FavoritesPage from './pages/FavoritesPage.tsx';
 import ProfilePage from './pages/ProfilePage.tsx';
@@ -136,16 +137,20 @@ function App() {
                     <Route
                         path="/favorites"
                         element={
-                            <FavoritesPage
-                                onOpenAlbumModal={openAlbumModal}
-                                onOpenPlaylistModal={openPlaylistModal}
-                            />
+                            <ProtectedRoute>
+                                <FavoritesPage
+                                    onOpenAlbumModal={openAlbumModal}
+                                    onOpenPlaylistModal={openPlaylistModal}
+                                />
+                            </ProtectedRoute>
                         }
                     />
                     <Route
                         path="/profile"
                         element={
-                            <ProfilePage />
+                            <ProtectedRoute>
+                                <ProfilePage />
+                            </ProtectedRoute>
                         }
                     />
                     <Route
