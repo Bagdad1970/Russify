@@ -42,8 +42,8 @@
         <insert tableName="users" schemaName="app">
             <column name="username" value="root"/>
             <column name="role_id" value="1"/>
-            <column name="password" value="password1234"/>
-            <column name="email" value="test@gmail.com"/>
+            <column name="password" value="$2a$10$PhnBjKZbpUgjx7wExmQ5Xup.iSULgbW9i1arLddylgoS/f0LDRHl."/>
+            <column name="email" value="root@gmail.com"/>
             <column name="created_at" valueComputed="NOW()"/>
         </insert>
         <insert tableName="users" schemaName="app">

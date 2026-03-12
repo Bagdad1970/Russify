@@ -57,6 +57,9 @@ public class User {
     @Column(name = "password", nullable = false, length = 255)
     private String password;
 
+    @Column(name = "avatar_hash", length = 64)
+    private String avatarHash;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 

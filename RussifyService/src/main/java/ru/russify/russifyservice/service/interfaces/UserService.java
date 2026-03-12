@@ -1,10 +1,13 @@
 package ru.russify.russifyservice.service.interfaces;
 
 import ru.russify.models.TrackDto;
+import ru.russify.models.response.UserProfileResponse;
 
 import java.util.List;
 
 public interface UserService {
+
+    UserProfileResponse getProfile(String email);
 
 //    TrackDto create(TrackDto album);
 //
