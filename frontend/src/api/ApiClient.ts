@@ -33,7 +33,7 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 apiClient.interceptors.response.use((response: AxiosResponse) => {
     if (
         response.data &&
-        response.headers['content-type'] === 'application/json'
+        response.headers['Content-type'] === 'application/json'
     ) {
         response.data = camelizeKeys(response.data);
     }

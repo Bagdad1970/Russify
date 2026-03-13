@@ -36,7 +36,7 @@ import java.util.List;
 public class PlaylistServiceImpl implements PlaylistService {
 
     private final UserRepository userRepository;
-    private final FileStorageServiceImpl fileStorageService;
+    private final S3ServiceImpl s3Service;
     private final PlaylistRepository playlistRepository;
     private final TrackRepository trackRepository;
     private final TrackPlaylistRepository trackPlaylistRepository;
@@ -111,13 +111,10 @@ public class PlaylistServiceImpl implements PlaylistService {
             playlist.setIsSystem(false);
         }
 
-        String coverHash;
-
-        if (request.getCoverFile() != null && !request.getCoverFile().isEmpty()) {
-            coverHash = fileStorageService.saveFile(request.getCoverFile());
-        } else {
-            coverHash = "default_playlist_cover";
-        }
+        String coverHash = s3Service.putObject(
+                "covers",
+                request.getCoverFile()
+        );
 
         playlist.setCoverHash(coverHash);
 
@@ -130,7 +127,6 @@ public class PlaylistServiceImpl implements PlaylistService {
                 .isSystem(saved.getIsSystem())
                 .coverHash(saved.getCoverHash())
                 .build();
-
     }
 
     @Override
@@ -158,8 +154,8 @@ public class PlaylistServiceImpl implements PlaylistService {
 
         if (request.getCoverFile() != null && !request.getCoverFile().isEmpty()) {
 
-            String hash = fileStorageService.saveFile(request.getCoverFile());
-            playlist.setCoverHash(hash);
+            //String hash = s3Service.saveFile(request.getCoverFile());
+            //playlist.setCoverHash(hash);
 
         }
 
