@@ -4,7 +4,7 @@ import type {PlaylistWithTracks} from "../types/PlaylistWithTracks.ts";
 
 export class PlaylistManager {
 
-    async create(playlist: PlaylistCreateRequest): Promise<Playlist> {
+    /*async create(playlist: PlaylistCreateRequest): Promise<Playlist> {
         try {
             const response = await api.post<Playlist>("playlists", playlist);
             return response.data;
@@ -14,6 +14,7 @@ export class PlaylistManager {
             throw error;
         }
     }
+    */
 
     async update(playlist: Playlist): Promise<Playlist> {
         try {
@@ -37,9 +38,10 @@ export class PlaylistManager {
         }
     }
 
-    async findById(id: bigint): Promise<Playlist> {
+    async findById(id: bigint): Promise<PlaylistWithTracks> {
         try {
             const response = await api.get<PlaylistWithTracks>(`playlists/${id}`);
+
             return response.data;
         }
         catch (error) {

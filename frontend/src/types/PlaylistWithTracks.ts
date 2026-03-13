@@ -5,5 +5,6 @@ export type PlaylistWithTracks = {
     userId: bigint,
     name: string,
     isSystem: boolean,
+    coverHash: string,
     tracks: Track[]
 }
