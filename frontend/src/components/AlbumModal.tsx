@@ -9,9 +9,14 @@ const AlbumModal = ({ isOpen, onClose, albumName = "Название альбо�
     const [isAlbumFavorite, setIsAlbumFavorite] = useState(false);
     const [menuTrack, setMenuTrack] = useState(null);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [isPositionCalculated, setIsPositionCalculated] = useState(false);
+
 
     useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen) {
+            setIsPositionCalculated(false);
+            return;
+        }
 
         const updateLayout = () => {
             const w = window.innerWidth;
@@ -26,6 +31,8 @@ const AlbumModal = ({ isOpen, onClose, albumName = "Название альбо�
             const top = Math.max(56, (window.innerHeight - modalHeight) / 2);
 
             setPosition({ x: left, y: top });
+
+            setIsPositionCalculated(true);
         };
 
         updateLayout();
@@ -84,7 +91,7 @@ const AlbumModal = ({ isOpen, onClose, albumName = "Название альбо�
     };
 
     return (
-        <div className="alm-overlay" onClick={() => setMenuTrack(null)}>
+        <div className="alm-overlay" onClick={() => setMenuTrack(null) } style={{ opacity: isPositionCalculated ? 1 : 0 }}>
             <div
                 ref={modalRef}
                 className={`alm-container ${isMobile ? 'mobile' : ''}`}

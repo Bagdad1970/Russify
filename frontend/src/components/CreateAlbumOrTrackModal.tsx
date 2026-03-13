@@ -18,6 +18,8 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
     const [tracks, setTracks] = useState([]);
     const [draggedIndex, setDraggedIndex] = useState(null);
 
+    const [isPositionCalculated, setIsPositionCalculated] = useState(false);
+
     const [availableTracks, setAvailableTracks] = useState([
         { id: 1, title: "Трек 1", artist: "Исполнитель A", duration: 180 },
         { id: 2, title: "Трек 2", artist: "Исполнитель B", duration: 210 },
@@ -38,7 +40,10 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
     };
 
     useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen) {
+            setIsPositionCalculated(false);
+            return;
+        }
 
         const updateLayout = () => {
             const w = window.innerWidth;
@@ -49,9 +54,11 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
 
             const modalHeight = Math.min(500, window.innerHeight - 112);
             const left = (window.innerWidth - modalWidth) / 2;
-            const top = Math.max(40, (window.innerHeight - modalHeight) / 2 - 60); // ← поднято на 40px
+            const top = Math.max(40, (window.innerHeight - modalHeight) / 2 - 60);
 
             setPosition({ x: left, y: top });
+
+            setIsPositionCalculated(true);
         };
 
         updateLayout();
@@ -163,7 +170,7 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
     };
 
     return (
-        <div className="caotm-overlay" onClick={onClose}>
+        <div className="caotm-overlay" onClick={onClose} style={{ opacity: isPositionCalculated ? 1 : 0 }}>
             <div
                 ref={modalRef}
                 className={`caotm-container ${isMobile ? 'mobile' : ''}`}

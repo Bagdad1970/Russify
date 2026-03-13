@@ -10,8 +10,13 @@ const SystemPlaylistModal = ({ isOpen, onClose, playlistName = "Название
 
     const [menuTrack, setMenuTrack] = useState(null);
 
+    const [isPositionCalculated, setIsPositionCalculated] = useState(false);
+
     useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen) {
+            setIsPositionCalculated(false);
+            return;
+        }
 
         const updateLayout = () => {
             const w = window.innerWidth;
@@ -26,6 +31,8 @@ const SystemPlaylistModal = ({ isOpen, onClose, playlistName = "Название
             const top = Math.max(56, (window.innerHeight - modalHeight) / 2);
 
             setPosition({ x: left, y: top });
+
+            setIsPositionCalculated(true);
         };
 
         updateLayout();
@@ -76,7 +83,7 @@ const SystemPlaylistModal = ({ isOpen, onClose, playlistName = "Название
     const durationStr = `${min} мин ${sec} сек`;
 
     return (
-        <div className="pml-overlay" onClick={() => setMenuTrack(null)}>
+        <div className="pml-overlay" onClick={() => setMenuTrack(null)} style={{ opacity: isPositionCalculated ? 1 : 0 }}>
             <div
                 ref={modalRef}
                 className={`pml-container ${isMobile ? 'mobile' : ''}`}

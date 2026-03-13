@@ -21,6 +21,8 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [position, setPosition] = useState({ x: 0, y: 0 });
 
+    const [isPositionCalculated, setIsPositionCalculated] = useState(false);
+
     useEffect(() => {
         if (isOpen) {
             setFormData({
@@ -37,6 +39,10 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
             const left = (window.innerWidth - modalWidth) / 2;
             const top = appBarHeight + (window.innerHeight - appBarHeight - modalHeight) / 2 - 20;
             setPosition({ x: left, y: top });
+
+            setIsPositionCalculated(true);
+        } else {
+            setIsPositionCalculated(false);
         }
     }, [isOpen]);
 
@@ -137,7 +143,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="logm-overlay">
+        <div className="logm-overlay" style={{ opacity: isPositionCalculated ? 1 : 0 }}>
             <div
                 ref={modalRef}
                 className="logm-container"

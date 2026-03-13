@@ -25,6 +25,8 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
 
     const [draggedIndex, setDraggedIndex] = useState(null);
 
+    const [isPositionCalculated, setIsPositionCalculated] = useState(false);
+
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
@@ -32,7 +34,10 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
     };
 
     useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen) {
+            setIsPositionCalculated(false);
+            return;
+        }
 
         const updateLayout = () => {
             const w = window.innerWidth;
@@ -47,6 +52,8 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
             const top = Math.max(40, (window.innerHeight - modalHeight) / 2 - 40);
 
             setPosition({ x: left, y: top });
+
+            setIsPositionCalculated(true);
         };
 
         updateLayout();
@@ -166,7 +173,7 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
     };
 
     return (
-        <div className="cpl-overlay" onClick={onClose}>
+        <div className="cpl-overlay" onClick={onClose} style={{ opacity: isPositionCalculated ? 1 : 0 }}>
             <div
                 ref={modalRef}
                 className={`cpl-container ${isMobile ? 'mobile' : ''}`}
