@@ -15,10 +15,9 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
     const [coverImage, setCoverImage] = useState(null);
     const [trackName, setTrackName] = useState("");
     const [authorName, setAuthorName] = useState("");
+    const [albumName, setAlbumName] = useState("");
     const [tracks, setTracks] = useState([]);
     const [draggedIndex, setDraggedIndex] = useState(null);
-
-    const [isPositionCalculated, setIsPositionCalculated] = useState(false);
 
     const [availableTracks, setAvailableTracks] = useState([
         { id: 1, title: "Трек 1", artist: "Исполнитель A", duration: 180 },
@@ -40,10 +39,7 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
     };
 
     useEffect(() => {
-        if (!isOpen) {
-            setIsPositionCalculated(false);
-            return;
-        }
+        if (!isOpen) return;
 
         const updateLayout = () => {
             const w = window.innerWidth;
@@ -54,11 +50,9 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
 
             const modalHeight = Math.min(500, window.innerHeight - 112);
             const left = (window.innerWidth - modalWidth) / 2;
-            const top = Math.max(40, (window.innerHeight - modalHeight) / 2 - 60);
+            const top = Math.max(40, (window.innerHeight - modalHeight) / 2 - 70);
 
             setPosition({ x: left, y: top });
-
-            setIsPositionCalculated(true);
         };
 
         updateLayout();
@@ -149,7 +143,14 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
     };
 
     const handleSubmit = () => {
-        console.log("Создание:", { type, coverImage, trackName, authorName, tracks });
+        console.log("Создание:", {
+            type,
+            coverImage,
+            trackName,
+            authorName,
+            albumName,
+            tracks
+        });
         onClose();
     };
 
@@ -170,7 +171,7 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
     };
 
     return (
-        <div className="caotm-overlay" onClick={onClose} style={{ opacity: isPositionCalculated ? 1 : 0 }}>
+        <div className="caotm-overlay" onClick={onClose}>
             <div
                 ref={modalRef}
                 className={`caotm-container ${isMobile ? 'mobile' : ''}`}
@@ -262,6 +263,16 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
 
                 {type === "album" && (
                     <>
+                        <div className={`caotm-input-group ${isMobile ? 'vertical' : ''}`}>
+                            <input
+                                type="text"
+                                className="caotm-input"
+                                placeholder="Название альбома"
+                                value={albumName}
+                                onChange={(e) => setAlbumName(e.target.value)}
+                            />
+                        </div>
+
                         <div className={`caotm-add-track-section ${isMobile ? 'centered' : ''}`}>
                             <button className="caotm-add-track-btn" onClick={addTrack}>
                                 Добавить трек

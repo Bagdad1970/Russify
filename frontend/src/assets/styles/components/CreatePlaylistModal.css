@@ -552,3 +552,34 @@
         height: 24px;
     }
 }
+
+.cpl-title-input {
+    font-size: 28px;
+    font-weight: 600;
+    color: #ffffff;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #ff2d55;
+    padding: 4px 0;
+    margin-bottom: 4px;
+    width: 100%;
+    outline: none;
+    font-family: inherit;
+}
+
+.cpl-title-input:focus {
+    border-bottom-color: #ff2d55;
+}
+
+.cpl-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.cpl-title:hover {
+    opacity: 0.8;
+}
