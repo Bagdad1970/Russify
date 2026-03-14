@@ -90,7 +90,7 @@
     color: #666;
 }
 
-.search-clear-btn {
+.search-clear-btnSPP {
     position: absolute;
     right: 12px;
     background: none;
@@ -103,7 +103,7 @@
     transition: color 0.2s;
 }
 
-.search-clear-btn:hover {
+.search-clear-btnSPP:hover {
     color: #e6e6e6;
 }
 
@@ -161,7 +161,7 @@
     text-align: center;
 }
 
-.playlist-play-btn {
+.playlist-play-btnSPP {
     width: 64px;
     height: 64px;
     border-radius: 50%;
@@ -176,12 +176,12 @@
     backdrop-filter: blur(10px);
 }
 
-.playlist-play-btn:hover {
+.playlist-play-btnSPP:hover {
     transform: scale(1.1);
     background: rgba(0, 0, 0, 0.6);
 }
 
-.playlist-play-btn svg {
+.playlist-play-btnSPP svg {
     width: 32px;
     height: 32px;
     color: #fff;
@@ -219,7 +219,7 @@
     margin-top: 16px;
 }
 
-.playlist-action-btn {
+.playlist-action-btnSPP {
     width: 36px;
     height: 36px;
     border-radius: 8px;
@@ -234,20 +234,20 @@
     backdrop-filter: blur(10px);
 }
 
-.playlist-action-btn:hover {
+.playlist-action-btnSPP:hover {
     transform: scale(1.1);
     background: rgba(0, 0, 0, 0.6);
 }
 
-.playlist-action-btn.edit:hover {
+.playlist-action-btnSPP.edit:hover {
     background: rgba(255, 183, 3, 0.6);
 }
 
-.playlist-action-btn.delete:hover {
+.playlist-action-btnSPP.delete:hover {
     background: rgba(220, 53, 69, 0.6);
 }
 
-.playlist-action-btn svg {
+.playlist-action-btnSPP svg {
     width: 18px;
     height: 18px;
 }
@@ -460,7 +460,7 @@
     margin-top: 24px;
 }
 
-.btn {
+.btnSPP {
     padding: 12px 24px;
     border-radius: 8px;
     font-family: 'Roboto', sans-serif;
@@ -472,21 +472,21 @@
     width: 100px;
 }
 
-.btn-secondary {
+.btnSPP-secondary {
     background: rgba(255, 255, 255, 0.1);
     color: #e6e6e6;
 }
 
-.btn-secondary:hover {
+.btnSPP-secondary:hover {
     background: rgba(255, 255, 255, 0.2);
 }
 
-.btn-primary {
+.btnSPP-primary {
     background: #ffb703;
     color: #1a1a1f;
 }
 
-.btn-primary:hover {
+.btnSPP-primary:hover {
     background: #ffa500;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(255, 183, 3, 0.4);
@@ -543,12 +543,12 @@
         padding: 16px;
     }
 
-    .playlist-play-btn {
+    .playlist-play-btnSPP {
         width: 52px;
         height: 52px;
     }
 
-    .playlist-play-btn svg {
+    .playlist-play-btnSPP svg {
         width: 26px;
         height: 26px;
     }

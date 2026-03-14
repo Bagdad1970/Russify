@@ -135,7 +135,7 @@ const SystemPlaylistsPage: React.FC<SystemPlaylistsPageProps> = ({
                         {searchQuery && (
                             <button
                                 onClick={() => setSearchQuery('')}
-                                className="search-clear-btn"
+                                className="search-clear-btnSPP"
                             >
                                 ×
                             </button>
@@ -161,7 +161,7 @@ const SystemPlaylistsPage: React.FC<SystemPlaylistsPageProps> = ({
                             onClick={() => handleOpenEditModal(playlist)}
                         >
                             <div className="playlist-card-content">
-                                <button className="playlist-play-btn" onClick={(e) => e.stopPropagation()}>
+                                <button className="playlist-play-btnSPP" onClick={(e) => e.stopPropagation()}>
                                     <svg viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M8 5v14l11-7z" />
                                     </svg>
@@ -183,7 +183,7 @@ const SystemPlaylistsPage: React.FC<SystemPlaylistsPageProps> = ({
                                         e.stopPropagation();
                                         handleOpenEditModal(playlist);
                                     }}
-                                    className="playlist-action-btn edit"
+                                    className="playlist-action-btnSPP edit"
                                     title="Редактировать"
                                 >
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -199,7 +199,7 @@ const SystemPlaylistsPage: React.FC<SystemPlaylistsPageProps> = ({
                                             e.stopPropagation();
                                             handleDelete(playlist);
                                         }}
-                                        className="playlist-action-btn delete"
+                                        className="playlist-action-btnSPP delete"
                                         title="Удалить"
                                     >
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
