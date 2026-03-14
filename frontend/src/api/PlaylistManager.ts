@@ -41,7 +41,6 @@ export class PlaylistManager {
     async findById(id: bigint): Promise<PlaylistWithTracks> {
         try {
             const response = await api.get<PlaylistWithTracks>(`playlists/${id}`);
-
             return response.data;
         }
         catch (error) {

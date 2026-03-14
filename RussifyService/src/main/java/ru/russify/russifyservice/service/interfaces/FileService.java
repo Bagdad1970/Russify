@@ -9,6 +9,6 @@ public interface FileService {
 
     GetObjectResponse getObject(String bucket, String hash);
 
-    void getFullObjects();
+    void removeObject(String bucket, String hash);
 
 }

@@ -24,4 +24,6 @@ public class PlaylistDto {
     @NotNull(message = "System playlist flag is required")
     private Boolean isSystem;
 
+    private String coverHash;
+
 }

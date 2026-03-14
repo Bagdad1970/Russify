@@ -15,7 +15,7 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
         newConfig.headers.Authorization = `Bearer ${token}`;
     }
 
-    if (newConfig.headers['Content-Type'] === 'multipart/form-data') {
+    if (newConfig.headers['content-Type'] === 'multipart/form-data') {
         return newConfig;
     }
 
@@ -31,9 +31,12 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 });
 
 apiClient.interceptors.response.use((response: AxiosResponse) => {
-    if (
-        response.data &&
-        response.headers['Content-type'] === 'application/json'
+    if (response.config.responseType === 'blob') {
+        return response;
+    }
+
+    if (response.data &&
+        response.headers['content-type'] === 'application/json'
     ) {
         response.data = camelizeKeys(response.data);
     }

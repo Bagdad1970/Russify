@@ -5,9 +5,12 @@ export class FileManager {
 
     async getFileUrl(request: FileGetRequest): Promise<string> {
         try {
-            const response = await api.post("files", {
-                params: request,
-                responseType: 'blob'
+            const response = await api.get("files", {
+                params: {
+                    bucket: request.bucket,
+                    hash: request.hash
+                },
+                responseType: "blob"
             });
 
             return URL.createObjectURL(response.data);

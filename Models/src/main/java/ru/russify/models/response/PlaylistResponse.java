@@ -3,8 +3,6 @@ package ru.russify.models.response;
 import lombok.Builder;
 import lombok.Data;
 
-import java.io.InputStream;
-
 @Data
 @Builder
 public class PlaylistResponse {
@@ -17,6 +15,6 @@ public class PlaylistResponse {
 
     private Boolean isSystem;
 
-    private InputStream coverHash;
+    private String coverHash;
 
 }

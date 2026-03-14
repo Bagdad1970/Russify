@@ -8,13 +8,15 @@ import AlbumModal from '../components/AlbumModal.tsx';
 import type {Playlist} from "../types/Playlist.ts";
 import {PlaylistManager} from "../api/PlaylistManager.ts";
 import {FileManager} from "../api/FileManager.ts";
+import type {FileGetRequest} from "../types/request/FileGetRequest.ts";
+import noCoverPlaylist from '../assets/images/no-cover-playlist.svg';
 
 const FavoritesPage = () => {
     const [category, setCategory] = useState("Треки");
-
     const playlistManager = new PlaylistManager();
     const fileManager = new FileManager();
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
+    const [covers, setCovers] = useState<Record<number, string>>({});
 
     useEffect(() => {
         const loadPlaylists = async () => {
@@ -22,12 +24,41 @@ const FavoritesPage = () => {
                 const playlists = await playlistManager.findAll();
                 setPlaylists(playlists);
 
+                const coversMap: Record<string, string> = {};
+
+                await Promise.all(playlists.map(async (playlist) => {
+                    const coverHash = playlist.coverHash;
+
+                    if (coverHash) {
+                        try {
+                            const fileGetRequest: FileGetRequest = {
+                                bucket: "covers",
+                                hash: coverHash
+                            };
+                            const coverSrc = await fileManager.getFileUrl(fileGetRequest);
+                            if (coverSrc) {
+                                coversMap[playlist.id.toString()] = coverSrc;
+                            }
+                        } catch (err) {
+                            console.log(`Error loading cover for playlist ${playlist.id}:`, err);
+                        }
+                    }
+                }));
+
+                setCovers(coversMap);
+
             } catch (err) {
-                console.log('Error', err);
+                console.log('Error loading playlists:', err);
             }
         };
 
         loadPlaylists();
+
+        return () => {
+            Object.values(covers).forEach(url => {
+                if (url) fileManager.revokeFileUrl(url);
+            });
+        };
     }, []);
 
     // Данные альбомов
@@ -251,6 +282,14 @@ const FavoritesPage = () => {
                                     style={{ backgroundColor: playlist.color }}
                                     onClick={() => openPlaylistModal(playlist)}
                                 >
+                                    <img
+                                        src={covers[playlist.id] || noCoverPlaylist}
+                                        alt={playlist.name}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        onError={(e) => {
+                                            e.currentTarget.src = noCoverPlaylist;
+                                        }}
+                                    />
                                     <div
                                         className="playlist-cover-play-button"
                                         onClick={(e) => {

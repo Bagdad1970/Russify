@@ -4,6 +4,7 @@ import io.minio.GetObjectArgs;
 import io.minio.GetObjectResponse;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,9 +57,18 @@ public class FileServiceImpl implements FileService {
             throw new RuntimeException("Failed to read file from storage", e);
         }
     }
-    @Override
-    public void getFullObjects() {
 
+    @Override
+    public void removeObject(String bucket, String hash) {
+        try {
+            client.removeObject(RemoveObjectArgs.builder()
+                    .bucket(bucket)
+                    .object(hash)
+                    .build());
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Failed to remove file from storage", e);
+        }
     }
 
 }
