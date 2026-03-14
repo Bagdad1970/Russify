@@ -8,6 +8,15 @@
     cursor: pointer;
 }
 
+.search-bar:hover {
+    background: #3a3a3a;
+}
+
+.search-bar:focus-within {
+    background: #404040;
+    outline: 1px solid #ff2d55;
+}
+
 .search-icon {
     margin-right: 8px;
     color: #aaa;
@@ -27,10 +36,16 @@
     background: transparent;
     border: none;
     color: white;
-    font-size: 14px;
+    font-size: 16px;
     flex: 1;
     outline: none;
-    height: 20px;
-    line-height: 20px;
+    width: 100%;
+    min-height: 24px;
+    line-height: 24px;
     padding: 0;
+}
+
+.search-bar input::placeholder {
+    color: #888;
+    font-size: 14px;
 }

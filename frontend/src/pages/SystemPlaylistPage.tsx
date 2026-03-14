@@ -121,7 +121,7 @@ const SystemPlaylistsPage: React.FC<SystemPlaylistsPageProps> = ({
                 {/* Search Bar */}
                 <div className="search-section">
                     <div className="search-input-wrapper">
-                        <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg className="search-iconSPP" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <circle cx="11" cy="11" r="8" />
                             <path d="m21 21-4.35-4.35" />
                         </svg>

@@ -19,6 +19,8 @@ const HomePage = ({
     const [error, setError] = useState<string | null>(null);
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
 
+    const [searchText, setSearchText] = useState('');
+
     const loadPlaylists = async () => {
         try {
             setLoading(true);
@@ -35,6 +37,7 @@ const HomePage = ({
             setLoading(false);
         }
     }
+
 
     useEffect(() => {
         loadPlaylists();
@@ -62,9 +65,6 @@ const HomePage = ({
         onOpenSystemModal(playlist);
     };
 
-    const handleSearchClick = () => {
-        onOpenAlbumModal();
-    };
 
     return (
         <div className="home-page-container">
@@ -73,11 +73,11 @@ const HomePage = ({
             </div>
 
             <div className="bottom-section">
+                {/* ✅ SearchBar теперь просто хранит текст, без фильтрации */}
                 <SearchBar
                     placeholder="Введите название трека..."
-                    value=""
-                    onChange={() => {}}
-                    onClick={handleSearchClick}
+                    value={searchText}
+                    onChange={(text) => setSearchText(text)}
                 />
                 <div className="section-title">Музыкальные подборки под ваше настроение</div>
                 <div className="scrollable-grid-container">
