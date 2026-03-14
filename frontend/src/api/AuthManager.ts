@@ -23,6 +23,7 @@ export class AuthManager {
 
             if (response.data.token) {
                 localStorage.setItem("auth_token", response.data.token);
+                window.dispatchEvent(new Event('authChange'));
             }
 
             return response.data;

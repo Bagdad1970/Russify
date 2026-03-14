@@ -1,6 +1,6 @@
 import api from "./ApiClient.ts";
-import {Role} from "../../../frontend/src/types/Role";
-import {RoleCreateRequest} from "../../../frontend/src/types/request/RoleCreateRequest";
+import type {Role} from "../../../frontend/src/types/Role";
+import type {RoleCreateRequest} from "../../../frontend/src/types/request/RoleCreateRequest";
 
 export class RoleManager {
 

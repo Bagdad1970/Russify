@@ -27,6 +27,18 @@ div::-webkit-scrollbar-thumb:hover {
     padding: 0; /* ← убран отступ */
 }
 
+
+.bottom-section {
+    padding: 0 16px;
+}
+
+.no-results {
+    color: #aaa;
+    text-align: center;
+    padding: 20px;
+    font-size: 14px;
+}
+
 .main-content {
     flex: 0 0 auto;
 }
