@@ -15,6 +15,7 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
     const [coverImage, setCoverImage] = useState(null);
     const [trackName, setTrackName] = useState("");
     const [authorName, setAuthorName] = useState("");
+    const [albumName, setAlbumName] = useState("");
     const [tracks, setTracks] = useState([]);
     const [draggedIndex, setDraggedIndex] = useState(null);
 
@@ -49,7 +50,7 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
 
             const modalHeight = Math.min(500, window.innerHeight - 112);
             const left = (window.innerWidth - modalWidth) / 2;
-            const top = Math.max(40, (window.innerHeight - modalHeight) / 2 - 60); // ← поднято на 40px
+            const top = Math.max(40, (window.innerHeight - modalHeight) / 2 - 70);
 
             setPosition({ x: left, y: top });
         };
@@ -142,7 +143,14 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
     };
 
     const handleSubmit = () => {
-        console.log("Создание:", { type, coverImage, trackName, authorName, tracks });
+        console.log("Создание:", {
+            type,
+            coverImage,
+            trackName,
+            authorName,
+            albumName,
+            tracks
+        });
         onClose();
     };
 
@@ -255,6 +263,16 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
 
                 {type === "album" && (
                     <>
+                        <div className={`caotm-input-group ${isMobile ? 'vertical' : ''}`}>
+                            <input
+                                type="text"
+                                className="caotm-input"
+                                placeholder="Название альбома"
+                                value={albumName}
+                                onChange={(e) => setAlbumName(e.target.value)}
+                            />
+                        </div>
+
                         <div className={`caotm-add-track-section ${isMobile ? 'centered' : ''}`}>
                             <button className="caotm-add-track-btn" onClick={addTrack}>
                                 Добавить трек

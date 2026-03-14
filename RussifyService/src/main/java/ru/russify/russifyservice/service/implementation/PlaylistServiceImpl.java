@@ -36,7 +36,7 @@ import java.util.List;
 public class PlaylistServiceImpl implements PlaylistService {
 
     private final UserRepository userRepository;
-    private final FileStorageServiceImpl fileStorageService;
+    private final FileServiceImpl fileService;
     private final PlaylistRepository playlistRepository;
     private final TrackRepository trackRepository;
     private final TrackPlaylistRepository trackPlaylistRepository;
@@ -59,6 +59,14 @@ public class PlaylistServiceImpl implements PlaylistService {
 
     @Override
     public void deleteById(Long id) {
+        PlaylistDto existing =  playlistRepository.findById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new PlaylistNotFoundException(id));
+
+        if (existing.getCoverHash() != null) {
+            fileService.removeObject("covers", existing.getCoverHash());
+        }
+
         playlistRepository.deleteById(id);
     }
 
@@ -90,6 +98,7 @@ public class PlaylistServiceImpl implements PlaylistService {
                 .name(first.playlistName())
                 .userId(first.userID())
                 .isSystem(first.isSystem())
+                .coverHash(first.coverHash())
                 .tracks(tracks)
                 .build();
     }
@@ -111,13 +120,10 @@ public class PlaylistServiceImpl implements PlaylistService {
             playlist.setIsSystem(false);
         }
 
-        String coverHash;
-
-        if (request.getCoverFile() != null && !request.getCoverFile().isEmpty()) {
-            coverHash = fileStorageService.saveFile(request.getCoverFile());
-        } else {
-            coverHash = "default_playlist_cover";
-        }
+        String coverHash = fileService.putObject(
+                "covers",
+                request.getCoverFile()
+        );
 
         playlist.setCoverHash(coverHash);
 
@@ -130,7 +136,6 @@ public class PlaylistServiceImpl implements PlaylistService {
                 .isSystem(saved.getIsSystem())
                 .coverHash(saved.getCoverHash())
                 .build();
-
     }
 
     @Override
@@ -140,7 +145,7 @@ public class PlaylistServiceImpl implements PlaylistService {
             PlaylistUpdateRequest request
     ) {
 
-       HashMap userAccess = userAccessToPlaylist(email, playlistId);
+        HashMap userAccess = userAccessToPlaylist(email, playlistId);
 
         if (!(boolean) userAccess.get("isOwner") && !(boolean) userAccess.get("isAdmin")) {
             throw new AccessDeniedException("Not enough permissions");
@@ -158,14 +163,13 @@ public class PlaylistServiceImpl implements PlaylistService {
 
         if (request.getCoverFile() != null && !request.getCoverFile().isEmpty()) {
 
-            String hash = fileStorageService.saveFile(request.getCoverFile());
+            String hash = fileService.putObject("covers", request.getCoverFile());
             playlist.setCoverHash(hash);
-
         }
 
         return mapper.toDto(playlistRepository.save(playlist));
     }
-    
+
     public void deletePlaylist(String email, Long playlistId) {
 
         HashMap userAccess = userAccessToPlaylist(email, playlistId);

@@ -24,6 +24,8 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
     ]);
 
     const [draggedIndex, setDraggedIndex] = useState(null);
+    const [isPositionCalculated, setIsPositionCalculated] = useState(false);
+    const [isEditingName, setIsEditingName] = useState(false);
 
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
@@ -32,7 +34,10 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
     };
 
     useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen) {
+            setIsPositionCalculated(false);
+            return;
+        }
 
         const updateLayout = () => {
             const w = window.innerWidth;
@@ -47,6 +52,7 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
             const top = Math.max(40, (window.innerHeight - modalHeight) / 2 - 40);
 
             setPosition({ x: left, y: top });
+            setIsPositionCalculated(true);
         };
 
         updateLayout();
@@ -165,8 +171,26 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
         onClose();
     };
 
+    const handleNameClick = () => {
+        setIsEditingName(true);
+    };
+
+    const handleNameChange = (e) => {
+        setPlaylistName(e.target.value);
+    };
+
+    const handleNameBlur = () => {
+        setIsEditingName(false);
+    };
+
+    const handleNameKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            setIsEditingName(false);
+        }
+    };
+
     return (
-        <div className="cpl-overlay" onClick={onClose}>
+        <div className="cpl-overlay" onClick={onClose} style={{ opacity: isPositionCalculated ? 1 : 0 }}>
             <div
                 ref={modalRef}
                 className={`cpl-container ${isMobile ? 'mobile' : ''}`}
@@ -187,14 +211,21 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
                     </div>
 
                     <div className="cpl-playlist-info">
-                        <div className="cpl-title" onClick={() => {
-                            const newName = prompt("Введите новое название:", playlistName);
-                            if (newName !== null) {
-                                setPlaylistName(newName);
-                            }
-                        }}>
-                            {playlistName}
-                        </div>
+                        {isEditingName ? (
+                            <input
+                                type="text"
+                                className="cpl-title-input"
+                                value={playlistName}
+                                onChange={handleNameChange}
+                                onBlur={handleNameBlur}
+                                onKeyDown={handleNameKeyDown}
+                                autoFocus
+                            />
+                        ) : (
+                            <div className="cpl-title" onClick={handleNameClick}>
+                                {playlistName}
+                            </div>
+                        )}
                         <div className="cpl-meta">
                             <div className="cpl-count">{playlistCount} треков</div>
                             <div className="cpl-duration">{durationFormatted}</div>

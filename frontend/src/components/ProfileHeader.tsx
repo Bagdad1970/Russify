@@ -1,13 +1,36 @@
 import '../assets/styles/components/ProfileHeader.css';
+import {useEffect, useState} from "react";
+import type {MeResponse} from "../types/request/auth/MeResponse.ts";
+import {AuthManager} from "../api/AuthManager.ts";
 
 const ProfileHeader = () => {
+
+    /*
     const user = {
         avatar: "",
-        firstName: "Иван",
-        lastName: "Иванов",
+        username: "Иван",
         registrationDate: "2024-05-15",
         monthlyPlays: 1234
     };
+    */
+
+    const [userData, setUserData] = useState<MeResponse>();
+    const authManager = new AuthManager();
+
+    useEffect(() => {
+        const loadUserData = async () => {
+            try {
+                const data = await authManager.getCurrentUser();
+
+                setUserData(data);
+            }
+            catch (err) {
+                console.log("Error", err)
+            }
+        };
+
+        loadUserData()
+    }, []); // тут перерендеревалось
 
     const formatDate = (dateStr) => {
         const months = [
@@ -36,10 +59,10 @@ const ProfileHeader = () => {
                     <div className="profile-info">
                         <div className="profile-name-line">
                             <div className="profile-full-name">
-                                {user.firstName} {user.lastName}
+                                {userData?.username}
                             </div>
                         </div>
-                        <div className="profile-registration-line">
+                        {/*<div className="profile-registration-line">
                             Дата регистрации: {formatDate(user.registrationDate)}
                         </div>
                         <div className="profile-monthly-plays-line">
@@ -48,6 +71,7 @@ const ProfileHeader = () => {
                             </svg>
                             {user.monthlyPlays} прослушиваний в месяц
                         </div>
+                        */}
                     </div>
                 </div>
             </div>

@@ -22,7 +22,6 @@ import ru.russify.models.request.AddTrackToPlaylistRequest;
 import ru.russify.models.request.PlaylistCreateRequest;
 import ru.russify.models.request.PlaylistUpdateRequest;
 import ru.russify.models.response.PlaylistResponse;
-import ru.russify.russifyservice.model.User;
 import ru.russify.russifyservice.service.implementation.PlaylistServiceImpl;
 
 import java.util.List;

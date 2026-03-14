@@ -1,11 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import '../assets/styles/components/LoginModal.css';
+import type {LoginUserDto} from "../types/request/auth/LoginUserDto.ts";
+import {AuthManager} from "../api/AuthManager.ts";
 
 const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
-    const [formData, setFormData] = useState({
-        username: '',
+    const [formData, setFormData] = useState<LoginUserDto>({
+        email: '',
         password: ''
     });
+
+    const authManager = new AuthManager();
 
     const [errors, setErrors] = useState({});
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -17,10 +21,12 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [position, setPosition] = useState({ x: 0, y: 0 });
 
+    const [isPositionCalculated, setIsPositionCalculated] = useState(false);
+
     useEffect(() => {
         if (isOpen) {
             setFormData({
-                username: '',
+                email: '',
                 password: ''
             });
             setErrors({});
@@ -33,6 +39,10 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
             const left = (window.innerWidth - modalWidth) / 2;
             const top = appBarHeight + (window.innerHeight - appBarHeight - modalHeight) / 2 - 20;
             setPosition({ x: left, y: top });
+
+            setIsPositionCalculated(true);
+        } else {
+            setIsPositionCalculated(false);
         }
     }, [isOpen]);
 
@@ -80,8 +90,8 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
         const newErrors = {};
 
         if (isSubmitted) {
-            if (!formData.username.trim()) {
-                newErrors.username = 'Имя пользователя обязательно';
+            if (!formData.email.trim()) {
+                newErrors.email = 'Email обязателен';
             }
 
             if (!formData.password) {
@@ -113,22 +123,27 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitted(true);
 
-        const isValid = !!(formData.username.trim() && formData.password);
+        const isValid = !!(formData.email.trim() && formData.password);
 
         if (isValid) {
-            console.log('Вход:', formData);
-            onClose();
+            try {
+                console.log('Вход:', formData);
+                await authManager.login(formData);
+                onClose();
+            } catch (error) {
+                console.error('Ошибка входа:', error);
+            }
         }
     };
 
     if (!isOpen) return null;
 
     return (
-        <div className="logm-overlay">
+        <div className="logm-overlay" style={{ opacity: isPositionCalculated ? 1 : 0 }}>
             <div
                 ref={modalRef}
                 className="logm-container"
@@ -155,15 +170,15 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
                 <form className="logm-form" onSubmit={handleSubmit}>
                     <div className="logm-input-group">
                         <input
-                            type="text"
-                            name="username"
-                            className={`logm-input ${errors.username ? 'error' : ''}`}
-                            placeholder="Введите имя пользователя"
-                            value={formData.username}
+                            type="email"
+                            name="email"
+                            className={`logm-input ${errors.email ? 'error' : ''}`}
+                            placeholder="Введите email"
+                            value={formData.email}
                             onChange={handleChange}
                             autoComplete="off"
                         />
-                        {errors.username && <div className="logm-error">{errors.username}</div>}
+                        {errors.email && <div className="logm-error">{errors.email}</div>}
                     </div>
 
                     <div className="logm-input-group">
@@ -193,7 +208,6 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
 
                 <div className="logm-divider"></div>
 
-                {/* Ссылка на регистрацию */}
                 <div className="logm-register-link">
                     Нет аккаунта?{' '}
                     <button className="logm-switch-btn" onClick={onSwitchToRegistration}>

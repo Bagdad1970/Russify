@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 
+import ProtectedRoute from './ProtectedRoute.tsx';
 import HomePage from './pages/HomePage.tsx';
 import FavoritesPage from './pages/FavoritesPage.tsx';
 import ProfilePage from './pages/ProfilePage.tsx';
@@ -25,7 +26,7 @@ function App() {
     const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
     const [isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen] = useState(false);
 
-    const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(true);
+    const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
     const albums = [
@@ -66,19 +67,23 @@ function App() {
     };
 
     const closeRegistrationModal = () => {
+        localStorage.removeItem('auth_modal_open');
         setIsRegistrationModalOpen(false);
     };
 
     const closeLoginModal = () => {
+        localStorage.removeItem('auth_modal_open');
         setIsLoginModalOpen(false);
     };
 
     const switchToLogin = () => {
+        localStorage.removeItem('auth_modal_open');
         setIsRegistrationModalOpen(false);
         setIsLoginModalOpen(true);
     };
 
     const switchToRegistration = () => {
+        localStorage.removeItem('auth_modal_open');
         setIsLoginModalOpen(false);
         setIsRegistrationModalOpen(true);
     };
@@ -109,6 +114,21 @@ function App() {
     useEffect(() => {
     }, []);
 
+
+    useEffect(() => {
+        const handleOpenAuthModal = (event: CustomEvent) => {
+            if (event.detail?.type === 'registration') {
+                openRegistrationModal();
+            }
+        };
+
+        window.addEventListener('openAuthModal', handleOpenAuthModal as EventListener);
+
+        return () => {
+            window.removeEventListener('openAuthModal', handleOpenAuthModal as EventListener);
+        };
+    }, []);
+
     return (
         <Router>
             <div className="app">
@@ -136,16 +156,20 @@ function App() {
                     <Route
                         path="/favorites"
                         element={
-                            <FavoritesPage
-                                onOpenAlbumModal={openAlbumModal}
-                                onOpenPlaylistModal={openPlaylistModal}
-                            />
+                            <ProtectedRoute>
+                                <FavoritesPage
+                                    onOpenAlbumModal={openAlbumModal}
+                                    onOpenPlaylistModal={openPlaylistModal}
+                                />
+                            </ProtectedRoute>
                         }
                     />
                     <Route
                         path="/profile"
                         element={
-                            <ProfilePage />
+                            <ProtectedRoute>
+                                <ProfilePage />
+                            </ProtectedRoute>
                         }
                     />
                     <Route

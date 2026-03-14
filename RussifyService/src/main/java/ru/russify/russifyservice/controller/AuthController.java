@@ -18,7 +18,7 @@ import ru.russify.models.response.MeResponse;
 import ru.russify.russifyservice.service.implementation.AuthServiceImpl;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 public class AuthController {

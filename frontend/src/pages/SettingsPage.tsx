@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import '../assets/styles/pages/SettingsPage.css';
+import { AuthManager } from '../api/AuthManager.ts';
 
 // Компоненты
 import SettingsHeader from '../components/SettingsHeader.tsx';
@@ -7,6 +8,7 @@ import SettingsHeader from '../components/SettingsHeader.tsx';
 const SettingsPage = () => {
     const [theme, setTheme] = useState("dark");
     const [language, setLanguage] = useState("ru");
+    const authManager = new AuthManager();
 
     const toggleTheme = () => {
         setTheme(theme === "dark" ? "light" : "dark");
@@ -18,6 +20,14 @@ const SettingsPage = () => {
 
     const handleAccountChange = () => {
         console.log("Сменить аккаунт");
+    };
+
+    const handleLogout = async () => {
+        try {
+            await authManager.logout();
+        } catch (error) {
+            console.error('Ошибка при выходе:', error);
+        }
     };
 
     return (
@@ -70,7 +80,12 @@ const SettingsPage = () => {
                     </div>
 
                     <div className="settings-option">
-                        <button className="settings-logout-btn">Выйти</button>
+                        <button
+                            className="settings-logout-btn"
+                            onClick={handleLogout}
+                        >
+                            Выйти
+                        </button>
                     </div>
                 </div>
             </div>

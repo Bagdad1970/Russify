@@ -1,7 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import '../assets/styles/components/PlaylistModal.css';
+import noCoverPlaylist from '../assets/images/no-cover-playlist.svg';
+import type {PlaylistWithTracks} from "../types/PlaylistWithTracks.ts";
+import {PlaylistManager} from "../api/PlaylistManager.ts";
+import {FileManager} from "../api/FileManager.ts";
+import type {FileGetRequest} from "../types/request/FileGetRequest.ts";
 
-const PlaylistModal = ({ isOpen, onClose, playlistName = "Название плейлиста", authorName = "Имя автора", tracks = [] }) => {
+const PlaylistModal = ({ isOpen, onClose, selectedId }) => {
     const modalRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -9,9 +14,60 @@ const PlaylistModal = ({ isOpen, onClose, playlistName = "Название пл�
     const [isPlaylistFavorite, setIsPlaylistFavorite] = useState(false);
     const [menuTrack, setMenuTrack] = useState(null);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [isPositionCalculated, setIsPositionCalculated] = useState(false);
+    const [cover, setCover] = useState<string>("");
+    const playlistManager = new PlaylistManager();
+    const fileManager = new FileManager();
+
+    const [formData, setFormData] = useState<PlaylistWithTracks>({
+        id: 0n,
+        userId: 0n,
+        name: "",
+        isSystem: false,
+        coverHash: "",
+        tracks: []
+    });
 
     useEffect(() => {
-        if (!isOpen) return;
+        const loadPlaylist = async () => {
+            if (!isOpen) return;
+
+            try {
+                const playlistWithTracks = await playlistManager.findById(selectedId);
+                setFormData(playlistWithTracks);
+
+                const coverHash = playlistWithTracks.coverHash;
+
+                if (coverHash) {
+                    const fileGetRequest: FileGetRequest = {
+                        bucket: "covers",
+                        hash: coverHash
+                    };
+                    const coverSrc = await fileManager.getFileUrl(fileGetRequest) ?? "";
+                    if (coverSrc) setCover(coverSrc);
+                }
+            }
+            catch (err) {
+                console.log('Error', err);
+            }
+        };
+
+        loadPlaylist();
+
+        return () => {
+            if (cover) {
+                console.log('Cleaning up cover URL:', cover);
+                fileManager.revokeFileUrl(cover);
+                setCover("");
+            }
+        };
+    }, [isOpen, selectedId]);
+
+    useEffect(() => {
+        if (!isOpen) {
+            setIsPositionCalculated(false);
+            return;
+        }
 
         const updateLayout = () => {
             const w = window.innerWidth;
@@ -26,6 +82,8 @@ const PlaylistModal = ({ isOpen, onClose, playlistName = "Название пл�
             const top = Math.max(56, (window.innerHeight - modalHeight) / 2);
 
             setPosition({ x: left, y: top });
+
+            setIsPositionCalculated(true);
         };
 
         updateLayout();
@@ -73,17 +131,17 @@ const PlaylistModal = ({ isOpen, onClose, playlistName = "Название пл�
 
     if (!isOpen) return null;
 
-    const totalSec = tracks.reduce((sum, t) => sum + (t.duration || 60), 0);
+    /*const totalSec = tracks.reduce((sum, t) => sum + (t.duration || 60), 0);
     const min = Math.floor(totalSec / 60);
     const sec = totalSec % 60;
-    const durationStr = `${min} минут ${sec} секунд`;
+    const durationStr = `${min} минут ${sec} секунд`;*/
 
     const togglePlaylistFavorite = () => {
         setIsPlaylistFavorite(!isPlaylistFavorite);
     };
 
     return (
-        <div className="pml-overlay" onClick={() => setMenuTrack(null)}>
+        <div className="pml-overlay" onClick={() => setMenuTrack(null)} style={{ opacity: isPositionCalculated ? 1 : 0 }}>
             <div
                 ref={modalRef}
                 className={`pml-container ${isMobile ? 'mobile' : ''}`}
@@ -95,22 +153,17 @@ const PlaylistModal = ({ isOpen, onClose, playlistName = "Название пл�
                 <div className="pml-header">
                     {/* Обложка */}
                     <div className="pml-playlist-cover-wrapper">
-                        <div className="pml-playlist-cover">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 156 156" width="156" height="156"
-                                 fill="none" stroke="#f1f1f1" strokeWidth="5">
-                                <rect x="28" y="28" width="100" height="100" rx="10"/>
-                                <path d="M52 52v64 M78 52v64 M104 52v64"/>
-                            </svg>
-                        </div>
+                        <img src={cover || noCoverPlaylist} alt="No cover of playlist" />
                     </div>
 
                     {/* Информация */}
                     <div className="pml-playlist-info">
-                        <div className="pml-title">{playlistName}</div>
-                        <div className="pml-author">{authorName}</div>
-                        <div className="pml-meta">{tracks.length} аудиозаписей</div>
-                        <div className="pml-meta">{durationStr}</div>
+                        <div className="pml-title">{formData.name}</div>
+                        <div className="pml-author">{formData.userId}</div>
+                        <div className="pml-meta">{formData.tracks?.length || 0} треков</div>
+                        {/*<div className="pml-meta">{durationStr}</div>*/}
                     </div>
+
 
                     <div className="pml-playlist-actions">
                         <button
@@ -167,7 +220,7 @@ const PlaylistModal = ({ isOpen, onClose, playlistName = "Название пл�
 
                 {/* Список треков */}
                 <div className="pml-track-list">
-                    {tracks.map((track, idx) => (
+                    {formData.tracks?.map((track, idx) => (
                         <TrackItem
                             key={idx}
                             index={idx + 1}

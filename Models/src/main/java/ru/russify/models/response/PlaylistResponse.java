@@ -8,8 +8,13 @@ import lombok.Data;
 public class PlaylistResponse {
 
     private Long id;
+
     private Long userId;
+
     private String name;
+
     private Boolean isSystem;
+
     private String coverHash;
+
 }

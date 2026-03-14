@@ -1,13 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
 import '../assets/styles/components/RegistrationModal.css';
+import type {CreateUserDto} from "../types/request/auth/CreateUserDto.ts";
+import {AuthManager} from "../api/AuthManager.ts";
 
 const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<CreateUserDto>({
         username: '',
         email: '',
         password: '',
-        confirmPassword: ''
+        passwordConfirm: ''
     });
+
+    const authManager = new AuthManager();
 
     const [errors, setErrors] = useState({});
     const [showRequirements, setShowRequirements] = useState(false);
@@ -20,13 +24,15 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [position, setPosition] = useState({ x: 0, y: 0 });
 
+    const [isPositionCalculated, setIsPositionCalculated] = useState(false);
+
     useEffect(() => {
         if (isOpen) {
             setFormData({
                 username: '',
                 email: '',
                 password: '',
-                confirmPassword: ''
+                passwordConfirm: ''
             });
             setErrors({});
             setShowRequirements(false);
@@ -39,6 +45,10 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
             const left = (window.innerWidth - modalWidth) / 2;
             const top = appBarHeight + (window.innerHeight - appBarHeight - modalHeight) / 2 - 20;
             setPosition({ x: left, y: top });
+
+            setIsPositionCalculated(true);
+        } else {
+            setIsPositionCalculated(false);
         }
     }, [isOpen]);
 
@@ -115,10 +125,10 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                 newErrors.password = 'Пароль не соответствует требованиям';
             }
 
-            if (!formData.confirmPassword) {
-                newErrors.confirmPassword = 'Подтвердите пароль';
-            } else if (formData.password !== formData.confirmPassword) {
-                newErrors.confirmPassword = 'Пароли не совпадают';
+            if (!formData.passwordConfirm) {
+                newErrors.passwordConfirm = 'Подтвердите пароль';
+            } else if (formData.password !== formData.passwordConfirm) {
+                newErrors.passwordConfirm = 'Пароли не совпадают';
             }
         }
 
@@ -143,7 +153,6 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
 
     const handleKeyDown = (e) => {
         if (e.ctrlKey || e.metaKey) {
-            // Разрешаем Ctrl+A, Ctrl+Z, Ctrl+C, Ctrl+V, Ctrl+X
             const key = e.key.toLowerCase();
             if (['a', 'z', 'c', 'v', 'x'].includes(key)) {
                 return;
@@ -151,7 +160,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitted(true);
 
@@ -161,13 +170,18 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         const isValid = !!(formData.username.trim() &&
             formData.email.trim() &&
             formData.password &&
-            formData.confirmPassword &&
+            formData.passwordConfirm &&
             isPasswordValid &&
-            formData.password === formData.confirmPassword);
+            formData.password === formData.passwordConfirm);
 
         if (isValid) {
-            console.log('Регистрация:', formData);
-            onClose();
+            try {
+                console.log('Регистрация:', formData);
+                await authManager.register(formData);
+                onClose();
+            } catch (error) {
+                console.error('Ошибка регистрации:', error);
+            }
         }
     };
 
@@ -176,13 +190,14 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
     const passwordValidation = validatePassword(formData.password);
 
     return (
-        <div className="regm-overlay">
+        <div className="regm-overlay" style={{ opacity: isPositionCalculated ? 1 : 0 }}>
             <div
                 ref={modalRef}
                 className="regm-container"
                 style={{ left: `${position.x}px`, top: `${position.y}px` }}
                 onMouseDown={handleMouseDown}
             >
+
                 {/* Заголовок */}
                 <div className="regm-header">
                     <div className="regm-title">Регистрация</div>
@@ -278,15 +293,15 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                         <input
                             key={`confirm-password-${inputKey}`}
                             type="password"
-                            name="confirmPassword"
-                            className={`regm-input ${errors.confirmPassword ? 'error' : ''}`}
+                            name="passwordConfirm"
+                            className={`regm-input ${errors.passwordConfirm ? 'error' : ''}`}
                             placeholder="Повторите пароль"
-                            value={formData.confirmPassword}
+                            value={formData.passwordConfirm}
                             onChange={handleChange}
-                            onKeyDown={handleKeyDown} // Добавляем обработчик клавиш
+                            onKeyDown={handleKeyDown}
                             autoComplete="new-password"
                         />
-                        {errors.confirmPassword && <div className="regm-error">{errors.confirmPassword}</div>}
+                        {errors.passwordConfirm && <div className="regm-error">{errors.passwordConfirm}</div>}
                     </div>
 
                     <button

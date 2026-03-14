@@ -1,34 +1,65 @@
-import { useState, useRef } from 'react';
+import {useState, useRef, useEffect} from 'react';
 import '../assets/styles/pages/FavoritesPage.css';
 import FavoriteCard from '../components/FavoriteCard.tsx';
 import SearchBar from '../components/SearchBar.tsx';
 import PlaylistModal from '../components/PlaylistModal.tsx';
 import CreatePlaylistModal from '../components/CreatePlaylistModal.tsx';
 import AlbumModal from '../components/AlbumModal.tsx';
+import type {Playlist} from "../types/Playlist.ts";
+import {PlaylistManager} from "../api/PlaylistManager.ts";
+import {FileManager} from "../api/FileManager.ts";
+import type {FileGetRequest} from "../types/request/FileGetRequest.ts";
+import noCoverPlaylist from '../assets/images/no-cover-playlist.svg';
 
 const FavoritesPage = () => {
     const [category, setCategory] = useState("Треки");
+    const playlistManager = new PlaylistManager();
+    const fileManager = new FileManager();
+    const [playlists, setPlaylists] = useState<Playlist[]>([]);
+    const [covers, setCovers] = useState<Record<number, string>>({});
 
-    // Данные плейлистов
-    const playlists = [
-        { id: 1, title: "Системный плейлист", date: "2025-01-15", color: "#00f0ff", creator: "Артур", tracks: [
-                { title: "Трек 1", artist: "Исполнитель A", duration: 180 },
-                { title: "Трек 2", artist: "Исполнитель B", duration: 210 },
-                { title: "Трек 3", artist: "Исполнитель C", duration: 150 },
-            ]},
-        { id: 2, title: "Плейлист 2", date: "2025-02-01", color: "#ff0000", creator: "Мария", tracks: [
-                { title: "Трек 4", artist: "Исполнитель D", duration: 200 },
-                { title: "Трек 5", artist: "Исполнитель E", duration: 170 },
-            ]},
-        { id: 3, title: "Плейлист 3", date: "2025-02-10", color: "#8000ff", creator: "Иван", tracks: [
-                { title: "Трек 6", artist: "Исполнитель F", duration: 190 },
-            ]},
-        { id: 4, title: "Плейлист 4", date: "2025-02-18", color: "#7fff7f", creator: "Ольга", tracks: []},
-        { id: 5, title: "Плейлист 5", date: "2025-02-20", color: "#00f0ff", creator: "Петр", tracks: []},
-        { id: 6, title: "Плейлист 6", date: "2025-02-22", color: "#ff0000", creator: "Анна", tracks: []},
-        { id: 7, title: "Плейлист 7", date: "2025-02-25", color: "#8000ff", creator: "Дмитрий", tracks: []},
-        { id: 8, title: "Плейлист 8", date: "2025-02-28", color: "#7fff7f", creator: "Елена", tracks: []},
-    ];
+    useEffect(() => {
+        const loadPlaylists = async () => {
+            try {
+                const playlists = await playlistManager.findAll();
+                setPlaylists(playlists);
+
+                const coversMap: Record<string, string> = {};
+
+                await Promise.all(playlists.map(async (playlist) => {
+                    const coverHash = playlist.coverHash;
+
+                    if (coverHash) {
+                        try {
+                            const fileGetRequest: FileGetRequest = {
+                                bucket: "covers",
+                                hash: coverHash
+                            };
+                            const coverSrc = await fileManager.getFileUrl(fileGetRequest);
+                            if (coverSrc) {
+                                coversMap[playlist.id.toString()] = coverSrc;
+                            }
+                        } catch (err) {
+                            console.log(`Error loading cover for playlist ${playlist.id}:`, err);
+                        }
+                    }
+                }));
+
+                setCovers(coversMap);
+
+            } catch (err) {
+                console.log('Error loading playlists:', err);
+            }
+        };
+
+        loadPlaylists();
+
+        return () => {
+            Object.values(covers).forEach(url => {
+                if (url) fileManager.revokeFileUrl(url);
+            });
+        };
+    }, []);
 
     // Данные альбомов
     const albums = [
@@ -74,7 +105,7 @@ const FavoritesPage = () => {
     const [startY, setStartY] = useState(0);
     const menuRef = useRef(null);
 
-    const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+    const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist>();
     const [selectedAlbum, setSelectedAlbum] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -126,7 +157,7 @@ const FavoritesPage = () => {
         hideMenu();
     };
 
-    const openPlaylistModal = (playlist) => {
+    const openPlaylistModal = (playlist: Playlist) => {
         setSelectedPlaylist(playlist);
         setIsModalOpen(true);
     };
@@ -251,11 +282,19 @@ const FavoritesPage = () => {
                                     style={{ backgroundColor: playlist.color }}
                                     onClick={() => openPlaylistModal(playlist)}
                                 >
+                                    <img
+                                        src={covers[playlist.id] || noCoverPlaylist}
+                                        alt={playlist.name}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        onError={(e) => {
+                                            e.currentTarget.src = noCoverPlaylist;
+                                        }}
+                                    />
                                     <div
                                         className="playlist-cover-play-button"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            console.log("Воспроизвести плейлист:", playlist.title);
+                                            console.log("Воспроизвести плейлист:", playlist.name);
                                             openPlaylistModal(playlist);
                                         }}
                                     >
@@ -266,7 +305,7 @@ const FavoritesPage = () => {
                                 </div>
                                 <div className="playlist-info-layer">
                                     <div className="playlist-info-text">
-                                        <div className="playlist-title">{playlist.title}</div>
+                                        <div className="playlist-title">{playlist.name}</div>
                                         <div className="playlist-meta">
                                             <span>{playlist.creator}</span>
                                             <span>{formatDate(playlist.date)}</span>
@@ -356,14 +395,11 @@ const FavoritesPage = () => {
                     </div>
                 )}
 
-                {/* Модальные окна */}
                 {isModalOpen && selectedPlaylist && (
                     <PlaylistModal
                         isOpen={true}
                         onClose={closePlaylistModal}
-                        playlistName={selectedPlaylist.title}
-                        authorName={selectedPlaylist.creator}
-                        tracks={selectedPlaylist.tracks}
+                        selectedId={selectedPlaylist.id}
                     />
                 )}
 

@@ -10,6 +10,7 @@ import ru.russify.russifyservice.model.Playlist;
 public interface PlaylistMapper {
 
     @Mapping(source = "user.id", target = "userId")
+    @Mapping(source = "coverHash", target = "coverHash")
 //    @Mapping(target = "trackIds",
 //            expression = "java(entity.getTrackPlaylists() == null ? null : " +
 //                    "entity.getTrackPlaylists().stream()" +

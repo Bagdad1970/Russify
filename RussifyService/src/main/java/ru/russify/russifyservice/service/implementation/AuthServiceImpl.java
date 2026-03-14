@@ -1,7 +1,6 @@
 package ru.russify.russifyservice.service.implementation;
 
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.patterns.IToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.russify.models.request.CreateUserDto;
@@ -10,7 +9,6 @@ import ru.russify.models.response.AuthResponse;
 import ru.russify.models.response.MeResponse;
 import ru.russify.russifyservice.exception.AlreadyExistsException;
 import ru.russify.russifyservice.exception.AuthException;
-import ru.russify.russifyservice.exception.NotFoundException;
 import ru.russify.russifyservice.exception.UserNotFoundException;
 import ru.russify.russifyservice.model.Role;
 import ru.russify.russifyservice.model.User;
