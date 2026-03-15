@@ -3,7 +3,7 @@ package ru.russify.russifyservice.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.russify.models.AlbumDto;
-import ru.russify.models.request.CreateAlbumDto;
+import ru.russify.models.request.AlbumCreateRequest;
 import ru.russify.russifyservice.model.Album;
 
 @Mapper(
@@ -20,7 +20,6 @@ public interface AlbumMapper {
 
     @Mapping(source = "title", target = "title")
     @Mapping(source = "releasedAt", target = "releasedAt")
-    @Mapping(source = "coverHash", target = "coverHash")
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", ignore = true)
@@ -28,6 +27,7 @@ public interface AlbumMapper {
     @Mapping(target = "trackAlbums", ignore = true)
     @Mapping(target = "authorAlbums", ignore = true)
     @Mapping(target = "favouriteAlbums", ignore = true)
+    @Mapping(target = "coverHash", ignore = true)
 
-    Album toEntity(CreateAlbumDto dto);
+    Album toEntity(AlbumCreateRequest dto);
 }

@@ -16,10 +16,12 @@ public interface AuthorMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "authorAlbums", ignore = true)
     @Mapping(target = "authorTracks", ignore = true)
+    @Mapping(target = "user", ignore = true)
     Author toEntity(CreateAuthorDto dto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "authorAlbums", ignore = true)
     @Mapping(target = "authorTracks", ignore = true)
+    @Mapping(target = "user", ignore = true)
     void updateEntity(UpdateAuthorDto dto, @MappingTarget Author author);
 }
