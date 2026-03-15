@@ -17,21 +17,28 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @Builder
 public class AlbumFlatDto {
-    
+
     private Long id;
 
+    // TRACK
     private Long trackId;
+    private String trackName;
+    private Long genreId;
+    private String genreName;
+    private String trackCoverHash;
+    private String audioHash;
 
+    // AUTHOR
     private Long authorId;
+    private String authorName;
+    private String authorPhotoHash;
+    private String authorDescription;
 
+    // ALBUM
     private String title;
-
     private String typeName;
-
     private OffsetDateTime releasedAt;
-
     private String coverHash;
-
     private AlbumStatus status;
 
 }

@@ -35,8 +35,19 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
     @Query("""
             select new ru.russify.models.projection.AlbumFlatDto(
                 a.id,
-                ta.track.id,
-                aa.author.id,
+            
+                t.id,
+                t.name,
+                g.id,
+                g.name,
+                t.coverHash,
+                t.audioHash,
+            
+                au.id,
+                au.name,
+                au.photoHash,
+                au.description,
+            
                 a.title,
                 at.name,
                 a.releasedAt,
@@ -46,10 +57,14 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
             from Album a
             join a.albumType at
             left join a.trackAlbums ta
+            left join ta.track t
+            left join t.genre g
             left join a.authorAlbums aa
+            left join aa.author au
             where a.id = :id
-        """)
+            """)
     List<AlbumFlatDto> findAlbumFlatById(Long id);
+
 
     @Query("""
                 select new ru.russify.models.AlbumDto(
