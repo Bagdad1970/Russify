@@ -1,4 +1,3 @@
-// src/pages/AdminDashboard.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -80,7 +79,6 @@ const tableConfigs = {
             { accessorKey: 'description', header: 'Описание' },
         ] as ColumnDef<Author>[],
     },
-    // users: { ... } → добавь когда будет UserManager и эндпоинты
 } as const;
 
 type TableKey = keyof typeof tableConfigs;

@@ -1,18 +1,38 @@
 import { useState, useRef, useEffect } from 'react';
 import '../assets/styles/components/AlbumModal.css';
+import type { Track } from '../types/Track.ts';
 
-const AlbumModal = ({ isOpen, onClose, albumName = "Название альбома", authorName = "Имя автора", tracks = [] }) => {
-    const modalRef = useRef(null);
+
+interface AlbumModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    albumName: string;
+    authorName?: string;
+    tracks: Track[];
+    albumAuthors?: Array<{ id: number; name: string }>; // Добавляем авторов альбома
+}
+
+const AlbumModal = ({
+                        isOpen,
+                        onClose,
+                        albumName,
+                        authorName = "Исполнитель",
+                        tracks = [],
+                        albumAuthors = []
+                    }: AlbumModalProps) => {
+    const modalRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isAlbumFavorite, setIsAlbumFavorite] = useState(false);
-    const [menuTrack, setMenuTrack] = useState(null);
+    const [menuTrack, setMenuTrack] = useState<Track | null>(null);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [isPositionCalculated, setIsPositionCalculated] = useState(false);
 
 
     useEffect(() => {
+        console.log('Tracks received:', tracks);
+        console.log('Album authors:', albumAuthors);
         if (!isOpen) {
             setIsPositionCalculated(false);
             return;
@@ -40,27 +60,29 @@ const AlbumModal = ({ isOpen, onClose, albumName = "Название альбо�
         return () => window.removeEventListener('resize', updateLayout);
     }, [isOpen]);
 
-    const handleMouseDown = (e) => {
+    const handleMouseDown = (e: React.MouseEvent) => {
         if (window.innerWidth < 1024) return;
-        if (e.target.closest('.alm-header') && !e.target.closest('.alm-close')) {
+        if (e.target instanceof Element && e.target.closest('.alm-header') && !e.target.closest('.alm-close')) {
             setIsDragging(true);
-            const rect = modalRef.current.getBoundingClientRect();
-            setDragOffset({
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top,
-            });
+            const rect = modalRef.current?.getBoundingClientRect();
+            if (rect) {
+                setDragOffset({
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top,
+                });
+            }
         }
     };
 
-    const handleMouseMove = (e) => {
-        if (!isDragging || window.innerWidth < 1024) return;
+    const handleMouseMove = (e: MouseEvent) => {
+        if (!isDragging || window.innerWidth < 1024 || !modalRef.current) return;
 
         let newX = e.clientX - dragOffset.x;
         let newY = e.clientY - dragOffset.y;
 
-        const r = modalRef.current.getBoundingClientRect();
-        newX = Math.max(0, Math.min(newX, window.innerWidth - r.width));
-        newY = Math.max(56, Math.min(newY, window.innerHeight - r.height));
+        const rect = modalRef.current.getBoundingClientRect();
+        newX = Math.max(0, Math.min(newX, window.innerWidth - rect.width));
+        newY = Math.max(56, Math.min(newY, window.innerHeight - rect.height));
 
         setPosition({ x: newX, y: newY });
     };
@@ -81,17 +103,29 @@ const AlbumModal = ({ isOpen, onClose, albumName = "Название альбо�
     if (!isOpen) return null;
 
     // Подсчёт длительности
-    const totalSec = tracks.reduce((sum, t) => sum + (t.duration || 60), 0);
-    const min = Math.floor(totalSec / 60);
-    const sec = totalSec % 60;
-    const durationStr = `${min} минут ${sec} секунд`;
+    const totalSec = tracks.reduce((sum, t) => sum + (t.duration || 0), 0);
+    const hours = Math.floor(totalSec / 3600);
+    const minutes = Math.floor((totalSec % 3600) / 60);
+    const seconds = totalSec % 60;
+
+    let durationStr = '';
+    if (hours > 0) {
+        durationStr = `${hours} ч ${minutes} мин`;
+    } else if (minutes > 0) {
+        durationStr = `${minutes} мин ${seconds} сек`;
+    } else {
+        durationStr = `${seconds} сек`;
+    }
 
     const toggleAlbumFavorite = () => {
         setIsAlbumFavorite(!isAlbumFavorite);
     };
 
+    // Получаем имя первого автора альбома
+    const albumAuthorName = albumAuthors.length > 0 ? albumAuthors[0].name : authorName;
+
     return (
-        <div className="alm-overlay" onClick={() => setMenuTrack(null) } style={{ opacity: isPositionCalculated ? 1 : 0 }}>
+        <div className="alm-overlay" onClick={() => setMenuTrack(null)} style={{ opacity: isPositionCalculated ? 1 : 0 }}>
             <div
                 ref={modalRef}
                 className={`alm-container ${isMobile ? 'mobile' : ''}`}
@@ -115,7 +149,7 @@ const AlbumModal = ({ isOpen, onClose, albumName = "Название альбо�
                     {/* Информация */}
                     <div className="alm-album-info">
                         <div className="alm-title">{albumName}</div>
-                        <div className="alm-author">{authorName}</div>
+                        <div className="alm-author">{albumAuthorName}</div>
                         <div className="alm-meta">{tracks.length} аудиозаписей</div>
                         <div className="alm-meta">{durationStr}</div>
                     </div>
@@ -124,7 +158,7 @@ const AlbumModal = ({ isOpen, onClose, albumName = "Название альбо�
                         <button
                             className="alm-btn alm-btn-play"
                             title="Воспроизвести альбом"
-                            onClick={() => console.log("Воспроизвести альбом")}
+                            onClick={() => console.log("Воспроизвести альбом:", albumName)}
                         >
                             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2">
                                 <path d="M8 5v14l11-7z" />
@@ -133,7 +167,7 @@ const AlbumModal = ({ isOpen, onClose, albumName = "Название альбо�
                         <button
                             className="alm-btn alm-btn-next"
                             title="Играть следующим"
-                            onClick={() => console.log("Играть следующим")}
+                            onClick={() => console.log("Играть следующим:", albumName)}
                         >
                             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2">
                                 <path d="M8 5v14l11-7z" />
@@ -143,7 +177,7 @@ const AlbumModal = ({ isOpen, onClose, albumName = "Название альбо�
                         <button
                             className="alm-btn alm-btn-shuffle"
                             title="Случайный порядок"
-                            onClick={() => console.log("Случайный порядок")}
+                            onClick={() => console.log("Случайный порядок:", albumName)}
                         >
                             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2">
                                 <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
@@ -175,15 +209,23 @@ const AlbumModal = ({ isOpen, onClose, albumName = "Название альбо�
 
                 {/* Список треков */}
                 <div className="alm-track-list">
-                    {tracks.map((track, idx) => (
-                        <TrackItem
-                            key={idx}
-                            index={idx + 1}
-                            track={track}
-                            isMobile={isMobile}
-                            onMoreClick={() => setMenuTrack(track)}
-                        />
-                    ))}
+                    {tracks.length > 0 ? (
+                        tracks.map((track, idx) => (
+                            <TrackItem
+                                key={track.id ? Number(track.id) : idx}
+                                index={idx + 1}
+                                track={track}
+                                albumName={albumName}
+                                authorName={albumAuthorName} // Передаем имя автора альбома
+                                isMobile={isMobile}
+                                onMoreClick={() => setMenuTrack(track)}
+                            />
+                        ))
+                    ) : (
+                        <div className="alm-empty-state">
+                            В этом альбоме пока нет треков
+                        </div>
+                    )}
                 </div>
 
                 {/* Мобильное контекстное меню */}
@@ -199,7 +241,7 @@ const AlbumModal = ({ isOpen, onClose, albumName = "Название альбо�
                             <div
                                 className="alm-context-item"
                                 onClick={() => {
-                                    console.log("Играть следующим:", menuTrack.title);
+                                    console.log("Играть следующим:", menuTrack.name);
                                     setMenuTrack(null);
                                 }}
                             >
@@ -211,7 +253,7 @@ const AlbumModal = ({ isOpen, onClose, albumName = "Название альбо�
                             <div
                                 className="alm-context-item"
                                 onClick={() => {
-                                    console.log("Добавить в избранное:", menuTrack.title);
+                                    console.log("Добавить в избранное:", menuTrack.name);
                                     setMenuTrack(null);
                                 }}
                             >
@@ -223,7 +265,7 @@ const AlbumModal = ({ isOpen, onClose, albumName = "Название альбо�
                             <div
                                 className="alm-context-item"
                                 onClick={() => {
-                                    console.log("Добавить в плейлист:", menuTrack.title);
+                                    console.log("Добавить в плейлист:", menuTrack.name);
                                     setMenuTrack(null);
                                 }}
                             >
@@ -237,8 +279,25 @@ const AlbumModal = ({ isOpen, onClose, albumName = "Название альбо�
     );
 };
 
-const TrackItem = ({ index, track, isMobile, onMoreClick }) => {
+interface TrackItemProps {
+    index: number;
+    track: Track;
+    albumName: string;
+    authorName: string;
+    isMobile: boolean;
+    onMoreClick: () => void;
+}
+
+const TrackItem = ({ index, track, albumName, authorName, isMobile, onMoreClick }: TrackItemProps) => {
     const [isFavorite, setIsFavorite] = useState(false);
+
+    // Форматирование длительности
+    const formatDuration = (seconds?: number) => {
+        if (!seconds) return "0:00";
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
 
     return (
         <div className={`alm-track-item ${isMobile ? 'mobile' : ''}`}>
@@ -257,29 +316,21 @@ const TrackItem = ({ index, track, isMobile, onMoreClick }) => {
                 </div>
             </div>
 
-            {/* Текст */}
             <div className="alm-track-text">
-                <div className="alm-track-title">{track.title || "Название трека"}</div>
-                <div className="alm-track-artist">{track.artist || "Исполнитель"}</div>
+                <div className="alm-track-title">{track.name || "Название трека"}</div>
+                <div className="alm-track-artist">{authorName || "Исполнитель"}</div>
             </div>
 
-            {/* Альбом (только на десктопе) */}
-            {!isMobile && (
-                <div className="alm-track-album">{track.album || "Альбом"}</div>
-            )}
 
             {/* Длительность */}
             <div className="alm-track-duration">
-                {track.duration
-                    ? `${Math.floor(track.duration / 60)}:${(track.duration % 60).toString().padStart(2, '0')}`
-                    : "01:00"}
+                {formatDuration(track.duration)}
             </div>
 
             {/* Действия */}
             <div className="alm-track-actions">
                 {isMobile ? (
                     <>
-                        {/* На мобильных: Играть → Троеточие */}
                         <button className="alm-btn alm-btn-play">
                             <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2">
                                 <path d="M8 5v14l11-7z"/>
@@ -331,10 +382,14 @@ const TrackItem = ({ index, track, isMobile, onMoreClick }) => {
                                 />
                             </svg>
                         </button>
-                        <button className="alm-btn alm-btn-more">
+                        <button
+                            className="alm-btn alm-btn-more"
+                            onClick={onMoreClick}
+                        >
                             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                                 <path
-                                    d="M14 10H2v2h12v-2zm0-4H2v2h12V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM2 16h8v-2H2v2z"/>
+                                    d="M14 10H2v2h12v-2zm0-4H2v2h12V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM2 16h8v-2H2v2z"
+                                />
                             </svg>
                         </button>
                     </>

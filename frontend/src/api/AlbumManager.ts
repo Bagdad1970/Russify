@@ -12,6 +12,12 @@ export class AlbumManager {
         }
     }
 
+    async findAllTrackById(id: bigint | number): Promise<Album> {
+        const response = await api.get<Album>(`albums/${id}`);
+        return response.data;
+    }
+
+
     async create(album: any): Promise<Album> {
         const response = await api.post<Album>("albums", album);
         return response.data;

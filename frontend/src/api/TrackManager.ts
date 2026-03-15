@@ -4,7 +4,12 @@ import type { Track } from "../types/Track.ts";
 export class TrackManager {
     async findAll(): Promise<Track[]> {
         try {
-            const response = await api.get<Track[]>("tracks");
+            const obj = {
+                name: "",
+                genre_ids: [
+                ]
+            }
+            const response = await api.post<Track[]>("tracks/search", obj);
             return response.data;
         } catch (error) {
             console.error("Error fetching tracks:", error);
