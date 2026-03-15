@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.russify.models.AlbumDto;
 import ru.russify.models.request.AlbumCreateRequest;
+import ru.russify.models.request.AlbumUpdateRequest;
 import ru.russify.models.request.UpdateAlbumDto;
 import ru.russify.russifyservice.mapper.AlbumMapper;
 import ru.russify.russifyservice.service.implementation.AlbumServiceImpl;
@@ -55,10 +57,11 @@ public class AlbumController {
         service.delete(id);
     }
 
-    @PutMapping("/{id}")
-    public AlbumDto update(
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public AlbumDto updateAlbum(
             @PathVariable Long id,
-            @RequestBody @Valid UpdateAlbumDto dto) {
-        return mapper.toDto(service.update(id, dto));
+            @ModelAttribute AlbumUpdateRequest request
+    ) {
+        return service.updateAlbum(id, request);
     }
 }

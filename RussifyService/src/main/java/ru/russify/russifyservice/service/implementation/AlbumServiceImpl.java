@@ -10,6 +10,7 @@ import ru.russify.models.AuthorDto;
 import ru.russify.models.TrackDto;
 import ru.russify.models.projection.AlbumFlatDto;
 import ru.russify.models.request.AlbumCreateRequest;
+import ru.russify.models.request.AlbumUpdateRequest;
 import ru.russify.models.request.UpdateAlbumDto;
 import ru.russify.russifyservice.exception.AlbumNotFoundException;
 import ru.russify.russifyservice.mapper.AlbumMapper;
@@ -111,44 +112,56 @@ public class AlbumServiceImpl implements AlbumService {
         return getAlbumById(result.getId());
     }
 
-
     @Transactional
-    public Album update(Long id, UpdateAlbumDto dto) {
+    public AlbumDto updateAlbum(Long id, AlbumUpdateRequest request) {
 
         Album album = albumRepository.findById(id)
                 .orElseThrow(() -> new AlbumNotFoundException(id));
 
-        album.setTitle(dto.getTitle());
-        album.setReleasedAt(dto.getReleasedAt());
+        if (request.getTitle() != null) {
+            album.setTitle(request.getTitle());
+        }
 
-        album.setAlbumType(
-                albumTypeRepository.findById(dto.getAlbumTypeId())
-                        .orElseThrow()
-        );
+        if (request.getReleasedAt() != null) {
+            album.setReleasedAt(request.getReleasedAt());
+        }
 
-        album.getAuthorAlbums().clear();
-        album.getTrackAlbums().clear();
+        if (request.getStatus() != null) {
+            album.setStatus(request.getStatus());
+        }
 
-        Set<AuthorAlbum> authors = dto.getAuthorIds().stream()
-                .map(authorId -> new AuthorAlbum(
-                        new AuthorAlbumPK(authorId, album.getId()),
-                        authorRepository.getReferenceById(authorId),
-                        album
-                ))
-                .collect(Collectors.toSet());
+        if (request.getTypeId() != null) {
+            album.setAlbumType(
+                    albumTypeRepository.findById(request.getTypeId())
+                            .orElseThrow()
+            );
+        }
 
-        Set<TrackAlbum> tracks = dto.getTrackIds().stream()
-                .map(trackId -> new TrackAlbum(
-                        new TrackAlbumPK(trackId, album.getId()),
-                        trackRepository.getReferenceById(trackId),
-                        album
-                ))
-                .collect(Collectors.toSet());
+        if (request.getCoverFile() != null) {
 
-        album.getAuthorAlbums().addAll(authors);
-        album.getTrackAlbums().addAll(tracks);
+            String coverHash = fileService.putObject("covers", request.getCoverFile());
 
-        return albumRepository.save(album);
+            album.setCoverHash(coverHash);
+        }
+
+        if (request.getAuthorId() != null) {
+
+            album.getAuthorAlbums().clear();
+
+            Author author = authorRepository.getReferenceById(request.getAuthorId());
+
+            AuthorAlbum authorAlbum = new AuthorAlbum(
+                    new AuthorAlbumPK(author.getId(), album.getId()),
+                    author,
+                    album
+            );
+
+            album.getAuthorAlbums().add(authorAlbum);
+        }
+
+        albumRepository.save(album);
+
+        return getAlbumById(album.getId());
     }
 
     /**
