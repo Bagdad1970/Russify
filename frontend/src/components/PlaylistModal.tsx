@@ -2,14 +2,16 @@ import { useState, useRef, useEffect } from 'react';
 import '../assets/styles/components/PlaylistModal.css';
 import noCoverPlaylist from '../assets/images/no-cover-playlist.svg';
 import type { PlaylistWithTracks } from "../types/PlaylistWithTracks.ts";
+import { PlaylistManager } from '../api/PlaylistManager';
+import { FileManager } from '../api/FileManager';
+import type { FileGetRequest } from '../types/request/FileGetRequest';
 
-// 🔥 Пропсы изменились: вместо ID передаем сразу данные
 const PlaylistModal = ({ isOpen, onClose, playlistData }: {
     isOpen: boolean;
     onClose: () => void;
     playlistData: PlaylistWithTracks | null
 }) => {
-    const modalRef = useRef(null);
+    const modalRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -17,7 +19,7 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
     const [menuTrack, setMenuTrack] = useState(null);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [isPositionCalculated, setIsPositionCalculated] = useState(false);
-    const [cover, setCover] = useState<string>("");
+    const [cover, setCover] = useState<string>(""); // ✅ ОДНО объявление
     const playlistManager = new PlaylistManager();
     const fileManager = new FileManager();
 
@@ -32,10 +34,11 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
 
     useEffect(() => {
         const loadPlaylist = async () => {
-            if (!isOpen) return;
+            if (!isOpen || !playlistData?.id) return; // ✅ Используем playlistData.id
 
             try {
-                const playlistWithTracks = await playlistManager.findById(selectedId);
+                // Если нужно загрузить дополнительные данные
+                const playlistWithTracks = await playlistManager.findById(playlistData.id);
                 setFormData(playlistWithTracks);
 
                 const coverHash = playlistWithTracks.coverHash;
@@ -63,12 +66,7 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
                 setCover("");
             }
         };
-    }, [isOpen, selectedId]);
-
-    // Обложку берем сразу из данных, если она там есть (или можно передать URL из родителя)
-    const [cover, setCover] = useState<string>("");
-
-    // 🔥 Никаких менеджеров и запросов здесь больше нет!
+    }, [isOpen, playlistData?.id]); // ✅ Зависимость от playlistData.id
 
     useEffect(() => {
         if (!isOpen) {
@@ -97,13 +95,12 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
         return () => window.removeEventListener('resize', updateLayout);
     }, [isOpen]);
 
-    // Если нужны обложки треков через FileManager, это тоже лучше делать в HomePage
-    // и передавать уже готовые URL в playlistData.tracks, но если очень нужно здесь:
-    // (в данном примере упрощено до статики или данных из пропсов)
-
-    const handleMouseDown = (e) => {
+    const handleMouseDown = (e: React.MouseEvent) => {
         if (window.innerWidth < 1024) return;
-        if (e.target.closest('.pml-header') && !e.target.closest('.pml-close')) {
+        if (e.target instanceof Element &&
+            e.target.closest('.pml-header') &&
+            !e.target.closest('.pml-close') &&
+            modalRef.current) {
             setIsDragging(true);
             const rect = modalRef.current.getBoundingClientRect();
             setDragOffset({
@@ -113,15 +110,15 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
         }
     };
 
-    const handleMouseMove = (e) => {
-        if (!isDragging || window.innerWidth < 1024) return;
+    const handleMouseMove = (e: MouseEvent) => {
+        if (!isDragging || window.innerWidth < 1024 || !modalRef.current) return;
 
         let newX = e.clientX - dragOffset.x;
         let newY = e.clientY - dragOffset.y;
 
-        const r = modalRef.current.getBoundingClientRect();
-        newX = Math.max(0, Math.min(newX, window.innerWidth - r.width));
-        newY = Math.max(56, Math.min(newY, window.innerHeight - r.height));
+        const rect = modalRef.current.getBoundingClientRect();
+        newX = Math.max(0, Math.min(newX, window.innerWidth - rect.width));
+        newY = Math.max(56, Math.min(newY, window.innerHeight - rect.height));
 
         setPosition({ x: newX, y: newY });
     };
