@@ -84,4 +84,21 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
             """)
     List<AlbumDto> findAlbumsByAuthorEmail(String email);
 
+    @Query("""
+            select new ru.russify.models.AlbumDto(
+                a.id,
+                a.title,
+                at.name,
+                a.status,
+                a.coverHash,
+                a.releasedAt
+            )
+            from favourite_album fa
+            join fa.album a
+            join a.albumType at
+            join fa.user u
+            where u.email = :email
+        """)
+    List<AlbumDto> findFavouriteAlbumsByUserEmail(String email);
+
 }

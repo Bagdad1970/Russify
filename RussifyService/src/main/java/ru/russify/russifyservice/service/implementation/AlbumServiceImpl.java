@@ -1,6 +1,6 @@
 package ru.russify.russifyservice.service.implementation;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.russify.models.AlbumDto;
@@ -11,14 +11,18 @@ import ru.russify.models.TrackDto;
 import ru.russify.models.projection.AlbumFlatDto;
 import ru.russify.models.request.AlbumCreateRequest;
 import ru.russify.models.request.AlbumUpdateRequest;
-import ru.russify.models.request.UpdateAlbumDto;
+import ru.russify.russifyservice.exception.AlbumAlreadyInFavouritesException;
 import ru.russify.russifyservice.exception.AlbumNotFoundException;
-import ru.russify.russifyservice.mapper.AlbumMapper;
+import ru.russify.russifyservice.exception.AlreadyInFavouritesException;
+import ru.russify.russifyservice.exception.UserNotFoundException;
 import ru.russify.russifyservice.model.Album;
 import ru.russify.russifyservice.model.Author;
 import ru.russify.russifyservice.model.AuthorAlbum;
+import ru.russify.russifyservice.model.FavouriteAlbum;
 import ru.russify.russifyservice.model.TrackAlbum;
+import ru.russify.russifyservice.model.User;
 import ru.russify.russifyservice.model.compositekey.AuthorAlbumPK;
+import ru.russify.russifyservice.model.compositekey.FavouriteAlbumPK;
 import ru.russify.russifyservice.model.compositekey.TrackAlbumPK;
 import ru.russify.russifyservice.repository.AlbumRepository;
 import ru.russify.russifyservice.repository.AlbumTypeRepository;
@@ -47,7 +51,6 @@ public class AlbumServiceImpl implements AlbumService {
     private final TrackRepository trackRepository;
     private final AuthorRepository authorRepository;
     private final FileService fileService;
-    private final AlbumMapper mapper;
 
     public List<AlbumDto> findAllWithRelations() {
         return albumRepository.findAllAlbumsDto();
@@ -252,4 +255,8 @@ public class AlbumServiceImpl implements AlbumService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public List<AlbumDto> getFavouriteAlbums(String email) {
+        return albumRepository.findFavouriteAlbumsByUserEmail(email);
+    }
 }
