@@ -1,4 +1,5 @@
 import {type Playlist} from "../types/Playlist.ts";
+import type {Track} from "../types/Track.ts"
 import api from "./ApiClient.ts";
 import type {PlaylistWithTracks} from "../types/PlaylistWithTracks.ts";
 
@@ -15,6 +16,16 @@ export class PlaylistManager {
         }
     }
     */
+
+    async findTracksByPlaylistId(id: number | bigint): Promise<Track[]> {
+        try {
+            const response = await api.get<Track[]>(`playlists/${id}/tracks`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching tracks for playlist ${id}:`, error);
+            throw error;
+        }
+    }
 
     async update(playlist: Playlist): Promise<Playlist> {
         try {
