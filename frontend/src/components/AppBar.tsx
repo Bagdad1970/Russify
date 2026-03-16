@@ -132,7 +132,7 @@ const AppBar = ({ activeTab = 'Главная', onFavoritesClick }) => {
                             <div className="cover-placeholder"></div>
                         </div>
                         <div className="track-text">
-                            <div className="track-title">{title}</div>
+                            <div className="track-title-AppBar">{title}</div>
                             <div className="track-artist">{artist}</div>
                         </div>
                     </div>

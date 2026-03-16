@@ -1,23 +1,65 @@
+/* 🌙 Темная тема (по умолчанию) */
+:root {
+    --pml-overlay: rgba(0, 0, 0, 0.5);
+    --pml-bg: linear-gradient(135deg, #22222a 0%, #1e1e2a 100%);
+    --pml-text: white;
+    --pml-text-secondary: rgba(255, 255, 255, 0.8);
+    --pml-text-tertiary: rgba(255, 255, 255, 0.7);
+    --pml-border: rgba(255, 255, 255, 0.1);
+    --pml-track-hover: rgba(255, 255, 255, 0.05);
+    --pml-btn-color: #aaa;
+    --pml-btn-hover-bg: rgba(255, 255, 255, 0.1);
+    --pml-btn-hover-color: white;
+    --pml-btn-hover-border: rgba(255, 255, 255, 0.3);
+    --pml-heart-active: #ff2d55;
+    --pml-cover-bg: rgba(228, 0, 0, 0.08);
+    --pml-track-cover-bg: rgba(255, 255, 255, 0.1);
+    --pml-context-menu-bg: #2a2a2a;
+    --pml-context-item-hover: rgba(255, 255, 255, 0.08);
+}
+
+/* ☀️ Светлая тема */
+[data-theme="light"] {
+    --pml-overlay: rgba(0, 0, 0, 0.3);
+    --pml-bg: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    --pml-text: #0f172a;
+    --pml-text-secondary: #1e293b;
+    --pml-text-tertiary: #334155;
+    --pml-border: rgba(0, 0, 0, 0.1);
+    --pml-track-hover: rgba(0, 0, 0, 0.02);
+    --pml-btn-color: #64748b;
+    --pml-btn-hover-bg: rgba(0, 0, 0, 0.05);
+    --pml-btn-hover-color: #0f172a;
+    --pml-btn-hover-border: rgba(0, 0, 0, 0.2);
+    --pml-heart-active: #e11d48;
+    --pml-cover-bg: rgba(0, 0, 0, 0.03);
+    --pml-track-cover-bg: rgba(0, 0, 0, 0.05);
+    --pml-context-menu-bg: #ffffff;
+    --pml-context-item-hover: rgba(0, 0, 0, 0.05);
+}
+
 .pml-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--pml-overlay);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    transition: background 0.3s ease;
 }
 
 .pml-container {
     position: absolute;
     width: 640px;
     max-height: calc(100vh - 120px);
-    background: linear-gradient(135deg, #22222a 0%, #1e1e2a 100%);
+    background: var(--pml-bg);
     border-radius: 12px;
     overflow: hidden;
     font-family: 'Roboto', sans-serif;
     padding: 20px;
     box-sizing: border-box;
+    transition: background 0.3s ease;
 }
 
 .pml-header {
@@ -35,8 +77,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(228, 0, 0, 0.08);
+    background: var(--pml-cover-bg);
     border-radius: 12px;
+    transition: background 0.3s ease;
 }
 
 .pml-playlist-info {
@@ -48,10 +91,11 @@
 
 .pml-playlist-actions-inline {
     display: flex;
-    gap: 8px; /* ← ближе к тексту */
-    align-self: flex-end; /* ←  по нижнему краю */
-    margin-top: auto; /* ← прижать к низу */
+    gap: 8px;
+    align-self: flex-end;
+    margin-top: auto;
 }
+
 .pml-playlist-actions {
     display: flex;
     gap: 8px;
@@ -61,46 +105,33 @@
 .pml-title {
     font-size: 24px;
     font-weight: 600;
-    color: white;
+    color: var(--pml-text);
     margin: 0;
+    transition: color 0.3s ease;
 }
 
 .pml-author {
     font-size: 16px;
     font-weight: 400;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--pml-text-secondary);
     margin: 0;
+    transition: color 0.3s ease;
 }
 
 .pml-meta {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--pml-text-tertiary);
+    transition: color 0.3s ease;
 }
 
-/*.pml-favorite-btn {*/
-/*    background: none;*/
-/*    border: none;*/
-/*    width: 32px;*/
-/*    height: 32px;*/
-/*    display: flex;*/
-/*    align-items: center;*/
-/*    justify-content: center;*/
-/*    border-radius: 6px;*/
-/*    cursor: pointer;*/
-/*    color: #ffffff;*/
-/*    transition: all 0.2s;*/
-/*    flex-shrink: 0;*/
-/*    align-self: flex-end;*/
-/*}*/
-
 .pml-favorite-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: var(--pml-btn-hover-bg);
+    color: var(--pml-btn-hover-color);
 }
 
 .pml-favorite-btn.active svg {
-    fill: #ff2d55;
-    stroke: #ff2d55;
+    fill: var(--pml-heart-active);
+    stroke: var(--pml-heart-active);
 }
 
 .pml-close {
@@ -116,20 +147,26 @@
     justify-content: center;
     border-radius: 6px;
     cursor: pointer;
-    color: #ffffff;
+    color: var(--pml-text);
     transition: all 0.2s;
 }
 
 .pml-close:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: var(--pml-btn-hover-bg);
+    color: var(--pml-btn-hover-color);
+}
+
+.pml-close svg {
+    stroke: currentColor;
+    transition: stroke 0.3s ease;
 }
 
 /* Разделитель */
 .pml-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--pml-border);
     margin: 16px 0;
+    transition: background 0.3s ease;
 }
 
 /* Треки */
@@ -144,12 +181,12 @@
     align-items: center;
     padding: 10px 0;
     gap: 30px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    transition: background 0.2s;
+    border-bottom: 1px solid var(--pml-border);
+    transition: background 0.2s, border-color 0.3s ease;
 }
 
 .pml-track-item:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--pml-track-hover);
 }
 
 .pml-track-item:last-child {
@@ -159,10 +196,11 @@
 /* Номер */
 .pml-track-index {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--pml-text-tertiary);
     width: 28px;
     text-align: right;
     flex-shrink: 0;
+    transition: color 0.3s ease;
 }
 
 /* Обложка трека + overlay */
@@ -179,9 +217,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--pml-track-cover-bg);
     border-radius: 8px;
     cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.pml-track-cover svg {
+    stroke: var(--pml-text-tertiary);
+    transition: stroke 0.3s ease;
 }
 
 .pml-play-overlay {
@@ -194,7 +238,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--pml-text);
     opacity: 0;
     transition: all 0.1s ease;
     pointer-events: none;
@@ -222,34 +266,38 @@
 .pml-track-title {
     font-size: 16px;
     font-weight: 500;
-    color: white;
+    color: var(--pml-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.3s ease;
 }
 
 .pml-track-artist {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--pml-text-tertiary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.3s ease;
 }
 
-/* Альбом  */
+/* Альбом */
 .pml-track-album {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--pml-text-tertiary);
     margin-left: 8px;
     white-space: nowrap;
+    transition: color 0.3s ease;
 }
 
 /* Длительность */
 .pml-track-duration {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--pml-text-tertiary);
     width: 56px;
     text-align: right;
+    transition: color 0.3s ease;
 }
 
 /* Действия */
@@ -261,27 +309,38 @@
 .pml-btn {
     background: none;
     border: none;
-    width: 32px; /* ← увеличенный размер */
+    width: 32px;
     height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%; /* ← круглая обводка */
+    border-radius: 50%;
     cursor: pointer;
-    color: #aaa;
+    color: var(--pml-btn-color);
     transition: all 0.2s;
-    border: 1px solid transparent; /* ← чтобы при наведении не прыгал размер */
+    border: 1px solid transparent;
 }
 
 .pml-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border-color: rgba(255, 255, 255, 0.3); /* ← круглая обводка при наведении */
+    background: var(--pml-btn-hover-bg);
+    color: var(--pml-btn-hover-color);
+    border-color: var(--pml-btn-hover-border);
 }
 
 .pml-btn-heart.active svg {
-    fill: #ff2d55;
-    stroke: #ff2d55;
+    fill: var(--pml-heart-active);
+    stroke: var(--pml-heart-active);
+}
+
+.pml-btn svg {
+    stroke: currentColor;
+    fill: none;
+    transition: stroke 0.3s ease, fill 0.3s ease;
+}
+
+.pml-btn-heart.active svg {
+    fill: var(--pml-heart-active);
+    stroke: var(--pml-heart-active);
 }
 
 .pml-track-play-controls {
@@ -290,11 +349,7 @@
     align-items: center;
 }
 
-/* ... остальные стили остаются как в исходном файле ... */
-
-/* ──────────────────────────────────────────────
-   Мобильное контекстное меню (только для ≤767px)
-─────────────────────────────────────────────── */
+/* Мобильное контекстное меню (≤767px) */
 @media (max-width: 767px) {
     .pml-container {
         width: calc(100% - 24px);
@@ -326,14 +381,16 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #ffffff;
+        color: var(--pml-text);
         cursor: pointer;
     }
+
     .pml-favorite-btn {
         display: none;
     }
+
     .pml-close:hover {
-        background: rgba(255, 255, 255, 0.1);
+        background: var(--pml-btn-hover-bg);
     }
 
     .pml-playlist-cover-wrapper {
@@ -360,15 +417,15 @@
 
     .pml-author {
         font-size: 14px;
-        color: rgba(255, 255, 255, 0.8);
+        color: var(--pml-text-secondary);
     }
 
     .pml-playlist-actions {
         display: flex;
         gap: 24px;
         margin-top: 16px;
-        justify-content: center; /* ← выравнивание по центру */
-        width: 100%; /* ← занимает всю ширину */
+        justify-content: center;
+        width: 100%;
     }
 
     .pml-playlist-actions .pml-btn {
@@ -380,17 +437,17 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #aaa;
+        color: var(--pml-btn-color);
         transition: color 0.2s;
     }
 
     .pml-playlist-actions .pml-btn:hover {
-        color: white;
+        color: var(--pml-btn-hover-color);
     }
 
     .pml-playlist-actions .pml-btn-heart.active svg {
-        fill: #ff2d55;
-        stroke: #ff2d55;
+        fill: var(--pml-heart-active);
+        stroke: var(--pml-heart-active);
     }
 
     .pml-meta {
@@ -407,7 +464,7 @@
     .pml-playlist-actions-inline .pml-btn {
         width: 48px;
         height: 48px;
-        background: rgba(255,255,255,0.06);
+        background: rgba(255, 255, 255, 0.06);
         border-radius: 12px;
     }
 
@@ -460,19 +517,19 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #aaa;
+        color: var(--pml-btn-color);
+        transition: all 0.2s;
     }
 
     .pml-playlist-actions-inline-mobile .pml-btn:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
+        background: var(--pml-btn-hover-bg);
+        color: var(--pml-btn-hover-color);
     }
 
     .pml-playlist-actions-inline-mobile .pml-btn-heart.active svg {
-        fill: #ff2d55;
-        stroke: #ff2d55;
+        fill: var(--pml-heart-active);
+        stroke: var(--pml-heart-active);
     }
-
 
     /* Контекстное меню */
     .pml-context-menu-overlay {
@@ -483,18 +540,19 @@
         align-items: flex-end;
         justify-content: center;
         z-index: 1500;
+        transition: background 0.3s ease;
     }
 
     .pml-context-menu {
-        background: #2a2a2a;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        background: var(--pml-context-menu-bg);
+        border-top: 1px solid var(--pml-border);
         border-radius: 16px 16px 0 0;
         width: 100%;
         max-width: 400px;
         display: flex;
         flex-direction: column;
         transform: translateY(100%);
-        transition: transform 0.3s ease;
+        transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
     }
 
     .pml-context-menu.active {
@@ -503,20 +561,21 @@
 
     .pml-context-item {
         padding: 16px;
-        color: white;
+        color: var(--pml-text);
         font-size: 16px;
         cursor: pointer;
         text-align: center;
-        transition: background 0.2s;
+        transition: background 0.2s, color 0.3s ease;
     }
 
     .pml-context-item:hover {
-        background: rgba(255, 255, 255, 0.08);
+        background: var(--pml-context-item-hover);
     }
 
     .pml-context-divider {
         height: 1px;
-        background: rgba(255, 255, 255, 0.1);
+        background: var(--pml-border);
         margin: 0 16px;
+        transition: background 0.3s ease;
     }
 }

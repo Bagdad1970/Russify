@@ -1,26 +1,72 @@
+/* 🌙 Темная тема (по умолчанию) */
+:root {
+    --pml-overlay: rgba(0, 0, 0, 0.6);
+    --pml-bg: linear-gradient(135deg, #1e1e24 0%, #16161e 100%);
+    --pml-text: white;
+    --pml-text-secondary: rgba(255, 255, 255, 0.8);
+    --pml-text-tertiary: rgba(255, 255, 255, 0.7);
+    --pml-text-muted: rgba(255, 255, 255, 0.6);
+    --pml-border: rgba(255, 255, 255, 0.1);
+    --pml-border-light: rgba(255, 255, 255, 0.08);
+    --pml-border-context: rgba(255, 255, 255, 0.06);
+    --pml-cover-bg: rgba(255, 255, 255, 0.08);
+    --pml-track-hover: rgba(255, 255, 255, 0.04);
+    --pml-btn-color: rgba(255, 255, 255, 0.7);
+    --pml-btn-hover-bg: rgba(255, 255, 255, 0.1);
+    --pml-btn-hover-color: white;
+    --pml-heart-active: #ff2d55;
+    --pml-close-bg: rgba(255, 255, 255, 0.08);
+    --pml-context-bg: #1e1e24;
+    --pml-context-hover: rgba(255, 255, 255, 0.06);
+    --pml-context-shadow: rgba(0, 0, 0, 0.4);
+}
+
+/* ☀️ Светлая тема */
+[data-theme="light"] {
+    --pml-overlay: rgba(0, 0, 0, 0.3);
+    --pml-bg: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    --pml-text: #0f172a;
+    --pml-text-secondary: #1e293b;
+    --pml-text-tertiary: #334155;
+    --pml-text-muted: #475569;
+    --pml-border: rgba(0, 0, 0, 0.1);
+    --pml-border-light: rgba(0, 0, 0, 0.08);
+    --pml-border-context: rgba(0, 0, 0, 0.06);
+    --pml-cover-bg: rgba(0, 0, 0, 0.04);
+    --pml-track-hover: rgba(0, 0, 0, 0.02);
+    --pml-btn-color: #475569;
+    --pml-btn-hover-bg: rgba(0, 0, 0, 0.05);
+    --pml-btn-hover-color: #0f172a;
+    --pml-heart-active: #e11d48;
+    --pml-close-bg: rgba(0, 0, 0, 0.05);
+    --pml-context-bg: #ffffff;
+    --pml-context-hover: rgba(0, 0, 0, 0.04);
+    --pml-context-shadow: rgba(0, 0, 0, 0.1);
+}
+
 .pml-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--pml-overlay);
     z-index: 1400;
     backdrop-filter: blur(4px);
+    transition: background 0.3s ease;
 }
 
 .pml-container {
     position: absolute;
     width: 640px;
     max-height: calc(100vh - 112px);
-    background: linear-gradient(135deg, #1e1e24 0%, #16161e 100%);
+    background: var(--pml-bg);
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    box-shadow: 0 20px 60px var(--pml-context-shadow);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    color: #f1f1f1;
+    color: var(--pml-text);
+    transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* ──────────────────────────────
-   Десктоп 1200+
-─────────────────────────────── */
+/* Десктоп 1200+ */
 @media (min-width: 1200px) {
     .pml-container {
         width: 680px;
@@ -35,9 +81,7 @@
     }
 }
 
-/* ──────────────────────────────
-   Ноутбуки 1024–1199
-─────────────────────────────── */
+/* Ноутбуки 1024–1199 */
 @media (min-width: 1024px) and (max-width: 1199px) {
     .pml-container {
         width: 580px;
@@ -48,9 +92,7 @@
     }
 }
 
-/* ──────────────────────────────
-   Планшеты 768–1023
-─────────────────────────────── */
+/* Планшеты 768–1023 */
 @media (min-width: 768px) and (max-width: 1023px) {
     .pml-container {
         width: calc(100% - 48px);
@@ -66,9 +108,7 @@
     }
 }
 
-/* ──────────────────────────────
-   Мобильные ≤ 767px
-─────────────────────────────── */
+/* Мобильные ≤ 767px */
 @media (max-width: 767px) {
     .pml-container {
         width: calc(100% - 24px);
@@ -94,10 +134,18 @@
         position: absolute;
         top: 12px;
         right: 12px;
-        background: rgba(255,255,255,0.08);
+        background: var(--pml-close-bg);
         border-radius: 50%;
         width: 36px;
         height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--pml-text);
+    }
+
+    .pml-close svg {
+        stroke: currentColor;
     }
 
     .pml-playlist-cover-wrapper {
@@ -142,12 +190,12 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #aaa;
+        color: var(--pml-btn-color);
         transition: color 0.2s;
     }
 
     .pml-playlist-actions-inline .pml-btn:hover {
-        color: white;
+        color: var(--pml-btn-hover-color);
     }
 
     .pml-track-list {
@@ -201,8 +249,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--pml-cover-bg);
     border-radius: 12px;
+    transition: background 0.3s ease;
+}
+
+.pml-playlist-cover svg {
+    stroke: var(--pml-text-tertiary);
+    transition: stroke 0.3s ease;
 }
 
 .pml-playlist-info {
@@ -214,13 +268,15 @@
 .pml-title {
     font-size: 24px;
     font-weight: 600;
-    color: white;
+    color: var(--pml-text);
     margin: 0;
+    transition: color 0.3s ease;
 }
 
 .pml-meta {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--pml-text-secondary);
+    transition: color 0.3s ease;
 }
 
 .pml-close {
@@ -233,18 +289,25 @@
     justify-content: center;
     border-radius: 6px;
     cursor: pointer;
-    color: #ffffff;
+    color: var(--pml-text);
     transition: all 0.2s;
 }
 
 .pml-close:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--pml-btn-hover-bg);
+    color: var(--pml-btn-hover-color);
+}
+
+.pml-close svg {
+    stroke: currentColor;
+    transition: stroke 0.3s ease;
 }
 
 .pml-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--pml-border);
     margin: 16px 0;
+    transition: background 0.3s ease;
 }
 
 .pml-track-list {
@@ -257,12 +320,12 @@
     align-items: center;
     padding: 10px 0;
     gap: 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    transition: background 0.18s;
+    border-bottom: 1px solid var(--pml-border-light);
+    transition: background 0.18s, border-color 0.3s ease;
 }
 
 .pml-track-item:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--pml-track-hover);
 }
 
 .pml-track-item:last-child {
@@ -271,10 +334,11 @@
 
 .pml-track-index {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--pml-text-muted);
     width: 32px;
     text-align: right;
     flex-shrink: 0;
+    transition: color 0.3s ease;
 }
 
 .pml-track-cover-wrapper {
@@ -287,11 +351,17 @@
 .pml-track-cover {
     width: 40px;
     height: 40px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--pml-cover-bg);
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background 0.3s ease;
+}
+
+.pml-track-cover svg {
+    stroke: var(--pml-text-tertiary);
+    transition: stroke 0.3s ease;
 }
 
 .pml-track-text {
@@ -302,32 +372,36 @@
 .pml-track-title {
     font-size: 15px;
     font-weight: 500;
-    color: white;
+    color: var(--pml-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.3s ease;
 }
 
 .pml-track-artist {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--pml-text-tertiary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.3s ease;
 }
 
 .pml-track-album {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--pml-text-muted);
     white-space: nowrap;
+    transition: color 0.3s ease;
 }
 
 .pml-track-duration {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--pml-text-tertiary);
     width: 60px;
     text-align: right;
     flex-shrink: 0;
+    transition: color 0.3s ease;
 }
 
 .pml-track-actions {
@@ -346,18 +420,24 @@
     justify-content: center;
     border-radius: 8px;
     cursor: pointer;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--pml-btn-color);
     transition: all 0.18s;
 }
 
 .pml-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: var(--pml-btn-hover-bg);
+    color: var(--pml-btn-hover-color);
+}
+
+.pml-btn svg {
+    stroke: currentColor;
+    fill: none;
+    transition: stroke 0.3s ease, fill 0.3s ease;
 }
 
 .pml-btn-heart.active svg {
-    fill: #ff2d55;
-    stroke: #ff2d55;
+    fill: var(--pml-heart-active);
+    stroke: var(--pml-heart-active);
 }
 
 .pml-playlist-actions-inline {
@@ -365,32 +445,29 @@
     gap: 12px;
 }
 
-
-
-/* ──────────────────────────────────────────────
-   Контекстное меню троеточия (мобильное)
-─────────────────────────────────────────────── */
+/* Контекстное меню троеточия (мобильное) */
 .pml-context-menu-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.65);           /* чуть темнее, чтобы выделять меню */
+    background: var(--pml-overlay);
     display: flex;
     align-items: flex-end;
     justify-content: center;
     z-index: 1500;
+    transition: background 0.3s ease;
 }
 
 .pml-context-menu {
-    background: #1e1e24;                        /* ← основной цвет окна */
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--pml-context-bg);
+    border-top: 1px solid var(--pml-border-context);
     border-radius: 16px 16px 0 0;
     width: 100%;
     max-width: 420px;
     display: flex;
     flex-direction: column;
     transform: translateY(100%);
-    transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
+    transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.3s ease, border-color 0.3s ease;
+    box-shadow: 0 -10px 30px var(--pml-context-shadow);
 }
 
 .pml-context-menu.active {
@@ -399,21 +476,22 @@
 
 .pml-context-item {
     padding: 17px 24px;
-    color: #e0e0e0;
+    color: var(--pml-text);
     font-size: 16px;
     font-weight: 400;
     cursor: pointer;
     text-align: center;
-    transition: background 0.16s;
+    transition: background 0.16s, color 0.3s ease;
 }
 
 .pml-context-item:hover,
 .pml-context-item:active {
-    background: rgba(255, 255, 255, 0.06);      /* лёгкий ховер, как в остальном интерфейсе */
+    background: var(--pml-context-hover);
 }
 
 .pml-context-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.07);
+    background: var(--pml-border-context);
     margin: 0 24px;
+    transition: background 0.3s ease;
 }

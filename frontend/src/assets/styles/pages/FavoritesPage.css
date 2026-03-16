@@ -1,3 +1,78 @@
+/* 🌙 Темная тема (по умолчанию) */
+:root {
+    --fav-bg: transparent;
+    --fav-bottom-bg: #2a2a2a;
+    --fav-text-primary: #e6e6e6;
+    --fav-text-secondary: rgba(255, 255, 255, 0.7);
+    --fav-text-tertiary: #aaa;
+    --fav-border: rgba(255, 255, 255, 0.1);
+    --fav-border-light: rgba(255, 255, 255, 0.08);
+    --fav-card-bg: #444;
+    --fav-card-shadow: rgba(0, 0, 0, 0.3);
+    --fav-hover-bg: rgba(255, 255, 255, 0.08);
+    --fav-hover-bg-light: rgba(255, 255, 255, 0.05);
+    --fav-btn-color: #aaa;
+    --fav-btn-hover-bg: rgba(255, 255, 255, 0.1);
+    --fav-btn-hover-color: white;
+    --fav-play-btn-bg: rgba(0, 0, 0, 0.6);
+    --fav-play-btn-hover: rgba(0, 0, 0, 0.8);
+    --fav-info-bg: #444;
+    --fav-trash-color: #aaa;
+    --fav-add-placeholder-bg: rgba(255, 255, 255, 0.05);
+    --fav-add-placeholder-border: rgba(255, 255, 255, 0.2);
+    --fav-add-placeholder-hover-bg: rgba(255, 255, 255, 0.1);
+    --fav-add-placeholder-hover-border: rgba(255, 255, 255, 0.4);
+    --fav-add-svg-fill: rgba(255, 255, 255, 0.6);
+    --fav-add-svg-hover: rgba(255, 255, 255, 0.9);
+    --fav-context-menu-bg: #2a2a2a;
+    --fav-context-hover: rgba(255, 255, 255, 0.08);
+    --fav-scroll-thumb: rgba(200, 200, 200, 0.3);
+    --fav-scroll-thumb-hover: rgba(200, 200, 200, 0.7);
+    --fav-scroll-track: transparent;
+}
+
+/* ☀️ Светлая тема */
+[data-theme="light"] {
+    --fav-bg: transparent;
+    --fav-bottom-bg: #ffffff;
+    --fav-text-primary: #0f172a;
+    --fav-text-secondary: #1e293b;
+    --fav-text-tertiary: #475569;
+    --fav-border: rgba(0, 0, 0, 0.1);
+    --fav-border-light: rgba(0, 0, 0, 0.08);
+    --fav-card-bg: #eef2f6;
+    --fav-card-shadow: rgba(0, 0, 0, 0.1);
+    --fav-hover-bg: rgba(0, 0, 0, 0.02);
+    --fav-hover-bg-light: rgba(0, 0, 0, 0.05);
+    --fav-btn-color: #64748b;
+    --fav-btn-hover-bg: rgba(0, 0, 0, 0.05);
+    --fav-btn-hover-color: #0f172a;
+    --fav-play-btn-bg: rgba(0, 0, 0, 0.4);
+    --fav-play-btn-hover: rgba(0, 0, 0, 0.6);
+    --fav-info-bg: #e2e8f0;
+    --fav-trash-color: #64748b;
+    --fav-add-placeholder-bg: rgba(0, 0, 0, 0.02);
+    --fav-add-placeholder-border: rgba(0, 0, 0, 0.1);
+    --fav-add-placeholder-hover-bg: rgba(0, 0, 0, 0.05);
+    --fav-add-placeholder-hover-border: rgba(0, 0, 0, 0.2);
+    --fav-add-svg-fill: rgba(0, 0, 0, 0.3);
+    --fav-add-svg-hover: rgba(0, 0, 0, 0.5);
+    --fav-context-menu-bg: #ffffff;
+    --fav-context-hover: rgba(0, 0, 0, 0.05);
+    --fav-scroll-thumb: rgba(100, 100, 120, 0.2);
+    --fav-scroll-thumb-hover: rgba(100, 100, 120, 0.4);
+    --fav-scroll-track: transparent;
+    --fav-cover-bg: #d1d9e6;
+}
+
+album-cover-FP {
+    height: 120px;
+    width: 100%;
+    position: relative;
+    cursor: pointer;
+    background-color: var(--fav-cover-bg, var(--fav-card-bg)); /* использовать переменную */
+}
+
 /* Стилизация скролла */
 .favorites-track-list::-webkit-scrollbar,
 .favorites-playlist-grid::-webkit-scrollbar,
@@ -8,14 +83,14 @@
 .favorites-track-list::-webkit-scrollbar-track,
 .favorites-playlist-grid::-webkit-scrollbar-track,
 .favorites-album-grid::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--fav-scroll-track);
     border-radius: 6px;
 }
 
 .favorites-track-list::-webkit-scrollbar-thumb,
 .favorites-playlist-grid::-webkit-scrollbar-thumb,
 .favorites-album-grid::-webkit-scrollbar-thumb {
-    background: rgba(200, 200, 200, 0.3);
+    background: var(--fav-scroll-thumb);
     border-radius: 6px;
     transition: background 0.3s ease;
 }
@@ -23,7 +98,7 @@
 .favorites-track-list::-webkit-scrollbar-thumb:hover,
 .favorites-playlist-grid::-webkit-scrollbar-thumb:hover,
 .favorites-album-grid::-webkit-scrollbar-thumb:hover {
-    background: rgba(200, 200, 200, 0.7);
+    background: var(--fav-scroll-thumb-hover);
 }
 
 /* Основной контейнер */
@@ -32,6 +107,8 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    background: var(--fav-bg);
+    transition: background 0.3s ease;
 }
 
 .favorites-main-content {
@@ -41,14 +118,15 @@
 .favorites-section-title {
     font-family: 'Roboto Condensed', sans-serif;
     text-align: center;
-    color: #e6e6e6;
+    color: var(--fav-text-primary);
     font-size: 25px;
     margin: 16px 0;
     padding: 0 16px;
+    transition: color 0.3s ease;
 }
 
 .favorites-bottom-section {
-    background-color: #2a2a2a;
+    background-color: var(--fav-bottom-bg);
     max-width: 800px;
     margin: 5px auto 10px auto;
     padding: 0 16px;
@@ -58,6 +136,7 @@
     flex-direction: column;
     overflow: hidden;
     border-radius: 12px;
+    transition: background-color 0.3s ease;
 }
 
 /* --- Треки --- */
@@ -82,18 +161,18 @@
 
 .favorites-playlist-card {
     position: relative;
-    background: #444;
+    background: var(--fav-card-bg);
     padding: 4px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     height: 180px;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.3s ease;
 }
 
 .favorites-playlist-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 12px var(--fav-card-shadow);
 }
 
 .playlist-cover {
@@ -109,7 +188,7 @@
     right: 5px;
     width: 32px;
     height: 32px;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--fav-play-btn-bg);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -125,7 +204,7 @@
 }
 
 .playlist-cover-play-button:hover {
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--fav-play-btn-hover);
 }
 
 .playlist-cover-play-icon {
@@ -144,14 +223,15 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: #444;
+    background: var(--fav-info-bg);
     padding: 8px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: white;
+    color: var(--fav-text-primary);
     font-size: 12px;
     box-sizing: border-box;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .playlist-info-text {
@@ -166,13 +246,16 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--fav-text-primary);
+    transition: color 0.3s ease;
 }
 
 .playlist-meta {
     display: flex;
     flex-direction: column;
     margin-top: 4px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--fav-text-secondary);
+    transition: color 0.3s ease;
 }
 
 .playlist-meta span {
@@ -191,13 +274,18 @@
     transition: opacity 0.2s;
 }
 
+.playlist-trash-icon svg {
+    stroke: var(--fav-trash-color);
+    transition: stroke 0.3s ease;
+}
+
 .playlist-trash-icon:hover {
     opacity: 1;
 }
 
 .add-placeholder {
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px dashed rgba(255, 255, 255, 0.2);
+    background: var(--fav-add-placeholder-bg);
+    border: 2px dashed var(--fav-add-placeholder-border);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -207,22 +295,22 @@
 }
 
 .add-placeholder:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.4);
+    background: var(--fav-add-placeholder-hover-bg);
+    border-color: var(--fav-add-placeholder-hover-border);
 }
 
 .add-plus-svg {
     width: 48px;
     height: 48px;
-    fill: rgba(255, 255, 255, 0.6);
+    fill: var(--fav-add-svg-fill);
     transition: fill 0.2s;
 }
 
 .add-placeholder:hover .add-plus-svg {
-    fill: rgba(255, 255, 255, 0.9);
+    fill: var(--fav-add-svg-hover);
 }
 
-/* <<<--- АЛЬБОМЫ --->>> */
+/* Альбомы */
 .favorites-album-grid {
     height: 400px;
     overflow-y: auto;
@@ -235,21 +323,21 @@
 
 .favorites-album-card {
     position: relative;
-    background: #444;
+    background: var(--fav-card-bg);
     padding: 4px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     height: 180px;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.3s ease;
 }
 
 .favorites-album-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 12px var(--fav-card-shadow);
 }
 
-.album-cover {
+album-cover-FP {
     height: 120px;
     width: 100%;
     position: relative;
@@ -262,7 +350,7 @@
     right: 5px;
     width: 32px;
     height: 32px;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--fav-play-btn-bg);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -273,21 +361,22 @@
     z-index: 2;
 }
 
-.album-cover:hover .album-fav-cover-play-button {
+album-cover-FP:hover .album-fav-cover-play-button {
     opacity: 1;
 }
 
 .album-fav-cover-play-button:hover {
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--fav-play-btn-hover);
 }
 
-.album-cover-play-icon {
+album-cover-FP-play-icon {
     width: 16px;
     height: 16px;
     fill: white;
+    transition: transform 0.2s;
 }
 
-.album-cover:hover .album-cover-play-icon {
+album-cover-FP:hover album-cover-FP-play-icon {
     transform: scale(1.1);
 }
 
@@ -296,14 +385,15 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: #444;
+    background: var(--fav-info-bg);
     padding: 8px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: white;
+    color: var(--fav-text-primary);
     font-size: 12px;
     box-sizing: border-box;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .album-info-text {
@@ -318,13 +408,16 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--fav-text-primary);
+    transition: color 0.3s ease;
 }
 
 .album-meta {
     display: flex;
     flex-direction: column;
     margin-top: 4px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--fav-text-secondary);
+    transition: color 0.3s ease;
 }
 
 .album-meta span {
@@ -343,22 +436,27 @@
     transition: opacity 0.2s;
 }
 
+.album-trash-icon svg {
+    stroke: var(--fav-trash-color);
+    transition: stroke 0.3s ease;
+}
+
 .album-trash-icon:hover {
     opacity: 1;
 }
 
-/* <<<--- ТРЕКИ (ОСНОВНОЙ СТИЛЬ) --->>> */
+/* Треки (основной стиль) */
 .favorites-track-row {
     display: flex;
     align-items: center;
     padding: 8px 0;
     gap: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    transition: background 0.2s ease;
+    border-bottom: 1px solid var(--fav-border-light);
+    transition: background 0.2s ease, border-color 0.3s ease;
 }
 
 .favorites-track-row:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--fav-hover-bg);
     border-radius: 8px;
 }
 
@@ -369,8 +467,9 @@
 .favorites-track-number {
     width: 30px;
     text-align: center;
-    color: #aaa;
+    color: var(--fav-text-tertiary);
     font-size: 14px;
+    transition: color 0.3s ease;
 }
 
 .favorites-track-cover {
@@ -379,8 +478,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--fav-hover-bg-light);
     border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.favorites-track-cover svg {
+    stroke: var(--fav-text-secondary);
+    transition: stroke 0.3s ease;
 }
 
 .favorites-track-info {
@@ -393,25 +498,28 @@
 .favorites-track-title {
     font-size: 14px;
     font-weight: 500;
-    color: white;
+    color: var(--fav-text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.3s ease;
 }
 
 .favorites-track-artist {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--fav-text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.3s ease;
 }
 
 .favorites-track-duration {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--fav-text-secondary);
     width: 56px;
     text-align: right;
+    transition: color 0.3s ease;
 }
 
 .favorites-track-actions-desktop {
@@ -433,13 +541,18 @@
     justify-content: center;
     border-radius: 6px;
     cursor: pointer;
-    color: #aaa;
+    color: var(--fav-btn-color);
     transition: all 0.2s;
 }
 
+.favorites-action-btn svg {
+    fill: none;
+    stroke: currentColor;
+}
+
 .favorites-action-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: var(--fav-btn-hover-bg);
+    color: var(--fav-btn-hover-color);
 }
 
 .favorites-dots-btn {
@@ -452,13 +565,17 @@
     justify-content: center;
     border-radius: 6px;
     cursor: pointer;
-    color: #aaa;
+    color: var(--fav-btn-color);
     transition: all 0.2s;
 }
 
+.favorites-dots-btn svg {
+    fill: currentColor;
+}
+
 .favorites-dots-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: var(--fav-btn-hover-bg);
+    color: var(--fav-btn-hover-color);
 }
 
 .favorites-track-favorite,
@@ -476,7 +593,7 @@
     opacity: 0.7;
 }
 
-/* <<<--- МЕНЮ ТРОЕТОЧИЯ (МОБИЛЬНОЕ) --->>> */
+/* Меню троеточия (мобильное) */
 .favorites-context-menu-overlay {
     position: fixed;
     top: 0;
@@ -488,17 +605,18 @@
     align-items: flex-end;
     justify-content: center;
     z-index: 1000;
+    transition: background 0.3s ease;
 }
 
 .favorites-context-menu {
-    background: #2a2a2a;
+    background: var(--fav-context-menu-bg);
     border-radius: 12px 12px 0 0;
     width: 100%;
     max-width: 400px;
     display: flex;
     flex-direction: column;
     transform: translateY(100%);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, background 0.3s ease;
 }
 
 .favorites-context-menu.active {
@@ -507,26 +625,25 @@
 
 .favorites-context-item {
     padding: 16px;
-    color: white;
+    color: var(--fav-text-primary);
     font-size: 16px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s, color 0.3s ease;
     text-align: center;
 }
 
 .favorites-context-item:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--fav-context-hover);
 }
 
 .favorites-context-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--fav-border);
     margin: 0 16px;
+    transition: background 0.3s ease;
 }
 
-/* ──────────────────────────────────────────────
-   АДАПТИВНОСТЬ: МОБИЛЬНЫЕ УСТРОЙСТВА (≤767px)
-─────────────────────────────────────────────── */
+/* Адаптивность: мобильные устройства (≤767px) */
 @media (max-width: 767px) {
     .favorites-bottom-section {
         margin: 0;
@@ -549,7 +666,6 @@
         padding: 0 4px;
     }
 
-    /* Треки */
     .favorites-track-actions-desktop {
         display: none;
     }
@@ -602,7 +718,6 @@
         height: 22px;
     }
 
-    /* Контекстное меню */
     .favorites-context-menu {
         width: 100%;
         max-width: none;
@@ -615,9 +730,7 @@
     }
 }
 
-/* ──────────────────────────────────────────────
-   Очень маленькие экраны (≤480px)
-─────────────────────────────────────────────── */
+/* Очень маленькие экраны (≤480px) */
 @media (max-width: 480px) {
     .favorites-bottom-section {
         padding: 0 6px;
@@ -668,9 +781,7 @@
     }
 }
 
-/* ──────────────────────────────────────────────
-   Десктоп (≥1200px)
-─────────────────────────────────────────────── */
+/* Десктоп (≥1200px) */
 @media (min-width: 1200px) {
     .favorites-track-row {
         padding: 8px 0;

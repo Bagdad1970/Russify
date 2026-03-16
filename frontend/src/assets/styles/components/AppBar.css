@@ -1,13 +1,68 @@
+/* 🌙 Темная тема (по умолчанию) */
+:root {
+    --appbar-bg: #22222a;
+    --appbar-text: #f1f1f1;
+    --appbar-border: rgba(255, 255, 255, 0.08);
+    --appbar-hover-bg: rgba(255, 255, 255, 0.08);
+    --appbar-hover-text: #ffffff;
+    --appbar-icon-fill: #f1f1f1;
+    --appbar-icon-hover: #ffffff;
+    --appbar-placeholder-bg: rgba(255, 255, 255, 0.15);
+    --appbar-time-color: #aaa;
+    --appbar-slider-bg: #444;
+    --appbar-slider-thumb: #f1f1f1;
+    --appbar-btn-hover: rgba(255, 255, 255, 0.15);
+    --appbar-btn-active: #ffb703;
+    --appbar-favorite-active: #ff2d55;
+
+    /* Добавил сюда */
+    --appbar-track-title: #f1f1f1;
+    --appbar-track-artist: rgba(255, 255, 255, 0.75);
+}
+
+/* ☀️ Светлая тема */
+[data-theme="light"] {
+    --appbar-bg: #f0f4f8;
+    --appbar-text: #0f172a;
+    --appbar-border: rgba(0, 0, 0, 0.08);
+    --appbar-hover-bg: rgba(0, 0, 0, 0.05);
+    --appbar-hover-text: #020617;
+    --appbar-icon-fill: #0f172a;
+    --appbar-icon-hover: #020617;
+    --appbar-placeholder-bg: rgba(0, 0, 0, 0.1);
+    --appbar-time-color: #475569;
+    --appbar-slider-bg: #cbd5e1;
+    --appbar-slider-thumb: #0f172a;
+    --appbar-btn-hover: rgba(0, 0, 0, 0.05);
+    --appbar-btn-active: #f59e0b;
+    --appbar-favorite-active: #e11d48;
+
+    --appbar-track-title: #0f172a;
+    --appbar-track-artist: #334155;
+}
+
+.track-title {
+    font-size: 14px;
+    color: var(--appbar-track-title);
+}
+
+.track-artist {
+    font-size: 12px;
+    opacity: 0.8;
+    color: var(--appbar-track-artist);
+}
+
 .app-bar {
     font-family: 'Roboto', sans-serif;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 8px 16px;
-    background-color: #22222a;
-    color: #f1f1f1;
+    background-color: var(--appbar-bg);
+    color: var(--appbar-text);
     font-size: 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--appbar-border);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .left-section,
@@ -32,12 +87,13 @@
 
 .icon-user svg,
 .settings-icon svg {
-    fill: #f1f1f1;
+    fill: var(--appbar-icon-fill);
+    transition: fill 0.3s ease;
 }
 
 .icon-user:hover svg,
 .settings-icon:hover svg {
-    fill: #ffffff;
+    fill: var(--appbar-icon-hover);
 }
 
 .center-section {
@@ -56,13 +112,13 @@
     padding: 10px 20px;
     border-radius: 10px;
     cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .track-and-controls:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--appbar-hover-bg);
 }
 
-/* <<<--- ОБЛОЖКА + ТЕКСТ В ОДНОЙ СТРОКЕ (всегда) --->>> */
 .track-info {
     display: flex;
     align-items: center;
@@ -84,17 +140,18 @@
 .cover-placeholder {
     width: 40px;
     height: 40px;
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--appbar-placeholder-bg);
     border-radius: 4px;
+    transition: background-color 0.3s ease;
 }
 
 .track-text {
     display: flex;
     flex-direction: column;
-    min-width: 0; /* ← критично для обрезки */
+    min-width: 0;
 }
 
-.track-title,
+.track-title-AppBar,
 .track-artist {
     white-space: nowrap;
     overflow: hidden;
@@ -102,7 +159,7 @@
     margin: 0;
 }
 
-.track-title {
+.track-title-AppBar {
     font-size: 14px;
 }
 
@@ -124,16 +181,18 @@
 
 .time {
     font-size: 12px;
-    color: #aaa;
+    color: var(--appbar-time-color);
+    transition: color 0.3s ease;
 }
 
 .progress-slider {
     width: 80px;
     height: 4px;
     -webkit-appearance: none;
-    background: #444;
+    background: var(--appbar-slider-bg);
     border-radius: 2px;
     outline: none;
+    transition: background-color 0.3s ease;
 }
 
 .progress-slider::-webkit-slider-thumb {
@@ -141,8 +200,9 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: #f1f1f1;
+    background: var(--appbar-slider-thumb);
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .extra-controls {
@@ -153,7 +213,7 @@
 .btn {
     background: none;
     border: none;
-    color: white;
+    color: var(--appbar-text);
     font-size: 1.2em;
     width: 32px;
     height: 32px;
@@ -162,28 +222,29 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background-color 0.2s ease, color 0.3s ease;
 }
 
 .btn:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--appbar-btn-hover);
 }
 
 .btn.active {
-    color: #ffb703;
+    color: var(--appbar-btn-active);
 }
 
 .btn.shuffle.active svg,
 .btn.repeat.active svg {
-    fill: #ffb703;
+    fill: var(--appbar-btn-active);
+    transition: fill 0.3s ease;
 }
 
 .btn.favorite.active svg {
-    fill: #ff2d55;
+    fill: var(--appbar-favorite-active);
+    transition: fill 0.3s ease;
 }
 
-/* ──────────────────────────────────────────────
-   Мобильные устройства (≤767px)
-─────────────────────────────────────────────── */
+/* Мобильные устройства (≤767px) */
 @media (max-width: 767px) {
     .app-bar {
         padding: 4px 8px;
@@ -205,16 +266,15 @@
         padding: 4px 6px;
     }
 
-    /* <<<--- МОБИЛЬНАЯ ВЕРСИЯ: Обложка + текст в строке, компактно, фикс. шрифт --->>> */
     .track-info {
-        gap: 6px; /* ← уменьшен отступ между обложкой и текстом */
-        max-width: 100px; /* ← ширина всего блока */
+        gap: 6px;
+        max-width: 100px;
     }
 
     .track-cover {
         width: 28px;
         height: 28px;
-        margin-right: 4px; /* ← уменьшен отступ */
+        margin-right: 4px;
     }
 
     .cover-placeholder {
@@ -225,11 +285,11 @@
     .track-text {
         display: flex;
         flex-direction: column;
-        min-width: 0; /* ← критично для обрезки */
-        gap: 1px; /* ← минимальный отступ между треком и автором */
+        min-width: 0;
+        gap: 1px;
     }
 
-    .track-title,
+    .track-title-AppBar,
     .track-artist {
         white-space: nowrap;
         overflow: hidden;
@@ -237,19 +297,17 @@
         margin: 0;
     }
 
-    .track-title {
-        font-size: 11px; /* ← фикс. шрифт */
-        max-width: 66px; /* ← фикс. ширина — если текст длиннее — ... */
+    .track-title-AppBar {
+        font-size: 11px;
+        max-width: 66px;
     }
 
     .track-artist {
-        font-size: 9px; /* ← фикс. шрифт */
+        font-size: 9px;
         opacity: 0.6;
-        max-width: 66px; /* ← фикс. ширина — если текст длиннее — ... */
+        max-width: 66px;
     }
-    /* <<<--- КОНЕЦ МОБИЛЬНОЙ ВЕРСИИ --->>> */
 
-    /* Скрываем лишние элементы */
     .controls,
     .progress-section,
     .extra-controls {
@@ -263,9 +321,7 @@
     }
 }
 
-/* ──────────────────────────────────────────────
-   Планшеты (768px–1023px)
-─────────────────────────────────────────────── */
+/* Планшеты (768px–1023px) */
 @media (min-width: 768px) and (max-width: 1023px) {
     .app-bar {
         padding: 6px 12px;
@@ -297,14 +353,14 @@
         height: 32px;
     }
 
-    .track-title {
+    .track-title-AppBar {
         font-size: 12px;
-        max-width: 100px; /* ← обрезка */
+        max-width: 100px;
     }
 
     .track-artist {
         font-size: 10px;
-        max-width: 100px; /* ← обрезка */
+        max-width: 100px;
     }
 
     .controls {
@@ -332,9 +388,7 @@
     }
 }
 
-/* ──────────────────────────────────────────────
-   Ноутбуки (1024px–1199px)
-─────────────────────────────────────────────── */
+/* Ноутбуки (1024px–1199px) */
 @media (min-width: 1024px) and (max-width: 1199px) {
     .app-bar {
         padding: 8px 14px;
@@ -366,7 +420,7 @@
         height: 36px;
     }
 
-    .track-title {
+    .track-title-AppBar {
         font-size: 13px;
         max-width: 120px;
     }
@@ -408,9 +462,7 @@
     }
 }
 
-/* ──────────────────────────────────────────────
-   Десктоп (≥1200px)
-─────────────────────────────────────────────── */
+/* Десктоп (≥1200px) */
 @media (min-width: 1200px) {
     .app-bar {
         padding: 8px 16px;
@@ -443,7 +495,7 @@
         height: 40px;
     }
 
-    .track-title {
+    .track-title-AppBar {
         font-size: 14px;
         max-width: 160px;
     }

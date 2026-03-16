@@ -50,7 +50,7 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
 
             const modalHeight = Math.min(500, window.innerHeight - 112);
             const left = (window.innerWidth - modalWidth) / 2;
-            const top = Math.max(40, (window.innerHeight - modalHeight) / 2 - 70);
+            const top = Math.max(40, (window.innerHeight - modalHeight) / 2 - 100);
 
             setPosition({ x: left, y: top });
         };

@@ -1,23 +1,67 @@
+/* 🌙 Темная тема (по умолчанию) */
+:root {
+    --alm-overlay: rgba(0, 0, 0, 0.5);
+    --alm-bg: linear-gradient(135deg, #22222a 0%, #1e1e2a 100%);
+    --alm-text: white;
+    --alm-text-primary: white;
+    --alm-text-secondary: rgba(255, 255, 255, 0.8);
+    --alm-text-tertiary: rgba(255, 255, 255, 0.7);
+    --alm-border: rgba(255, 255, 255, 0.1);
+    --alm-cover-bg: rgba(255, 255, 255, 0.08);
+    --alm-track-hover: rgba(255, 255, 255, 0.05);
+    --alm-btn-color: #aaa;
+    --alm-btn-hover-bg: rgba(255, 255, 255, 0.1);
+    --alm-btn-hover-color: white;
+    --alm-btn-hover-border: rgba(255, 255, 255, 0.3);
+    --alm-heart-active: #ff2d55;
+    --alm-context-menu-bg: #2a2a2a;
+    --alm-context-item-hover: rgba(255, 255, 255, 0.08);
+    --alm-close-bg: rgba(255, 255, 255, 0.08);
+}
+
+/* ☀️ Светлая тема */
+[data-theme="light"] {
+    --alm-overlay: rgba(0, 0, 0, 0.3);
+    --alm-bg: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    --alm-text: #0f172a;
+    --alm-text-primary: #0f172a;
+    --alm-text-secondary: #1e293b;
+    --alm-text-tertiary: #334155;
+    --alm-border: rgba(0, 0, 0, 0.1);
+    --alm-cover-bg: rgba(0, 0, 0, 0.04);
+    --alm-track-hover: rgba(0, 0, 0, 0.02);
+    --alm-btn-color: #475569;
+    --alm-btn-hover-bg: rgba(0, 0, 0, 0.05);
+    --alm-btn-hover-color: #0f172a;
+    --alm-btn-hover-border: rgba(0, 0, 0, 0.2);
+    --alm-heart-active: #e11d48;
+    --alm-context-menu-bg: #ffffff;
+    --alm-context-item-hover: rgba(0, 0, 0, 0.05);
+    --alm-close-bg: rgba(0, 0, 0, 0.05);
+}
+
 .alm-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--alm-overlay);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    transition: background 0.3s ease;
 }
 
 .alm-container {
     position: absolute;
     width: 640px;
     max-height: calc(100vh - 120px);
-    background: linear-gradient(135deg, #22222a 0%, #1e1e2a 100%);
+    background: var(--alm-bg);
     border-radius: 12px;
     overflow: hidden;
     font-family: 'Roboto', sans-serif;
     padding: 20px;
     box-sizing: border-box;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .alm-header {
@@ -26,7 +70,6 @@
     gap: 32px;
     position: relative;
     padding: 16px;
-
 }
 
 .alm-album-cover {
@@ -36,10 +79,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--alm-cover-bg);
     border-radius: 12px;
+    transition: background 0.3s ease;
 }
 
+.alm-album-cover svg {
+    stroke: var(--alm-text-tertiary);
+    transition: stroke 0.3s ease;
+}
 
 .alm-album-info {
     display: flex;
@@ -59,20 +107,23 @@
 .alm-title {
     font-size: 24px;
     font-weight: 600;
-    color: white;
+    color: var(--alm-text-primary);
     margin: 0;
+    transition: color 0.3s ease;
 }
 
 .alm-author {
     font-size: 16px;
     font-weight: 400;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--alm-text-secondary);
     margin: 0;
+    transition: color 0.3s ease;
 }
 
 .alm-meta {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--alm-text-secondary);
+    transition: color 0.3s ease;
 }
 
 .alm-favorite-btn {
@@ -85,20 +136,20 @@
     justify-content: center;
     border-radius: 6px;
     cursor: pointer;
-    color: #ffffff;
+    color: var(--alm-text-primary);
     transition: all 0.2s;
     flex-shrink: 0;
     align-self: flex-end;
 }
 
 .alm-favorite-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: var(--alm-btn-hover-bg);
+    color: var(--alm-btn-hover-color);
 }
 
 .alm-favorite-btn.active svg {
-    fill: #ff2d55;
-    stroke: #ff2d55;
+    fill: var(--alm-heart-active);
+    stroke: var(--alm-heart-active);
 }
 
 .alm-close {
@@ -114,20 +165,25 @@
     justify-content: center;
     border-radius: 6px;
     cursor: pointer;
-    color: #ffffff;
+    color: var(--alm-text-primary);
     transition: all 0.2s;
 }
 
+.alm-close svg {
+    stroke: currentColor;
+}
+
 .alm-close:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: var(--alm-btn-hover-bg);
+    color: var(--alm-btn-hover-color);
 }
 
 /* Разделитель */
 .alm-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--alm-border);
     margin: 16px 0;
+    transition: background 0.3s ease;
 }
 
 /* Треки */
@@ -142,12 +198,12 @@
     align-items: center;
     padding: 10px 0;
     gap: 30px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    transition: background 0.2s;
+    border-bottom: 1px solid var(--alm-border);
+    transition: background 0.2s, border-color 0.3s ease;
 }
 
 .alm-track-item:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--alm-track-hover);
 }
 
 .alm-track-item:last-child {
@@ -157,10 +213,11 @@
 /* Номер */
 .alm-track-index {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--alm-text-tertiary);
     width: 28px;
     text-align: right;
     flex-shrink: 0;
+    transition: color 0.3s ease;
 }
 
 /* Обложка трека + overlay */
@@ -177,9 +234,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--alm-cover-bg);
     border-radius: 8px;
     cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.alm-track-cover svg {
+    stroke: var(--alm-text-tertiary);
+    transition: stroke 0.3s ease;
 }
 
 .alm-play-overlay {
@@ -192,7 +255,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--alm-text-primary);
     opacity: 0;
     transition: all 0.1s ease;
     pointer-events: none;
@@ -220,26 +283,29 @@
 .alm-track-title {
     font-size: 16px;
     font-weight: 500;
-    color: white;
+    color: var(--alm-text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.3s ease;
 }
 
 .alm-track-artist {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--alm-text-tertiary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.3s ease;
 }
 
 /* Длительность */
 .alm-track-duration {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--alm-text-tertiary);
     width: 56px;
     text-align: right;
+    transition: color 0.3s ease;
 }
 
 /* Действия */
@@ -251,36 +317,43 @@
 .alm-btn {
     background: none;
     border: none;
-    width: 32px; /* увеличенный размер */
+    width: 32px;
     height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%; /* круглая обводка */
+    border-radius: 50%;
     cursor: pointer;
-    color: #aaa;
+    color: var(--alm-btn-color);
     transition: all 0.2s;
-    border: 1px solid transparent; /* чтобы при наведении не прыгал размер */
+    border: 1px solid transparent;
 }
 
 .alm-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: var(--alm-btn-hover-bg);
+    color: var(--alm-btn-hover-color);
     border-radius: 12px;
 }
 
+.alm-btn svg {
+    stroke: currentColor;
+    fill: none;
+    transition: stroke 0.3s ease, fill 0.3s ease;
+}
+
 .alm-btn-heart.active svg {
-    fill: #ff2d55;
-    stroke: #ff2d55;
+    fill: var(--alm-heart-active);
+    stroke: var(--alm-heart-active);
 }
 
 .alm-track-album {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--alm-text-tertiary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     flex-shrink: 0;
+    transition: color 0.3s ease;
 }
 
 .alm-track-play-controls {
@@ -290,9 +363,7 @@
     flex-shrink: 0;
 }
 
-/* ──────────────────────────────────────────────
-   МОБИЛЬНЫЕ УСТРОЙСТВА (≤767px)
-─────────────────────────────────────────────── */
+/* Мобильные устройства (≤767px) */
 @media (max-width: 767px) {
     .alm-container {
         width: calc(100% - 24px);
@@ -338,7 +409,7 @@
 
     .alm-author {
         font-size: 14px;
-        color: rgba(255, 255, 255, 0.8);
+        color: var(--alm-text-secondary);
     }
 
     .alm-meta {
@@ -355,23 +426,23 @@
     .alm-album-actions .alm-btn {
         width: 48px;
         height: 48px;
-        background: transparent; /* ← убрана обводка */
+        background: transparent;
         border: none;
-        border-radius: 0; /* ← обводка отключена */
+        border-radius: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #aaa;
+        color: var(--alm-btn-color);
         transition: color 0.2s;
     }
 
     .alm-album-actions .alm-btn:hover {
-        color: white;
+        color: var(--alm-btn-hover-color);
     }
 
     .alm-album-actions .alm-btn-heart.active svg {
-        fill: #ff2d55;
-        stroke: #ff2d55;
+        fill: var(--alm-heart-active);
+        stroke: var(--alm-heart-active);
     }
 
     .alm-close {
@@ -380,17 +451,17 @@
         right: 12px;
         width: 36px;
         height: 36px;
-        background: rgba(255, 255, 255, 0.08);
+        background: var(--alm-close-bg);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #ffffff;
+        color: var(--alm-text-primary);
         cursor: pointer;
     }
 
     .alm-close:hover {
-        background: rgba(255, 255, 255, 0.1);
+        background: var(--alm-btn-hover-bg);
     }
 
     .alm-track-list {
@@ -425,14 +496,14 @@
     .alm-track-item.mobile .alm-btn {
         width: 40px;
         height: 40px;
-        background: transparent; /* ← убрана обводка */
+        background: transparent;
         border: none;
-        border-radius: 0; /* ← обводка отключена */
-        color: #aaa;
+        border-radius: 0;
+        color: var(--alm-btn-color);
     }
 
     .alm-track-item.mobile .alm-btn:hover {
-        color: white;
+        color: var(--alm-btn-hover-color);
     }
 
     /* Контекстное меню */
@@ -444,18 +515,19 @@
         align-items: flex-end;
         justify-content: center;
         z-index: 1500;
+        transition: background 0.3s ease;
     }
 
     .alm-context-menu {
-        background: #2a2a2a;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        background: var(--alm-context-menu-bg);
+        border-top: 1px solid var(--alm-border);
         border-radius: 16px 16px 0 0;
         width: 100%;
         max-width: 400px;
         display: flex;
         flex-direction: column;
         transform: translateY(100%);
-        transition: transform 0.3s ease;
+        transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
     }
 
     .alm-context-menu.active {
@@ -464,21 +536,22 @@
 
     .alm-context-item {
         padding: 16px;
-        color: white;
+        color: var(--alm-text-primary);
         font-size: 16px;
         cursor: pointer;
         text-align: center;
-        transition: background 0.2s;
+        transition: background 0.2s, color 0.3s ease;
     }
 
     .alm-context-item:hover {
-        background: rgba(255, 255, 255, 0.08);
+        background: var(--alm-context-item-hover);
     }
 
     .alm-context-divider {
         height: 1px;
-        background: rgba(255, 255, 255, 0.1);
+        background: var(--alm-border);
         margin: 0 16px;
+        transition: background 0.3s ease;
     }
 }
 

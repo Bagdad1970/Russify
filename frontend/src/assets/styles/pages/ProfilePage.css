@@ -1,14 +1,57 @@
+/* 🌙 Темная тема (по умолчанию) */
+:root {
+    --profile-page-bg: transparent;
+    --profile-bottom-bg: #2a2a2a;
+    --profile-text-primary: #e6e6e6;
+    --profile-text-secondary: rgba(255, 255, 255, 0.7);
+    --profile-btn-color: #aaa;
+    --profile-btn-hover-bg: rgba(255, 255, 255, 0.1);
+    --profile-btn-hover-color: white;
+    --profile-card-bg: #444;
+    --profile-card-shadow: rgba(0, 0, 0, 0.3);
+    --profile-overlay-bg: rgba(0, 0, 0, 0.4);
+    --profile-play-btn-bg: rgba(0, 0, 0, 0.6);
+    --profile-play-btn-hover: rgba(0, 0, 0, 0.8);
+    --profile-info-bg: #444;
+    --profile-trash-color: #aaa;
+    --profile-scroll-thumb: rgba(200, 200, 200, 0.3);
+    --profile-scroll-thumb-hover: rgba(200, 200, 200, 0.7);
+    --profile-scroll-track: transparent;
+}
+
+/* ☀️ Светлая тема */
+[data-theme="light"] {
+    --profile-page-bg: transparent;
+    --profile-bottom-bg: #ffffff;
+    --profile-text-primary: #0f172a;
+    --profile-text-secondary: #1e293b;
+    --profile-btn-color: #475569;
+    --profile-btn-hover-bg: rgba(0, 0, 0, 0.05);
+    --profile-btn-hover-color: #0f172a;
+    --profile-card-bg: #f1f5f9;
+    --profile-card-shadow: rgba(0, 0, 0, 0.1);
+    --profile-overlay-bg: rgba(0, 0, 0, 0.2);
+    --profile-play-btn-bg: rgba(0, 0, 0, 0.4);
+    --profile-play-btn-hover: rgba(0, 0, 0, 0.6);
+    --profile-info-bg: #f1f5f9;
+    --profile-trash-color: #64748b;
+    --profile-scroll-thumb: rgba(100, 100, 120, 0.2);
+    --profile-scroll-thumb-hover: rgba(100, 100, 120, 0.4);
+    --profile-scroll-track: transparent;
+}
+
 .profile-page-container {
     height: 100vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     position: relative;
+    background: var(--profile-page-bg);
+    transition: background 0.3s ease;
 }
 
-
 .profile-bottom-section {
-    background-color: #2a2a2a;
+    background-color: var(--profile-bottom-bg);
     max-width: 800px;
     margin: 5px auto 10px auto;
     padding: 0 16px;
@@ -18,6 +61,7 @@
     flex-direction: column;
     overflow: hidden;
     border-radius: 12px;
+    transition: background-color 0.3s ease;
 }
 
 .profile-albums-header {
@@ -30,8 +74,9 @@
 .profile-albums-title {
     font-family: 'Roboto Condensed', sans-serif;
     font-size: 25px;
-    color: #e6e6e6;
+    color: var(--profile-text-primary);
     margin: 0;
+    transition: color 0.3s ease;
 }
 
 .profile-add-album-btn {
@@ -44,13 +89,17 @@
     justify-content: center;
     border-radius: 50%;
     cursor: pointer;
-    color: #aaa;
+    color: var(--profile-btn-color);
     transition: all 0.2s;
 }
 
 .profile-add-album-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: var(--profile-btn-hover-bg);
+    color: var(--profile-btn-hover-color);
+}
+
+.profile-add-album-btn svg {
+    fill: currentColor;
 }
 
 .profile-albums-grid {
@@ -63,21 +112,21 @@
     margin-bottom: 16px;
 }
 
-/* Стили альбомов (копия из FavoritesPage) */
+/* Стили альбомов */
 .profile-album-card {
     position: relative;
-    background: #444;
+    background: var(--profile-card-bg);
     padding: 4px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     height: 180px;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.3s ease;
 }
 
 .profile-album-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 12px var(--profile-card-shadow);
 }
 
 .album-cover {
@@ -93,7 +142,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--profile-overlay-bg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -122,7 +171,7 @@
     right: 10px;
     width: 32px;
     height: 32px;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--profile-play-btn-bg);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -138,7 +187,7 @@
 }
 
 .album-cover-play-button:hover {
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--profile-play-btn-hover);
 }
 
 .album-info-layer {
@@ -146,14 +195,15 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: #444;
+    background: var(--profile-info-bg);
     padding: 8px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: white;
+    color: var(--profile-text-primary);
     font-size: 12px;
     box-sizing: border-box;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .album-info-text {
@@ -162,19 +212,22 @@
     flex-direction: column;
 }
 
-.album-title {
+.album-title-FP {
     font-size: 14px;
     font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--profile-text-primary);
+    transition: color 0.3s ease;
 }
 
 .album-meta {
     display: flex;
     flex-direction: column;
     margin-top: 4px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--profile-text-secondary);
+    transition: color 0.3s ease;
 }
 
 .album-meta span {
@@ -193,6 +246,11 @@
     transition: opacity 0.2s;
 }
 
+.album-trash-icon svg {
+    stroke: var(--profile-trash-color);
+    transition: stroke 0.3s ease;
+}
+
 .album-trash-icon:hover {
     opacity: 1;
 }
@@ -203,16 +261,16 @@
 }
 
 .profile-albums-grid::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--profile-scroll-track);
     border-radius: 6px;
 }
 
 .profile-albums-grid::-webkit-scrollbar-thumb {
-    background: rgba(200, 200, 200, 0.3);
+    background: var(--profile-scroll-thumb);
     border-radius: 6px;
     transition: background 0.3s ease;
 }
 
 .profile-albums-grid::-webkit-scrollbar-thumb:hover {
-    background: rgba(200, 200, 200, 0.7);
+    background: var(--profile-scroll-thumb-hover);
 }

@@ -20,6 +20,9 @@ import ModerationPage from "./pages/ModerationPage.tsx";
 import SystemPlaylistsPage from "./pages/SystemPlaylistPage.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
 
+import { ThemeProvider } from './context/ThemeContext';
+
+
 function App() {
     const [selectedPlaylist, setSelectedPlaylist] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -131,6 +134,7 @@ function App() {
     }, []);
 
     return (
+        <ThemeProvider>
         <Router>
             <div className="app">
                 <AppBar
@@ -251,6 +255,7 @@ function App() {
                 />
             </div>
         </Router>
+        </ThemeProvider>
     );
 }
 

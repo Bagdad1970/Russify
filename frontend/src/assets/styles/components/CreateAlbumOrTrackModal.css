@@ -1,18 +1,75 @@
+/* 🌙 Темная тема (по умолчанию) */
+:root {
+    --caotm-overlay: rgba(0, 0, 0, 0.5);
+    --caotm-bg: linear-gradient(135deg, #22222a 0%, #1e1e2a 100%);
+    --caotm-text: white;
+    --caotm-text-primary: white;
+    --caotm-text-secondary: rgba(255, 255, 255, 0.7);
+    --caotm-text-tertiary: rgba(255, 255, 255, 0.5);
+    --caotm-border: rgba(255, 255, 255, 0.1);
+    --caotm-btn-bg: rgba(255, 255, 255, 0.1);
+    --caotm-btn-hover-bg: rgba(255, 255, 255, 0.2);
+    --caotm-btn-active-bg: #007aff;
+    --caotm-btn-active-color: white;
+    --caotm-cover-bg: rgba(255, 255, 255, 0.08);
+    --caotm-input-bg: rgba(255, 255, 255, 0.1);
+    --caotm-input-focus: rgba(255, 255, 255, 0.15);
+    --caotm-track-bg: rgba(255, 255, 255, 0.05);
+    --caotm-track-hover: rgba(255, 255, 255, 0.1);
+    --caotm-btn-color: #aaa;
+    --caotm-btn-hover-color: white;
+    --caotm-submit-bg: #007aff;
+    --caotm-submit-hover: #0062cc;
+    --caotm-close-bg: rgba(255, 255, 255, 0.08);
+    --caotm-scroll-thumb: rgba(200, 200, 200, 0.3);
+    --caotm-scroll-thumb-hover: rgba(200, 200, 200, 0.7);
+    --caotm-scroll-track: rgba(255, 255, 255, 0.05);
+}
+
+/* ☀️ Светлая тема */
+[data-theme="light"] {
+    --caotm-overlay: rgba(0, 0, 0, 0.3);
+    --caotm-bg: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    --caotm-text: #0f172a;
+    --caotm-text-primary: #0f172a;
+    --caotm-text-secondary: #1e293b;
+    --caotm-text-tertiary: #334155;
+    --caotm-border: rgba(0, 0, 0, 0.1);
+    --caotm-btn-bg: rgba(0, 0, 0, 0.05);
+    --caotm-btn-hover-bg: rgba(0, 0, 0, 0.1);
+    --caotm-btn-active-bg: #2563eb;
+    --caotm-btn-active-color: white;
+    --caotm-cover-bg: rgba(0, 0, 0, 0.04);
+    --caotm-input-bg: rgba(0, 0, 0, 0.05);
+    --caotm-input-focus: rgba(0, 0, 0, 0.08);
+    --caotm-track-bg: rgba(0, 0, 0, 0.02);
+    --caotm-track-hover: rgba(0, 0, 0, 0.05);
+    --caotm-btn-color: #64748b;
+    --caotm-btn-hover-color: #0f172a;
+    --caotm-submit-bg: #2563eb;
+    --caotm-submit-hover: #1d4ed8;
+    --caotm-close-bg: rgba(0, 0, 0, 0.05);
+    --caotm-scroll-thumb: rgba(100, 100, 120, 0.2);
+    --caotm-scroll-thumb-hover: rgba(100, 100, 120, 0.4);
+    --caotm-scroll-track: rgba(0, 0, 0, 0.05);
+}
+
 .caotm-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--caotm-overlay);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    transition: background 0.3s ease;
 }
 
 .caotm-container {
     position: absolute;
     width: 600px;
     max-height: calc(100vh - 112px);
-    background: linear-gradient(135deg, #22222a 0%, #1e1e2a 100%);
+    background: var(--caotm-bg);
     border-radius: 12px;
     overflow: hidden;
     font-family: 'Roboto', sans-serif;
@@ -20,9 +77,10 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* <<<--- ШАПКА: ЦЕНТРИРОВАНА НА ВСЕХ УСТРОЙСТВАХ --->>> */
+/* Шапка центрирована */
 .caotm-header-centered {
     display: flex;
     align-items: center;
@@ -34,10 +92,11 @@
 .caotm-title {
     font-size: 24px;
     font-weight: 600;
-    color: white;
+    color: var(--caotm-text-primary);
     margin: 0;
     text-align: center;
     flex: 1;
+    transition: color 0.3s ease;
 }
 
 .caotm-close-btn {
@@ -53,20 +112,25 @@
     justify-content: center;
     border-radius: 6px;
     cursor: pointer;
-    color: #ffffff;
+    color: var(--caotm-text-primary);
     transition: all 0.2s;
 }
 
-.caotm-close-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+.caotm-close-btn svg {
+    stroke: currentColor;
 }
 
-/* <<<--- РАЗДЕЛИТЕЛЬ --->>> */
+.caotm-close-btn:hover {
+    background: var(--caotm-btn-hover-bg);
+    color: var(--caotm-btn-hover-color);
+}
+
+/* Разделитель */
 .caotm-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--caotm-border);
     margin: 16px 0;
+    transition: background 0.3s ease;
 }
 
 .caotm-type-selector-centered {
@@ -77,11 +141,11 @@
 }
 
 .caotm-type-btn {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--caotm-btn-bg);
     border: none;
     padding: 8px 24px;
     border-radius: 20px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--caotm-text-secondary);
     cursor: pointer;
     transition: all 0.2s;
     font-family: 'Roboto', sans-serif;
@@ -89,15 +153,15 @@
 }
 
 .caotm-type-btn.active {
-    background: #007aff;
-    color: white;
+    background: var(--caotm-btn-active-bg);
+    color: var(--caotm-btn-active-color);
 }
 
 .caotm-type-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--caotm-btn-hover-bg);
 }
 
-/* <<<--- ОБЛОЖКА И ФАЙЛ --->>> */
+/* Обложка и файл */
 .caotm-cover-section {
     display: flex;
     align-items: center;
@@ -124,8 +188,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--caotm-cover-bg);
     border-radius: 12px;
+    transition: background 0.3s ease;
+}
+
+.caotm-cover-placeholder svg {
+    stroke: var(--caotm-text-tertiary);
+    transition: stroke 0.3s ease;
 }
 
 .caotm-cover-img {
@@ -144,10 +214,10 @@
 
 .caotm-file-btn-bordered {
     background: none;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--caotm-border);
     padding: 8px 16px;
     border-radius: 6px;
-    color: white;
+    color: var(--caotm-text-primary);
     cursor: pointer;
     transition: all 0.2s;
     font-family: 'Roboto', sans-serif;
@@ -155,17 +225,18 @@
 }
 
 .caotm-file-btn-bordered:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: var(--caotm-btn-hover-bg);
+    border-color: var(--caotm-text-secondary);
 }
 
 .caotm-file-format {
     font-family: 'Roboto', sans-serif;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--caotm-text-tertiary);
+    transition: color 0.3s ease;
 }
 
-/* <<<--- ПОЛЯ ВВОДА --->>> */
+/* Поля ввода */
 .caotm-input-group {
     display: flex;
     gap: 12px;
@@ -178,29 +249,29 @@
 }
 
 .caotm-input {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--caotm-input-bg);
     border: none;
     padding: 12px;
     border-radius: 6px;
-    color: white;
+    color: var(--caotm-text-primary);
     font-family: 'Roboto', sans-serif;
     font-size: 14px;
     flex: 1;
+    transition: background 0.2s, color 0.3s ease;
 }
 
 .caotm-input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--caotm-text-tertiary);
 }
 
 .caotm-input:focus {
     outline: none;
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--caotm-input-focus);
 }
 
-/* <<<--- ДОБАВИТЬ ТРЕК --->>> */
+/* Добавить трек */
 .caotm-add-track-section {
     display: flex;
-    justify-content: flex-start;
     justify-content: center;
     padding: 16px 0;
 }
@@ -210,11 +281,11 @@
 }
 
 .caotm-add-track-btn {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--caotm-btn-bg);
     border: none;
     padding: 12px 24px;
     border-radius: 6px;
-    color: white;
+    color: var(--caotm-text-primary);
     cursor: pointer;
     transition: all 0.2s;
     font-family: 'Roboto', sans-serif;
@@ -222,10 +293,10 @@
 }
 
 .caotm-add-track-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--caotm-btn-hover-bg);
 }
 
-/* <<<--- СПИСОК ТРЕКОВ --->>> */
+/* Список треков */
 .caotm-tracks-list-container {
     max-height: 200px;
     overflow-y: auto;
@@ -244,21 +315,23 @@
     align-items: center;
     gap: 12px;
     padding: 8px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--caotm-track-bg);
     border-radius: 6px;
     cursor: move;
+    transition: background 0.2s ease;
 }
 
 .caotm-track-row.dragging {
     opacity: 0.6;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--caotm-track-hover);
 }
 
 .caotm-track-number {
     width: 24px;
     text-align: center;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--caotm-text-secondary);
     font-size: 14px;
+    transition: color 0.3s ease;
 }
 
 .caotm-track-input {
@@ -276,19 +349,25 @@
     justify-content: center;
     border-radius: 4px;
     cursor: pointer;
-    color: #aaa;
+    color: var(--caotm-btn-color);
     transition: all 0.2s;
 }
 
+.caotm-trash-btn svg {
+    stroke: currentColor;
+    fill: none;
+}
+
 .caotm-trash-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: var(--caotm-btn-hover-bg);
+    color: var(--caotm-btn-hover-color);
 }
 
 .caotm-before-submit-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--caotm-border);
     margin: 16px 0;
+    transition: background 0.3s ease;
 }
 
 .caotm-submit-section-centered {
@@ -297,12 +376,8 @@
     padding: 16px 0;
 }
 
-.caotm-submit-section-centered.mobile-center {
-    justify-content: center;
-}
-
 .caotm-submit-btn-no-arrow {
-    background: #007aff;
+    background: var(--caotm-submit-bg);
     border: none;
     padding: 12px 24px;
     border-radius: 6px;
@@ -316,32 +391,30 @@
 }
 
 .caotm-submit-btn-no-arrow:hover {
-    background: #0062cc;
+    background: var(--caotm-submit-hover);
 }
 
-/* <<<--- СТИЛИЗАЦИЯ СКРОЛЛА --->>> */
+/* Стилизация скролла */
 .caotm-tracks-list-container::-webkit-scrollbar {
     width: 8px;
 }
 
 .caotm-tracks-list-container::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--caotm-scroll-track);
     border-radius: 4px;
 }
 
 .caotm-tracks-list-container::-webkit-scrollbar-thumb {
-    background: rgba(200, 200, 200, 0.3);
+    background: var(--caotm-scroll-thumb);
     border-radius: 4px;
     transition: background 0.3s ease;
 }
 
 .caotm-tracks-list-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(200, 200, 200, 0.7);
+    background: var(--caotm-scroll-thumb-hover);
 }
 
-/* ──────────────────────────────
-   МОБИЛЬНЫЕ УСТРОЙСТВА (≤767px)
-─────────────────────────────── */
+/* Мобильные устройства (≤767px) */
 @media (max-width: 767px) {
     .caotm-container {
         width: calc(100% - 24px);
@@ -371,7 +444,7 @@
         position: absolute;
         top: 12px;
         right: 12px;
-        background: rgba(255, 255, 255, 0.08);
+        background: var(--caotm-close-bg);
         border-radius: 50%;
         width: 36px;
         height: 36px;
@@ -467,9 +540,7 @@
     }
 }
 
-/* ──────────────────────────────
-   Очень маленькие экраны (≤480px)
-─────────────────────────────── */
+/* Очень маленькие экраны (≤480px) */
 @media (max-width: 480px) {
     .caotm-container {
         width: calc(100% - 16px);
@@ -549,9 +620,7 @@
     }
 }
 
-/* ──────────────────────────────
-   Десктоп (≥1200px)
-─────────────────────────────── */
+/* Десктоп (≥1200px) */
 @media (min-width: 1200px) {
     .caotm-container {
         width: 640px;

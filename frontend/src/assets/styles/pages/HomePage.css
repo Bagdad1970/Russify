@@ -1,3 +1,23 @@
+/* 🌙 Темная тема (по умолчанию) */
+:root {
+    --home-bg-primary: #222;
+    --home-bg-secondary: #2a2a2a;
+    --home-text-primary: #e6e6e6;
+    --home-text-secondary: #aaa;
+    --home-scroll-thumb: rgba(200, 200, 200, 0.3);
+    --home-scroll-thumb-hover: rgba(200, 200, 200, 0.7);
+}
+
+/* ☀️ Светлая тема */
+[data-theme="light"] {
+    --home-bg-primary: #f0f4f8;
+    --home-bg-secondary: #ffffff;
+    --home-text-primary: #1e293b;
+    --home-text-secondary: #64748b;
+    --home-scroll-thumb: rgba(100, 100, 120, 0.2);
+    --home-scroll-thumb-hover: rgba(100, 100, 120, 0.4);
+}
+
 /* Стилизация скролла */
 div::-webkit-scrollbar {
     width: 12px;
@@ -9,13 +29,13 @@ div::-webkit-scrollbar-track {
 }
 
 div::-webkit-scrollbar-thumb {
-    background: rgba(200, 200, 200, 0.3);
+    background: var(--home-scroll-thumb);
     border-radius: 6px;
     transition: background 0.3s ease;
 }
 
 div::-webkit-scrollbar-thumb:hover {
-    background: rgba(200, 200, 200, 0.7);
+    background: var(--home-scroll-thumb-hover);
 }
 
 /* Основной контейнер — без отступа сверху */
@@ -24,19 +44,21 @@ div::-webkit-scrollbar-thumb:hover {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    padding: 0; /* ← убран отступ */
+    padding: 0;
+    background-color: var(--home-bg-primary);
+    transition: background-color 0.3s ease;
 }
-
 
 .bottom-section {
     padding: 0 16px;
 }
 
 .no-results {
-    color: #aaa;
+    color: var(--home-text-secondary);
     text-align: center;
     padding: 20px;
     font-size: 14px;
+    transition: color 0.3s ease;
 }
 
 .main-content {
@@ -46,14 +68,15 @@ div::-webkit-scrollbar-thumb:hover {
 .section-title {
     font-family: 'Roboto Condensed', sans-serif;
     text-align: center;
-    color: #e6e6e6;
+    color: var(--home-text-primary);
     font-size: 25px;
     margin: 16px 0;
     padding: 0 16px;
+    transition: color 0.3s ease;
 }
 
 .bottom-section {
-    background-color: #2a2a2a;
+    background-color: var(--home-bg-secondary);
     max-width: 800px;
     margin: 5px auto;
     padding: 0 16px;
@@ -63,6 +86,7 @@ div::-webkit-scrollbar-thumb:hover {
     flex-direction: column;
     overflow: hidden;
     border-radius: 12px;
+    transition: background-color 0.3s ease;
 }
 
 /* Мобильные устройства */
@@ -90,7 +114,6 @@ div::-webkit-scrollbar-thumb:hover {
         width: 100%;
         max-width: none;
     }
-
 
     .scrollable-grid-container {
         max-height: 300px;
@@ -226,12 +249,12 @@ div::-webkit-scrollbar-thumb:hover {
 /* Десктоп */
 @media (min-width: 1200px) {
     .home-page-container {
-        padding: 0; /* ← убран отступ */
+        padding: 0;
     }
 
     .main-content {
         flex: 0 0 auto;
-        padding: 0; /* ← убран отступ */
+        padding: 0;
     }
 
     .section-title {

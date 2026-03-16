@@ -1,14 +1,47 @@
+/* 🌙 Темная тема */
+:root {
+    --bg-primary: #222;
+    --bg-secondary: #2a2a2a;
+    --text-primary: #e6e6e6;
+    --text-secondary: rgba(255, 255, 255, 0.8);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --button-bg: rgba(255, 255, 255, 0.1);
+    --button-hover: rgba(255, 255, 255, 0.2);
+    --button-text: white;
+    --danger-bg: rgba(255, 0, 0, 0.2);
+    --danger-text: #ff4d4d;
+    --danger-hover-bg: rgba(255, 0, 0, 0.3);
+    --danger-hover-text: #ff6666;
+}
+
+/* ☀️ Светлая тема */
+[data-theme="light"] {
+    --bg-primary: #f0f4f8;
+    --bg-secondary: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --border-color: rgba(0, 0, 0, 0.06);
+    --button-bg: #e2e8f0;
+    --button-hover: #cbd5e1;
+    --button-text: #1e293b;
+    --danger-bg: rgba(239, 68, 68, 0.1);
+    --danger-text: #dc2626;
+    --danger-hover-bg: rgba(239, 68, 68, 0.15);
+    --danger-hover-text: #b91c1c;
+}
+
 .settings-page-container {
     height: 100vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background-color: #222;
+    background-color: var(--bg-primary);
     position: relative;
+    transition: background-color 0.3s ease;
 }
 
 .settings-bottom-section {
-    background-color: #2a2a2a;
+    background-color: var(--bg-secondary);
     max-width: 800px;
     margin: 5px auto 10px auto;
     padding: 0 16px;
@@ -18,11 +51,13 @@
     flex-direction: column;
     overflow: hidden;
     border-radius: 12px;
+    transition: background-color 0.3s ease;
 }
 
 .settings-section {
     padding: 16px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-color);
+    transition: border-color 0.3s ease;
 }
 
 .settings-section:last-child {
@@ -32,9 +67,10 @@
 .settings-section-title {
     font-family: 'Roboto Condensed', sans-serif;
     font-size: 20px;
-    color: #e6e6e6;
+    color: var(--text-primary);
     margin: 0 0 16px 0;
     padding: 0 8px;
+    transition: color 0.3s ease;
 }
 
 .settings-option {
@@ -52,16 +88,17 @@
 .settings-option-label {
     font-family: 'Roboto', sans-serif;
     font-size: 16px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--text-secondary);
     flex: 1;
+    transition: color 0.3s ease;
 }
 
 .settings-toggle-btn {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--button-bg);
     border: none;
     padding: 8px 16px;
     border-radius: 6px;
-    color: white;
+    color: var(--button-text);
     cursor: pointer;
     transition: all 0.2s;
     font-family: 'Roboto', sans-serif;
@@ -71,15 +108,15 @@
 }
 
 .settings-toggle-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--button-hover);
 }
 
 .settings-select-btn {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--button-bg);
     border: none;
     padding: 8px 16px;
     border-radius: 6px;
-    color: white;
+    color: var(--button-text);
     cursor: pointer;
     transition: all 0.2s;
     font-family: 'Roboto', sans-serif;
@@ -89,15 +126,15 @@
 }
 
 .settings-select-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--button-hover);
 }
 
 .settings-avatar-btn {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--button-bg);
     border: none;
     padding: 8px 16px;
     border-radius: 6px;
-    color: white;
+    color: var(--button-text);
     cursor: pointer;
     transition: all 0.2s;
     font-family: 'Roboto', sans-serif;
@@ -107,19 +144,20 @@
 }
 
 .settings-avatar-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--button-hover);
 }
 
 .settings-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--border-color);
     margin: 24px 0;
     width: 100%;
+    transition: background-color 0.3s ease;
 }
 
 .settings-login-btn {
-    background: rgba(255, 0, 0, 0.2);
-    color: #ff4d4d;
+    background: var(--danger-bg);
+    color: var(--danger-text);
     border: none;
     border-radius: 4px;
     padding: 8px 24px;
@@ -129,40 +167,35 @@
 }
 
 .settings-login-btn:hover {
-    background: rgba(255, 0, 0, 0.3);
-    color: #ff6666;
-
+    background: var(--danger-hover-bg);
+    color: var(--danger-hover-text);
 }
 
-
-
-/* <<<--- ИСПРАВЛЕНО: Сменить аккаунт - кнопка как "Выйти" --->>> */
 .settings-account-btn {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--button-bg);
     border: none;
     padding: 8px 16px;
     border-radius: 6px;
-    color: white;
+    color: var(--button-text);
     cursor: pointer;
     transition: all 0.2s;
     font-family: 'Roboto', sans-serif;
     font-size: 14px;
     min-width: 120px;
     text-align: center;
-    align-self: flex-start; /* ← выравнивание по левому краю */
+    align-self: flex-start;
 }
 
 .settings-account-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--button-hover);
 }
-/* <<<--- КОНЕЦ ИСПРАВЛЕНИЯ --->>> */
 
 .settings-logout-btn {
-    background: rgba(255, 0, 0, 0.2);
+    background: var(--danger-bg);
     border: none;
     padding: 8px 16px;
     border-radius: 6px;
-    color: #ff4d4d;
+    color: var(--danger-text);
     cursor: pointer;
     transition: all 0.2s;
     font-family: 'Roboto', sans-serif;
@@ -173,6 +206,6 @@
 }
 
 .settings-logout-btn:hover {
-    background: rgba(255, 0, 0, 0.3);
-    color: #ff6666;
+    background: var(--danger-hover-bg);
+    color: var(--danger-hover-text);
 }

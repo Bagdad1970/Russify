@@ -351,7 +351,7 @@ const FavoritesPage = () => {
                                 </div>
                                 <div className="album-info-layer">
                                     <div className="album-info-text">
-                                        <div className="album-title">{album.title}</div>
+                                        <div className="album-title-FP">{album.title}</div>
                                         <div className="album-meta">
                                             <span>{album.creator}</span>
                                             <span>{formatDate(album.date)}</span>

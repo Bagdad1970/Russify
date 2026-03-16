@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import '../assets/styles/pages/SettingsPage.css';
 import { AuthManager } from '../api/AuthManager.ts';
+import { useTheme } from '../hooks/useTheme';
 
 import SettingsHeader from '../components/SettingsHeader.tsx';
 
 const SettingsPage = () => {
-    const [theme, setTheme] = useState("dark");
+    const { theme, toggleTheme } = useTheme();
     const [language, setLanguage] = useState("ru");
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const authManager = new AuthManager();
@@ -36,10 +37,6 @@ const SettingsPage = () => {
             window.removeEventListener('authChange', handleAuthChange);
         };
     }, []);
-
-    const toggleTheme = () => {
-        setTheme(theme === "dark" ? "light" : "dark");
-    };
 
     const toggleLanguage = () => {
         setLanguage(language === "ru" ? "en" : "ru");

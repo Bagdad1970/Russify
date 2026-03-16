@@ -1,3 +1,19 @@
+/* 🌙 Темная тема (по умолчанию) */
+:root {
+    --tile-bg: #2a2a34;
+    --tile-bg-hover: #32323d;
+    --tile-outline: rgba(245, 158, 11, 0.7);
+    --tile-text: #f1f1f1;
+}
+
+/* ☀️ Светлая тема */
+[data-theme="light"] {
+    --tile-bg: #e2e8f0;
+    --tile-bg-hover: #d1d9e6;
+    --tile-outline: rgba(245, 158, 11, 0.8);
+    --tile-text: #0f172a;
+}
+
 .color-tile-wrapper {
     display: flex;
     flex-direction: column;
@@ -10,20 +26,21 @@
     width: 140px;
     height: 140px;
     border-radius: 10px;
-    background: #2a2a34;
+    background: var(--tile-bg);
     cursor: pointer;
     transition: transform 0.2s, background 0.2s, outline 0.2s;
 }
 
 .color-tile:hover {
     transform: scale(1.05);
-    background: #32323d;
-    outline: 2px solid rgba(245, 158, 11, 0.7);
+    background: var(--tile-bg-hover);
+    outline: 2px solid var(--tile-outline);
 }
 
 .tile-label {
     font-family: 'Roboto', sans-serif;
-    color: #f1f1f1;
+    color: var(--tile-text);
     font-size: 14px;
     text-align: center;
+    transition: color 0.3s ease;
 }

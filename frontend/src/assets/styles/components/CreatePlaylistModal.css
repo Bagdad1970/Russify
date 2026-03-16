@@ -1,27 +1,81 @@
+/* 🌙 Темная тема (по умолчанию) */
+:root {
+    --cpl-overlay: rgba(0, 0, 0, 0.6);
+    --cpl-bg: linear-gradient(135deg, #1e1e24 0%, #16161e 100%);
+    --cpl-text: #f1f1f1;
+    --cpl-text-primary: white;
+    --cpl-text-secondary: rgba(255, 255, 255, 0.8);
+    --cpl-text-tertiary: rgba(255, 255, 255, 0.7);
+    --cpl-border: rgba(255, 255, 255, 0.1);
+    --cpl-border-light: rgba(255, 255, 255, 0.08);
+    --cpl-cover-bg: rgba(255, 255, 255, 0.08);
+    --cpl-track-bg: rgba(255, 255, 255, 0.05);
+    --cpl-track-hover: rgba(255, 255, 255, 0.1);
+    --cpl-btn-color: #aaa;
+    --cpl-btn-hover-bg: rgba(255, 255, 255, 0.1);
+    --cpl-btn-hover-color: white;
+    --cpl-save-btn: #ff2d55;
+    --cpl-save-btn-hover: #ff1a45;
+    --cpl-cancel-btn: rgba(255, 255, 255, 0.1);
+    --cpl-cancel-btn-hover: rgba(255, 255, 255, 0.2);
+    --cpl-input-border: #ff2d55;
+    --cpl-scroll-thumb: rgba(200, 200, 200, 0.3);
+    --cpl-scroll-thumb-hover: rgba(200, 200, 200, 0.7);
+    --cpl-scroll-track: rgba(255, 255, 255, 0.05);
+}
+
+/* ☀️ Светлая тема */
+[data-theme="light"] {
+    --cpl-overlay: rgba(0, 0, 0, 0.3);
+    --cpl-bg: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    --cpl-text: #0f172a;
+    --cpl-text-primary: #0f172a;
+    --cpl-text-secondary: #1e293b;
+    --cpl-text-tertiary: #334155;
+    --cpl-border: rgba(0, 0, 0, 0.1);
+    --cpl-border-light: rgba(0, 0, 0, 0.08);
+    --cpl-cover-bg: rgba(0, 0, 0, 0.04);
+    --cpl-track-bg: rgba(0, 0, 0, 0.02);
+    --cpl-track-hover: rgba(0, 0, 0, 0.05);
+    --cpl-btn-color: #64748b;
+    --cpl-btn-hover-bg: rgba(0, 0, 0, 0.05);
+    --cpl-btn-hover-color: #0f172a;
+    --cpl-save-btn: #e11d48;
+    --cpl-save-btn-hover: #c81e4a;
+    --cpl-cancel-btn: rgba(0, 0, 0, 0.05);
+    --cpl-cancel-btn-hover: rgba(0, 0, 0, 0.1);
+    --cpl-input-border: #e11d48;
+    --cpl-scroll-thumb: rgba(100, 100, 120, 0.2);
+    --cpl-scroll-thumb-hover: rgba(100, 100, 120, 0.4);
+    --cpl-scroll-track: rgba(0, 0, 0, 0.05);
+}
+
 .cpl-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--cpl-overlay);
     z-index: 1400;
     backdrop-filter: blur(4px);
+    transition: background 0.3s ease;
 }
 
 .cpl-container {
     position: absolute;
     width: 800px;
     max-height: calc(100vh - 112px);
-    background: linear-gradient(135deg, #1e1e24 0%, #16161e 100%);
+    background: var(--cpl-bg);
     border-radius: 16px;
     overflow: hidden;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    color: #f1f1f1;
+    color: var(--cpl-text);
     padding: 20px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* <<<--- ШАПКА: НА ДЕСКТОПЕ — ЛЕВО, НА МОБИЛЬНЫХ — ЦЕНТР --->>> */
+/* Шапка */
 .cpl-header {
     display: flex;
     align-items: flex-end;
@@ -46,9 +100,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--cpl-cover-bg);
     border-radius: 12px;
     cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.cpl-playlist-cover svg {
+    stroke: var(--cpl-text-tertiary);
+    transition: stroke 0.3s ease;
 }
 
 .cpl-playlist-info {
@@ -67,11 +127,16 @@
 .cpl-title {
     font-size: 24px;
     font-weight: 600;
-    color: white;
+    color: var(--cpl-text-primary);
     margin: 0;
     cursor: pointer;
     max-width: 400px;
     word-break: break-word;
+    transition: color 0.3s ease, opacity 0.2s;
+}
+
+.cpl-title:hover {
+    opacity: 0.8;
 }
 
 .cpl-header.mobile-centered .cpl-title {
@@ -86,7 +151,8 @@
 
 .cpl-count, .cpl-duration {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--cpl-text-secondary);
+    transition: color 0.3s ease;
 }
 
 .cpl-close {
@@ -102,33 +168,38 @@
     justify-content: center;
     border-radius: 6px;
     cursor: pointer;
-    color: #ffffff;
+    color: var(--cpl-text-primary);
     transition: all 0.2s;
+}
+
+.cpl-close svg {
+    stroke: currentColor;
 }
 
 .cpl-header.mobile-centered .cpl-close {
     position: absolute;
     top: 12px;
     right: 12px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--cpl-cover-bg);
     border-radius: 50%;
     width: 36px;
     height: 36px;
 }
 
 .cpl-close:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: var(--cpl-btn-hover-bg);
+    color: var(--cpl-btn-hover-color);
 }
 
-/* <<<--- РАЗДЕЛИТЕЛЬ --->>> */
+/* Разделитель */
 .cpl-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--cpl-border);
     margin: 16px 0;
+    transition: background 0.3s ease;
 }
 
-/* <<<--- ОСНОВНОЕ СОДЕРЖИМОЕ --->>> */
+/* Основное содержимое */
 .cpl-main-content {
     display: flex;
     gap: 20px;
@@ -144,7 +215,7 @@
 }
 
 .cpl-playlist-column {
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid var(--cpl-border);
     padding-right: 10px;
 }
 
@@ -155,8 +226,9 @@
 .cpl-column-title {
     font-size: 18px;
     font-weight: 600;
-    color: white;
+    color: var(--cpl-text-primary);
     margin: 0 0 12px 0;
+    transition: color 0.3s ease;
 }
 
 .cpl-track-list {
@@ -166,22 +238,23 @@
     padding-right: 4px;
 }
 
+/* Стилизация скролла */
 .cpl-track-list::-webkit-scrollbar {
     width: 6px;
 }
 
 .cpl-track-list::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--cpl-scroll-track);
 }
 
 .cpl-track-list::-webkit-scrollbar-thumb {
-    background: rgba(200, 200, 200, 0.3);
+    background: var(--cpl-scroll-thumb);
     border-radius: 3px;
     transition: background 0.3s ease;
 }
 
 .cpl-track-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(200, 200, 200, 0.7);
+    background: var(--cpl-scroll-thumb-hover);
 }
 
 .cpl-track-item {
@@ -189,8 +262,8 @@
     align-items: center;
     padding: 8px 0;
     gap: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    transition: background 0.2s ease;
+    border-bottom: 1px solid var(--cpl-border-light);
+    transition: background 0.2s ease, border-color 0.3s ease;
     cursor: grab;
 }
 
@@ -204,7 +277,7 @@
 
 .cpl-track-item.dragging {
     opacity: 0.6;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--cpl-track-bg);
 }
 
 .cpl-track-cover {
@@ -213,8 +286,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--cpl-cover-bg);
     border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.cpl-track-cover svg {
+    stroke: var(--cpl-text-tertiary);
+    transition: stroke 0.3s ease;
 }
 
 .cpl-track-text {
@@ -227,25 +306,28 @@
 .cpl-track-title {
     font-size: 14px;
     font-weight: 500;
-    color: white;
+    color: var(--cpl-text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.3s ease;
 }
 
 .cpl-track-artist {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--cpl-text-tertiary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.3s ease;
 }
 
 .cpl-track-duration {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--cpl-text-tertiary);
     width: 56px;
     text-align: right;
+    transition: color 0.3s ease;
 }
 
 .cpl-add-btn,
@@ -259,17 +341,23 @@
     justify-content: center;
     border-radius: 6px;
     cursor: pointer;
-    color: #aaa;
+    color: var(--cpl-btn-color);
     transition: all 0.2s;
+}
+
+.cpl-add-btn svg,
+.cpl-remove-btn svg {
+    stroke: currentColor;
+    fill: none;
 }
 
 .cpl-add-btn:hover,
 .cpl-remove-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: var(--cpl-btn-hover-bg);
+    color: var(--cpl-btn-hover-color);
 }
 
-/* <<<--- КНОПКИ ВНИЗУ: ЦЕНТРИРОВАННЫЕ НА МОБИЛЬНЫХ --->>> */
+/* Кнопки внизу */
 .cpl-buttons {
     display: flex;
     justify-content: flex-end;
@@ -287,29 +375,48 @@
     border: none;
     cursor: pointer;
     font-weight: 500;
+    transition: all 0.2s;
 }
 
 .cpl-btn-cancel {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: var(--cpl-cancel-btn);
+    color: var(--cpl-text-primary);
 }
 
 .cpl-btn-cancel:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--cpl-cancel-btn-hover);
 }
 
 .cpl-btn-save {
-    background: #ff2d55;
+    background: var(--cpl-save-btn);
     color: white;
 }
 
 .cpl-btn-save:hover {
-    background: #ff1a45;
+    background: var(--cpl-save-btn-hover);
 }
 
-/* ──────────────────────────────
-   АДАПТИВНОСТЬ: МОБИЛЬНЫЕ (≤767px)
-─────────────────────────────── */
+/* Поле ввода названия */
+.cpl-title-input {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--cpl-text-primary);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--cpl-input-border);
+    padding: 4px 0;
+    margin-bottom: 4px;
+    width: 100%;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.cpl-title-input:focus {
+    border-bottom-color: var(--cpl-input-border);
+}
+
+/* Адаптивность: мобильные (≤767px) */
 @media (max-width: 767px) {
     .cpl-container {
         width: calc(100% - 24px);
@@ -355,7 +462,7 @@
         position: absolute;
         top: 12px;
         right: 12px;
-        background: rgba(255, 255, 255, 0.08);
+        background: var(--cpl-cover-bg);
         border-radius: 50%;
         width: 36px;
         height: 36px;
@@ -368,7 +475,7 @@
 
     .cpl-playlist-column {
         border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid var(--cpl-border);
         padding-right: 0;
         padding-bottom: 12px;
     }
@@ -423,9 +530,7 @@
     }
 }
 
-/* ──────────────────────────────
-   Очень маленькие (≤480px)
-─────────────────────────────── */
+/* Очень маленькие (≤480px) */
 @media (max-width: 480px) {
     .cpl-container {
         width: calc(100% - 16px);
@@ -505,9 +610,7 @@
     }
 }
 
-/* ──────────────────────────────
-   Ноутбуки (≥1200px)
-─────────────────────────────── */
+/* Ноутбуки (≥1200px) */
 @media (min-width: 1200px) {
     .cpl-container {
         width: 840px;
@@ -545,41 +648,4 @@
         font-size: 12px;
         width: 56px;
     }
-
-    .cpl-action-btn,
-    .cpl-dots-btn {
-        width: 24px;
-        height: 24px;
-    }
-}
-
-.cpl-title-input {
-    font-size: 28px;
-    font-weight: 600;
-    color: #ffffff;
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid #ff2d55;
-    padding: 4px 0;
-    margin-bottom: 4px;
-    width: 100%;
-    outline: none;
-    font-family: inherit;
-}
-
-.cpl-title-input:focus {
-    border-bottom-color: #ff2d55;
-}
-
-.cpl-title {
-    font-size: 28px;
-    font-weight: 600;
-    color: #ffffff;
-    margin-bottom: 4px;
-    cursor: pointer;
-    transition: opacity 0.2s;
-}
-
-.cpl-title:hover {
-    opacity: 0.8;
 }

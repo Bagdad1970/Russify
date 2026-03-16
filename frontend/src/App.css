@@ -2,6 +2,20 @@
   box-sizing: border-box;
 }
 
+/* 🌙 Темная тема (по умолчанию) */
+:root {
+  --app-bg: #222;
+  --app-bottom-bg: #2a2a2a;
+  --app-text: #e6e6e6;
+}
+
+/* ☀️ Светлая тема */
+[data-theme="light"] {
+  --app-bg: #f0f4f8;
+  --app-bottom-bg: #ffffff;
+  --app-text: #0f172a;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -11,11 +25,12 @@ html, body {
 
 .app {
   font-family: sans-serif;
-  background-color: #222;
+  background-color: var(--app-bg);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transition: background-color 0.3s ease;
 }
 
 .main-content {
@@ -25,14 +40,15 @@ html, body {
 .section-title {
   font-family: 'Roboto Condensed', sans-serif;
   text-align: center;
-  color: #e6e6e6;
+  color: var(--app-text);
   font-size: 25px;
   margin: 16px 0;
   padding: 0 16px;
+  transition: color 0.3s ease;
 }
 
 .bottom-section {
-  background-color: #2a2a2a;
+  background-color: var(--app-bottom-bg);
   max-width: 800px;
   margin: 5px auto;
   padding: 0 16px;
@@ -40,10 +56,8 @@ html, body {
   flex: 1;
   overflow-y: auto;
   border-radius: 12px;
+  transition: background-color 0.3s ease;
 }
-
-
-/* ... (все предыдущие стили остаются) ... */
 
 /* Мобильные устройства */
 @media (max-width: 767px) {

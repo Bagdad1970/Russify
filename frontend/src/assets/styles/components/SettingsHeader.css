@@ -1,19 +1,37 @@
 .settings-header-full-width {
     width: 100%;
-    /* <<<--- ЛИНЕЙНЫЙ ГРАДИЕНТ по умолчанию (для мобильных) --->>> */
-    background: linear-gradient(to right, #ffb703 0%, #8b5cf6 100%);
     padding: 32px 16px;
-    /* <<<--- УМЕНЬШЕННЫЕ СКРУГЛЕНИЯ СНИЗУ --->>> */
     border-radius: 16px 16px 12px 12px;
     margin: 0 auto;
     position: relative;
     overflow: hidden;
+    transition: background 0.3s ease;
 }
 
-/* <<<--- ДЕСКТОП: РАДИАЛЬНЫЙ ГРАДИЕНТ + БОЛЬШИЕ СКРУГЛЕНИЯ --->>> */
+/* 🌙 Темная тема (по умолчанию) */
+:root {
+    --settings-gradient-mobile: linear-gradient(to right, #ffb703 0%, #8b5cf6 100%);
+    --settings-gradient-desktop: radial-gradient(circle at 50% 20%, #ffb703 0%, #8b5cf6 35%, #222 65%);
+    --settings-text: white;
+    --settings-glow: rgba(255, 255, 255, 0.15);
+}
+
+/* ☀️ Светлая тема */
+[data-theme="light"] {
+    --settings-gradient-mobile: linear-gradient(to right, #ffb703 0%, #8b5cf6 100%);
+    --settings-gradient-desktop: radial-gradient(circle at 50% 20%, #ffb703 0%, #8b5cf6 35%, #f0f4f8 65%);
+    --settings-text: #1e293b;
+    --settings-glow: rgba(255, 255, 255, 0.4);
+}
+
+.settings-header-full-width {
+    background: var(--settings-gradient-mobile);
+}
+
+/* Десктоп */
 @media (min-width: 1200px) {
     .settings-header-full-width {
-        background: radial-gradient(circle at 50% 20%, #ffb703 0%, #8b5cf6 35%, #222 65%);
+        background: var(--settings-gradient-desktop);
         padding: 64px 32px;
         border-radius: 16px 16px 44px 44px;
     }
@@ -25,12 +43,12 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.15), transparent 60%);
+        background: radial-gradient(circle at 50% 30%, var(--settings-glow), transparent 60%);
         opacity: 0;
         animation: combinedPulse 6s ease-in-out infinite;
+        pointer-events: none;
     }
 }
-/* <<<--- КОНЕЦ ДЕСКТОП --->>> */
 
 @keyframes combinedPulse {
     0%, 100% { opacity: 0; }
@@ -44,9 +62,18 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #e6e6e6;
+    color: var(--settings-text);
     position: relative;
     text-align: center;
+}
+
+.settings-title {
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 40px;
+    color: var(--settings-text);
+    margin: 0;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: color 0.3s ease;
 }
 
 .settings-header {
@@ -57,20 +84,11 @@
     max-width: 640px;
 }
 
-.settings-title {
-    font-family: 'Roboto Condensed', sans-serif;
-    font-size: 40px;
-    color: white;
-    margin: 0;
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-}
-
-/* <<<--- АДАПТИВНОСТЬ: ПЛАНШЕТЫ (≤768px) --->>> */
+/* Адаптивность */
 @media (max-width: 768px) {
     .settings-header-full-width {
         padding: 24px 12px;
-        border-radius: 12px 12px 10px 10px; /* ← уменьшены скругления */
-        background: linear-gradient(to right, #ffb703 0%, #8b5cf6 100%);
+        border-radius: 12px 12px 10px 10px;
     }
 
     .settings-title {
@@ -78,12 +96,10 @@
     }
 }
 
-/* <<<--- АДАПТИВНОСТЬ: МАЛЕНЬКИЕ ЭКРАНЫ (≤480px) --->>> */
 @media (max-width: 480px) {
     .settings-header-full-width {
         padding: 16px 8px;
-        border-radius: 10px 10px 8px 8px; /* ← ещё меньше скруглений */
-        background: linear-gradient(to right, #ffb703 0%, #8b5cf6 100%);
+        border-radius: 10px 10px 8px 8px;
     }
 
     .settings-title {

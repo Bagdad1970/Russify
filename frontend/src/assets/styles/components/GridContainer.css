@@ -1,3 +1,21 @@
+/* 🌙 Темная тема (по умолчанию) */
+:root {
+    --grid-bg: transparent;
+    --grid-text: inherit;
+    --grid-scroll-thumb: rgba(200, 200, 200, 0.3);
+    --grid-scroll-thumb-hover: rgba(200, 200, 200, 0.7);
+    --grid-scroll-track: transparent;
+}
+
+/* ☀️ Светлая тема */
+[data-theme="light"] {
+    --grid-bg: transparent;
+    --grid-text: inherit;
+    --grid-scroll-thumb: rgba(100, 100, 120, 0.2);
+    --grid-scroll-thumb-hover: rgba(100, 100, 120, 0.4);
+    --grid-scroll-track: transparent;
+}
+
 .grid-container-wrapper {
     flex: 1;
     overflow-y: auto;
@@ -5,8 +23,29 @@
     max-width: 800px;
     margin: 0 auto;
     height: 400px;
+    background: var(--grid-bg);
+    transition: background 0.3s ease;
 }
 
+/* Стилизация скролла для wrapper */
+.grid-container-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.grid-container-wrapper::-webkit-scrollbar-track {
+    background: var(--grid-scroll-track);
+    border-radius: 4px;
+}
+
+.grid-container-wrapper::-webkit-scrollbar-thumb {
+    background: var(--grid-scroll-thumb);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+.grid-container-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--grid-scroll-thumb-hover);
+}
 
 .grid-container {
     display: flex;

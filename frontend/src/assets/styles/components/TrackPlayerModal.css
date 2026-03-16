@@ -1,15 +1,54 @@
+/* 🌙 Темная тема (по умолчанию) */
+:root {
+    --tpm-overlay: rgba(0, 0, 0, 0.7);
+    --tpm-bg: #22222a;
+    --tpm-border: rgba(255, 255, 255, 0.08);
+    --tpm-text-primary: #f1f1f1;
+    --tpm-text-secondary: #aaa;
+    --tpm-btn-hover-bg: rgba(255, 255, 255, 0.1);
+    --tpm-btn-hover-bg-strong: rgba(255, 255, 255, 0.2);
+    --tpm-progress-bg: #444;
+    --tpm-progress-fill: #ffb703;
+    --tpm-btn-active: #ffb703;
+    --tpm-favorite-active: #ff2d55;
+    --tpm-btn-play-bg: rgba(255, 255, 255, 0.1);
+    --tpm-btn-play-hover: rgba(255, 255, 255, 0.2);
+    --tpm-close-bg: rgba(255, 255, 255, 0.1);
+    --tpm-close-hover: rgba(255, 255, 255, 0.2);
+}
+
+/* ☀️ Светлая тема */
+[data-theme="light"] {
+    --tpm-overlay: rgba(0, 0, 0, 0.4);
+    --tpm-bg: #ffffff;
+    --tpm-border: rgba(0, 0, 0, 0.08);
+    --tpm-text-primary: #0f172a;
+    --tpm-text-secondary: #475569;
+    --tpm-btn-hover-bg: rgba(0, 0, 0, 0.05);
+    --tpm-btn-hover-bg-strong: rgba(0, 0, 0, 0.1);
+    --tpm-progress-bg: #e2e8f0;
+    --tpm-progress-fill: #f59e0b;
+    --tpm-btn-active: #f59e0b;
+    --tpm-favorite-active: #e11d48;
+    --tpm-btn-play-bg: rgba(0, 0, 0, 0.05);
+    --tpm-btn-play-hover: rgba(0, 0, 0, 0.1);
+    --tpm-close-bg: rgba(0, 0, 0, 0.05);
+    --tpm-close-hover: rgba(0, 0, 0, 0.1);
+}
+
 .tpm-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: var(--tpm-overlay);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
     pointer-events: all;
+    transition: background-color 0.3s ease;
 }
 
 .tpm-container-mobile {
@@ -19,27 +58,27 @@
     transform: translate(-50%, -50%) scale(0.9);
     width: 90%;
     max-width: 400px;
-    background-color: #22222a;
+    background-color: var(--tpm-bg);
     border-radius: 12px;
     padding: 24px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     z-index: 1001;
     opacity: 0;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+    border: 1px solid var(--tpm-border);
 }
 
 .tpm-container-desktop {
     position: fixed;
-    background-color: #22222a;
+    background-color: var(--tpm-bg);
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
     z-index: 1001;
     opacity: 0;
     transform-origin: top center;
-    transition: opacity 0.2s ease;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: opacity 0.2s ease, background-color 0.3s ease;
+    border: 1px solid var(--tpm-border);
     pointer-events: auto;
 }
 
@@ -59,7 +98,7 @@
     position: absolute;
     top: 12px;
     right: 12px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--tpm-close-bg);
     border: none;
     border-radius: 50%;
     width: 36px;
@@ -72,8 +111,12 @@
     transition: background-color 0.2s;
 }
 
+.tpm-close-btn svg {
+    stroke: var(--tpm-text-primary);
+}
+
 .tpm-close-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--tpm-close-hover);
 }
 
 .tpm-cover-wrapper {
@@ -90,6 +133,9 @@
 
 .tpm-cover svg {
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    stroke: var(--tpm-text-secondary);
+    fill: none;
+    transition: stroke 0.3s ease;
 }
 
 .tpm-info-row {
@@ -108,13 +154,15 @@
 .tpm-track-title {
     font-size: 16px;
     font-weight: 500;
-    color: #f1f1f1;
+    color: var(--tpm-text-primary);
     margin-bottom: 4px;
+    transition: color 0.3s ease;
 }
 
 .tpm-track-artist {
     font-size: 14px;
-    color: #aaa;
+    color: var(--tpm-text-secondary);
+    transition: color 0.3s ease;
 }
 
 .tpm-progress-section {
@@ -127,24 +175,26 @@
 .tpm-time-current,
 .tpm-time-total {
     font-size: 12px;
-    color: #aaa;
+    color: var(--tpm-text-secondary);
     min-width: 40px;
+    transition: color 0.3s ease;
 }
 
 .tpm-progress-bar-bg {
     flex: 1;
     height: 4px;
-    background-color: #444;
+    background-color: var(--tpm-progress-bg);
     border-radius: 2px;
     cursor: pointer;
     position: relative;
+    transition: background-color 0.3s ease;
 }
 
 .tpm-progress-bar-fill {
     height: 100%;
-    background-color: #ffb703;
+    background-color: var(--tpm-progress-fill);
     border-radius: 2px;
-    transition: width 0.1s ease;
+    transition: width 0.1s ease, background-color 0.3s ease;
 }
 
 .tpm-controls-row {
@@ -157,7 +207,7 @@
 .tpm-btn {
     background: none;
     border: none;
-    color: #f1f1f1;
+    color: var(--tpm-text-primary);
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -165,38 +215,47 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, color 0.3s ease;
 }
 
 .tpm-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--tpm-btn-hover-bg);
+}
+
+.tpm-btn svg {
+    fill: none;
+    stroke: currentColor;
+    transition: stroke 0.3s ease, fill 0.3s ease;
 }
 
 .tpm-btn.active {
-    color: #ffb703;
+    color: var(--tpm-btn-active);
 }
 
 .tpm-btn.active svg {
-    fill: #ffb703;
+    fill: var(--tpm-btn-active);
+    stroke: var(--tpm-btn-active);
 }
 
 .tpm-btn-shuffle.active svg,
 .tpm-btn-repeat.active svg {
-    fill: #ffb703;
+    fill: var(--tpm-btn-active);
+    stroke: var(--tpm-btn-active);
 }
 
 .tpm-btn-favorite.active svg {
-    fill: #ff2d55;
+    fill: var(--tpm-favorite-active);
+    stroke: var(--tpm-favorite-active);
 }
 
 .tpm-btn-play-pause {
     width: 56px;
     height: 56px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--tpm-btn-play-bg);
 }
 
 .tpm-btn-play-pause:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--tpm-btn-play-hover);
 }
 
 @media (max-width: 480px) {

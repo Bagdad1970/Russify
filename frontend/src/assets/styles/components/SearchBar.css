@@ -1,51 +1,81 @@
+/* 🌙 Темная тема (по умолчанию) */
+:root {
+    --search-bg: #333;
+    --search-bg-hover: #3a3a3a;
+    --search-bg-focus: #404040;
+    --search-outline: #ff2d55;
+    --search-icon-color: #aaa;
+    --search-text: white;
+    --search-placeholder: #888;
+}
+
+/* ☀️ Светлая тема */
+[data-theme="light"] {
+    --search-bg: #f1f5f9;
+    --search-bg-hover: #e2e8f0;
+    --search-bg-focus: #ffffff;
+    --search-outline: #f43f5e;
+    --search-icon-color: #64748b;
+    --search-text: #1e293b;
+    --search-placeholder: #94a3b8;
+}
+
+.search-bar-container {
+    margin-top: 20px;
+    margin-bottom: 8px;
+}
+
 .search-bar {
     display: flex;
     align-items: center;
-    background: #333;
-    border-radius: 4px;
-    padding: 8px 12px;
-    margin: 16px;
+    background: var(--search-bg);
+    border-radius: 8px;
+    padding: 10px 14px;
     cursor: pointer;
+    transition: background 0.2s ease, outline 0.2s ease, box-shadow 0.2s ease;
 }
 
 .search-bar:hover {
-    background: #3a3a3a;
+    background: var(--search-bg-hover);
 }
 
 .search-bar:focus-within {
-    background: #404040;
-    outline: 1px solid #ff2d55;
+    background: var(--search-bg-focus);
+    outline: 2px solid var(--search-outline);
+    box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.1); /* Мягкое свечение */
 }
 
 .search-icon {
-    margin-right: 8px;
-    color: #aaa;
+    margin-right: 10px;
+    color: var(--search-icon-color);
     display: flex;
     align-items: center;
+    transition: color 0.2s ease;
 }
 
 .search-icon svg {
     fill: currentColor;
     width: 20px;
     height: 20px;
-    vertical-align: middle;
 }
 
 .search-bar input {
     font-family: 'Roboto', sans-serif;
     background: transparent;
     border: none;
-    color: white;
-    font-size: 16px;
+    color: var(--search-text);
+    font-size: 15px;
     flex: 1;
     outline: none;
     width: 100%;
     min-height: 24px;
     line-height: 24px;
     padding: 0;
+    transition: color 0.2s ease;
 }
 
 .search-bar input::placeholder {
-    color: #888;
+    color: var(--search-placeholder);
     font-size: 14px;
+    transition: color 0.2s ease;
 }
