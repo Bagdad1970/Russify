@@ -18,6 +18,7 @@ import LoginModal from "./components/LoginModal.tsx";
 import AdminLogin from "./pages/AdminLogin.tsx";
 import ModerationPage from "./pages/ModerationPage.tsx";
 import SystemPlaylistsPage from "./pages/SystemPlaylistPage.tsx";
+import AdminDashboard from "./pages/AdminDashboard.tsx";
 
 function App() {
     const [selectedPlaylist, setSelectedPlaylist] = useState(null);
@@ -202,6 +203,9 @@ function App() {
                                 onPlaylistCreate={handlePlaylistCreate}
                             />
                         }
+                    />
+                    <Route path="/admin/dashboard"
+                           element={<AdminDashboard />}
                     />
                 </Routes>
 

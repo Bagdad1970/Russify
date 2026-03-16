@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
 import '../assets/styles/components/FavoriteCard.css';
 
+
+//ВНИМАНИЕ! ЩАС ТУТ АЛЬБОМЫ ВСЕ НАХОДЯТСЯ! ОБНОВИТЬ КОГДА РУЧКА БУДЕТ ГОТОВА НАДО!
+//ОСТАЛЬНОЕ ПРОСТО СДЕЛАЙТЕ ПО АНАЛОГИИ!!
+
+
+
 const FavoriteCard = ({ title = "Избранное", onCategoryChange, initialCategory = "Треки" }) => {
     const items = ["Альбомы", "Плейлисты", "Треки"];
 

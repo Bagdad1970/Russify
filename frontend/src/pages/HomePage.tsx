@@ -1,70 +1,208 @@
 import '../assets/styles/pages/HomePage.css';
-
 import TrackCard from '../components/TrackCard.tsx';
 import SearchBar from '../components/SearchBar.tsx';
 import GridContainer from '../components/GridContainer.tsx';
 import ColorTile from '../components/ColorTile.tsx';
-import type {Playlist} from "../types/Playlist.ts";
-import {PlaylistManager} from "../api/PlaylistManager.ts";
-import {useEffect, useState} from "react";
+import PlaylistModal from '../components/PlaylistModal.tsx';
+import AlbumModal from '../components/AlbumModal.tsx';
+import type { Playlist } from "../types/Playlist.ts";
+import type { Track } from "../types/Track.ts";
+import type { Album } from "../types/Album.ts";
+import type { PlaylistWithTracks } from "../types/PlaylistWithTracks.ts";
+import { PlaylistManager } from "../api/PlaylistManager.ts";
+import { TrackManager } from "../api/TrackManager.ts";
+import { AlbumManager } from "../api/AlbumManager.ts";
+import { useEffect, useState } from "react";
+
+const playlistManager = new PlaylistManager();
+const trackManager = new TrackManager();
+const albumManager = new AlbumManager();
 
 const HomePage = ({
-                      onOpenPlaylistModal,
+                      onOpenPlaylistModal: parentOnOpenPlaylistModal,
                       onOpenSystemModal,
-                      onOpenAlbumModal,
+                      onOpenAlbumModal: parentOnOpenAlbumModal,
                       onOpenCreatePlaylistModal,
                   }) => {
-    const playlistManager = new PlaylistManager();
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [playlists, setPlaylists] = useState<Playlist[]>([]);
 
-    const loadPlaylists = async () => {
-        try {
-            setLoading(true);
+    const [searchText, setSearchText] = useState('');
+    const [allAlbums, setAllAlbums] = useState<Album[]>([]);
+    const [allTracks, setAllTracks] = useState<Track[]>([]);
+    const [allPlaylists, setAllPlaylists] = useState<Playlist[]>([]);
+    const [moodPlaylists, setMoodPlaylists] = useState<Playlist[]>([]);
 
-            const foundPlaylists = await playlistManager.findAll();
+    const [searchResults, setSearchResults] = useState<{
+        tracks: Track[];
+        albums: Album[];
+        playlists: Playlist[];
+    }>({
+        tracks: [],
+        albums: [],
+        playlists: []
+    });
 
-            setPlaylists(foundPlaylists);
-            setError(null);
-        }
-        catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to process query');
-        }
-        finally {
-            setLoading(false);
-        }
-    }
+    const [isSearching, setIsSearching] = useState(false);
+
+    // Состояния для модалок
+    const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+    const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
+
+    // Храним полные данные плейлиста (с треками)
+    const [selectedPlaylistData, setSelectedPlaylistData] = useState<PlaylistWithTracks | null>(null);
+    const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
 
     useEffect(() => {
-        loadPlaylists();
+        loadAllData();
     }, []);
 
-    /*const playlists: Playlist[] = [
-        { id: 1n, name: 'Системный плейлист', userId: 1n, isSystem: true, tracks: [{ name: 'Трек 1', artist: 'Исполнитель A' }, { name: 'Трек 2', artist: 'Исполнитель B' }] },
-        { id: 2n, name: 'Плейлист 2', author: 'Автор 2', tracks: [{ name: 'Трек 3', artist: 'Исполнитель C' }] },
-        { id: 3n, name: 'Плейлист 3', author: 'Автор 3', tracks: [] },
-        { id: 4n, name: 'Плейлист 4', author: 'Автор 4', tracks: [{ name: 'Трек 4', artist: 'Исполнитель D' }, { name: 'Трек 5', artist: 'Исполнитель E' }] },
-        { id: 5n, name: 'Плейлист 5', author: 'Автор 5', tracks: [] },
-        { id: 6n, name: 'Плейлист 6', author: 'Автор 6', tracks: [] },
-        { id: 7n, name: 'Плейлист 7', author: 'Автор 7', tracks: [] },
-        { id: 8n, name: 'Плейлист 8', author: 'Автор 8', tracks: [] }
-    ];
-    */
+    const loadAllData = async () => {
+        try {
+            setLoading(true);
+            const [tracks, albums, playlists] = await Promise.all([
+                trackManager.findAll(),
+                albumManager.findAll(),
+                playlistManager.findAll()
+            ]);
 
-    const handleTrackCardClick = () => {
-        if (playlists.length > 0) {
-            onOpenPlaylistModal(playlists[0]);
+            setAllTracks(tracks);
+            setAllAlbums(albums);
+            setAllPlaylists(playlists);
+
+            const moodPlaylistsFiltered = playlists.filter(p =>
+                p.name?.toLowerCase().includes('микс') ||
+                p.name?.toLowerCase().includes('настроение') ||
+                p.name?.toLowerCase().includes('хит')
+            ).slice(0, 10);
+
+            setMoodPlaylists(moodPlaylistsFiltered.length > 0 ? moodPlaylistsFiltered : playlists.slice(0, 8));
+
+        } catch (error) {
+            console.error('Error loading data:', error);
+            setError('Failed to load data');
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleTileClick = (playlist) => {
-        onOpenSystemModal(playlist);
+    const handleSearch = () => {
+        if (!searchText.trim()) {
+            setIsSearching(false);
+            setSearchResults({ tracks: [], albums: [], playlists: [] });
+            return;
+        }
+
+        setIsSearching(true);
+        const searchQuery = searchText.toLowerCase().trim();
+
+        const filteredTracks = allTracks.filter(track => {
+            if (!track) return false;
+            const trackName = track.name?.toLowerCase() || '';
+            const trackArtist = track.artist?.toLowerCase() || '';
+            const trackAlbum = track.album?.toLowerCase() || '';
+            return trackName.includes(searchQuery) || trackArtist.includes(searchQuery) || trackAlbum.includes(searchQuery);
+        });
+
+        const filteredAlbums = allAlbums.filter(album => {
+            if (!album) return false;
+            const albumTitle = album.title?.toLowerCase() || '';
+            const albumStatus = album.status?.toLowerCase() || '';
+            return albumTitle.includes(searchQuery) || albumStatus.includes(searchQuery);
+        });
+
+        const filteredPlaylists = allPlaylists.filter(playlist => {
+            if (!playlist) return false;
+            const playlistName = playlist.name?.toLowerCase() || '';
+            const playlistDescription = playlist.description?.toLowerCase() || '';
+            return playlistName.includes(searchQuery) || playlistDescription.includes(searchQuery);
+        });
+
+        setSearchResults({ tracks: filteredTracks, albums: filteredAlbums, playlists: filteredPlaylists });
     };
 
-    const handleSearchClick = () => {
-        onOpenAlbumModal();
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') handleSearch();
     };
+
+    const handleSearchChange = (text: string) => {
+        setSearchText(text);
+        if (!text.trim()) {
+            setIsSearching(false);
+            setSearchResults({ tracks: [], albums: [], playlists: [] });
+        }
+    };
+
+    const handleTrackCardClick = () => {
+        if (moodPlaylists.length > 0) {
+            if (parentOnOpenPlaylistModal) {
+                parentOnOpenPlaylistModal(moodPlaylists[0]);
+            } else {
+                openPlaylistModal(moodPlaylists[0].id);
+            }
+        }
+    };
+
+    const handleSystemTileClick = (playlist) => {
+        openPlaylistModal(playlist.id);
+    };
+
+    const handlePlaylistClick = async (playlist: Playlist) => {
+        await openPlaylistModal(playlist.id);
+    };
+
+    const handleTrackClick = (track) => {
+        console.log('Track clicked:', track);
+    };
+
+    const handleAlbumClick = async (album: Album) => {
+        try {
+            const fullAlbum = await albumManager.findAllTrackById(album.id);
+            setSelectedAlbum(fullAlbum);
+            setIsAlbumModalOpen(true);
+        } catch (err) {
+            console.error('Error loading album details:', err);
+        }
+    };
+
+    const openPlaylistModal = async (playlistId: bigint | number) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const playlistInfo = await playlistManager.findById(playlistId);
+
+            const tracksResult = await playlistManager.findTracksByPlaylistId(playlistId);
+
+            const tracksArray = Array.isArray(tracksResult) ? tracksResult : (tracksResult?.tracks || []);
+
+            const playlistWithTracks: PlaylistWithTracks = {
+                ...playlistInfo,
+                tracks: tracksArray
+            };
+
+            setSelectedPlaylistData(playlistWithTracks);
+            setIsPlaylistModalOpen(true);
+        } catch (err) {
+            console.error('Error loading playlist details:', err);
+            setError('Failed to load playlist');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const closePlaylistModal = () => {
+        setIsPlaylistModalOpen(false);
+        setSelectedPlaylistData(null);
+    };
+
+    const closeAlbumModal = () => {
+        setIsAlbumModalOpen(false);
+        setSelectedAlbum(null);
+    };
+
+    const hasSearchResults = searchResults.tracks.length > 0 || searchResults.albums.length > 0 || searchResults.playlists.length > 0;
 
     return (
         <div className="home-page-container">
@@ -74,24 +212,94 @@ const HomePage = ({
 
             <div className="bottom-section">
                 <SearchBar
-                    placeholder="Введите название трека..."
-                    value=""
-                    onChange={() => {}}
-                    onClick={handleSearchClick}
+                    placeholder="Введите название трека или исполнителя..."
+                    value={searchText}
+                    onChange={handleSearchChange}
+                    onKeyDown={handleKeyDown}
                 />
-                <div className="section-title">Музыкальные подборки под ваше настроение</div>
-                <div className="scrollable-grid-container">
-                    <GridContainer>
-                        {playlists.map((playlist) => (
-                            <ColorTile
-                                key={playlist.id}
-                                title={playlist.name}
-                                onClick={() => handleTileClick(playlist)}
-                            />
-                        ))}
-                    </GridContainer>
-                </div>
+
+                {loading && <div className="search-loading">Загрузка...</div>}
+                {error && <div className="search-error">{error}</div>}
+
+                {!loading && !error && isSearching && (
+                    <>
+                        {hasSearchResults ? (
+                            <div className="search-results">
+                                {searchResults.tracks.length > 0 && (
+                                    <div className="search-section">
+                                        <div className="section-title">Треки</div>
+                                        <div className="scrollable-grid-container">
+                                            <GridContainer>
+                                                {searchResults.tracks.map((track) => (
+                                                    <ColorTile key={track.id} title={track.name || 'Без названия'} subtitle={track.artist || track.album || ''} onClick={() => handleTrackClick(track)} />
+                                                ))}
+                                            </GridContainer>
+                                        </div>
+                                    </div>
+                                )}
+                                {searchResults.albums.length > 0 && (
+                                    <div className="search-section">
+                                        <div className="section-title">Альбомы</div>
+                                        <div className="scrollable-grid-container">
+                                            <GridContainer>
+                                                {searchResults.albums.map((album) => (
+                                                    <ColorTile key={album.id} title={album.title || 'Без названия'} subtitle={`Статус: ${album.status === 'APPROVED' ? 'Опубликован' : album.status === 'IN_PROGRESS' ? 'В процессе' : 'Отклонён'}`} onClick={() => handleAlbumClick(album)} />
+                                                ))}
+                                            </GridContainer>
+                                        </div>
+                                    </div>
+                                )}
+                                {searchResults.playlists.length > 0 && (
+                                    <div className="search-section">
+                                        <div className="section-title">Плейлисты</div>
+                                        <div className="scrollable-grid-container">
+                                            <GridContainer>
+                                                {searchResults.playlists.map((playlist) => (
+                                                    <ColorTile key={playlist.id} title={playlist.name || 'Без названия'} subtitle="Плейлист" onClick={() => handlePlaylistClick(playlist)} />
+                                                ))}
+                                            </GridContainer>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="no-results">Ничего не найдено</div>
+                        )}
+                    </>
+                )}
+
+                {!loading && !error && !isSearching && (
+                    <>
+                        <div className="section-title">Музыкальные подборки под ваше настроение</div>
+                        <div className="scrollable-grid-container">
+                            <GridContainer>
+                                {moodPlaylists.map((playlist) => (
+                                    <ColorTile key={playlist.id} title={playlist.name} onClick={() => handleSystemTileClick(playlist)} />
+                                ))}
+                            </GridContainer>
+                        </div>
+                    </>
+                )}
             </div>
+
+            {isPlaylistModalOpen && selectedPlaylistData && (
+                <PlaylistModal
+                    isOpen={true}
+                    onClose={closePlaylistModal}
+                    playlistData={selectedPlaylistData}
+                />
+            )}
+
+            {isAlbumModalOpen && selectedAlbum && (
+                <AlbumModal
+                    isOpen={true}
+                    onClose={closeAlbumModal}
+                    albumName={String(selectedAlbum.title)}
+                    authorName={selectedAlbum.authors?.[0]?.name || "Исполнитель"}
+                    tracks={selectedAlbum.tracks || []}
+                    albumAuthors={selectedAlbum.authors || []}
+                />
+            )}
         </div>
     );
 };
