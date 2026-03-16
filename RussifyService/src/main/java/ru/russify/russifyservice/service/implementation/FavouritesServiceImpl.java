@@ -22,6 +22,28 @@ public class FavouritesServiceImpl {
     private final FavouriteAlbumRepository favouriteAlbumRepository;
 
     @Transactional
+    public void deleteAlbumFromFavoritesById(String email, Long albumId){
+        if (albumId == null){
+            throw new IllegalArgumentException("albumId must not be null");
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
+
+        Album album = albumRepository.findById(albumId)
+                .orElseThrow(() -> new AlbumNotFoundException(albumId));
+
+        FavouriteAlbumPK favouriteAlbumPK = new FavouriteAlbumPK(user.getId(), albumId);
+
+        if (!favouriteAlbumRepository.existsById(favouriteAlbumPK)){
+            System.out.println("favoriteAlbumPk = " + favouriteAlbumPK.toString());
+            throw new AlbumNotFoundException(albumId);
+        }
+
+        favouriteAlbumRepository.deleteById(favouriteAlbumPK);
+    }
+
+    @Transactional
     public void addFavouriteAlbum(String email, Long albumId) {
 
         if (albumId == null) {
