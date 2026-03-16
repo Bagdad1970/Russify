@@ -4,6 +4,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.russify.models.AlbumDto;
+import ru.russify.models.AlbumTypeDto;
+import ru.russify.models.AuthorDto;
+import ru.russify.models.TrackDto;
 import ru.russify.models.projection.AlbumFlatDto;
 import ru.russify.models.request.CreateAlbumDto;
 import ru.russify.models.request.UpdateAlbumDto;
@@ -22,6 +25,7 @@ import ru.russify.russifyservice.service.interfaces.AlbumService;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -120,7 +124,8 @@ public class AlbumServiceImpl implements AlbumService {
         return albumRepository.save(album);
     }
 
-    public AlbumDto findDtoById(Long id){
+    public AlbumDto findDtoById(Long id) {
+
         List<AlbumFlatDto> flatRows = albumRepository.findAlbumFlatById(id);
 
         if (flatRows.isEmpty()){
@@ -138,21 +143,41 @@ public class AlbumServiceImpl implements AlbumService {
                 first.getReleasedAt()
         );
 
-        dto.setTrackIds(new HashSet<>());
-        dto.setAuthorIds(new HashSet<>());
+        Set<TrackDto> tracks = new HashSet<>();
+        Set<AuthorDto> authors = new HashSet<>();
 
         for (AlbumFlatDto row : flatRows){
+
             if (row.getTrackId() != null) {
-                dto.getTrackIds().add(row.getTrackId());
+                tracks.add(
+                        TrackDto.builder()
+                                .id(row.getTrackId())
+                                .name(row.getTrackName())
+                                .genreId(row.getGenreId())
+                                .coverHash(row.getTrackCoverHash())
+                                .audioHash(row.getAudioHash())
+                                .build()
+                );
             }
 
             if (row.getAuthorId() != null) {
-                dto.getAuthorIds().add(row.getAuthorId());
+                authors.add(
+                        AuthorDto.builder()
+                                .id(row.getAuthorId())
+                                .name(row.getAuthorName())
+                                .photoHash(row.getAuthorPhotoHash())
+                                .description(row.getAuthorDescription())
+                                .build()
+                );
             }
         }
 
+        dto.setTracks(tracks);
+        dto.setAuthors(authors);
+
         return dto;
     }
+
 
     /**
      * Метод сохранения альбома в бд.
@@ -191,4 +216,55 @@ public class AlbumServiceImpl implements AlbumService {
     public void deleteById(Long id) {
         albumRepository.deleteById(id);
     }
+
+    public List<AlbumDto> findAlbumsByUser(String email){
+        return albumRepository.findAlbumsByAuthorEmail(email);
+    }
+
+    public AlbumDto getAlbumById(Long albumId) {
+
+        List<AlbumFlatDto> rows = albumRepository.findAlbumFlatById(albumId);
+
+        if (rows.isEmpty()) {
+            throw new AlbumNotFoundException(albumId);
+        }
+
+        AlbumFlatDto first = rows.get(0);
+
+        Set<TrackDto> tracks = rows.stream()
+                .filter(r -> r.getTrackId() != null)
+                .map(r -> TrackDto.builder()
+                        .id(r.getTrackId())
+                        .name(r.getTrackName())
+                        .genreId(r.getGenreId())
+                        .coverHash(r.getCoverHash())
+                        .audioHash(r.getAudioHash())
+                        .build())
+                .collect(Collectors.toSet());
+
+        Set<AuthorDto> authors = rows.stream()
+                .filter(r -> r.getAuthorId() != null)
+                .map(r -> AuthorDto.builder()
+                        .id(r.getAuthorId())
+                        .name(r.getAuthorName())
+                        .photoHash(r.getAuthorPhotoHash())
+                        .description(r.getAuthorDescription())
+                        .build())
+                .collect(Collectors.toSet());
+
+        AlbumTypeDto type = new AlbumTypeDto();
+        type.setName(first.getTypeName());
+
+        return AlbumDto.builder()
+                .id(first.getId())
+                .title(first.getTitle())
+                .type(type)
+                .status(first.getStatus())
+                .releasedAt(first.getReleasedAt())
+                .coverHash(first.getCoverHash())
+                .tracks(tracks)
+                .authors(authors)
+                .build();
+    }
+
 }

@@ -1,8 +1,5 @@
 package ru.russify.models;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,37 +8,27 @@ import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
 import java.util.Set;
 
-/**
- * КТО ПРОЧИТАЛ ТОТ молодец
- * параметры в DTO и MODEL ДОЛЖНЫ называться также, как и в таблицах!!!
- */
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Data
 public class AlbumDto {
 
     private Long id;
 
-    @NotBlank(message = "The album title cannot be empty")
     private String title;
 
-    @NotNull(message = "The album type is required")
     private AlbumTypeDto type;
 
-    @NotNull(message = "The album status is required")
     private AlbumStatus status;
 
-    @NotNull(message = "The release date is required")
     private OffsetDateTime releasedAt;
 
     private String coverHash;
 
-    @NotEmpty(message = "Album must contain at least one track")
-    private Set<Long> trackIds;
+    private Set<TrackDto> tracks;
 
-    @NotEmpty(message = "Album must contain at least one author")
-    private Set<Long> authorIds;
+    private Set<AuthorDto> authors;
 
     public AlbumDto(
             Long id,

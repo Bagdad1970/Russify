@@ -45,6 +45,7 @@ public class SecurityConfig {
 
                         //GET
                         .requestMatchers(HttpMethod.GET, "/auth/me").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/user/profile").authenticated()
 
                         // остальные endpoints защищены
                         .anyRequest().permitAll()

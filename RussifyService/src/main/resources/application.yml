@@ -26,5 +26,12 @@ spring:
 app:
   schemas: liquibase, app
 
+s3:
+  minio:
+    url: http://127.0.0.1:9000
+    access-key: minioadmin
+    secret-key: miniopassword
+    buckets: audios, photos, covers, avatars
+
 jwt:
   secret: my-super-secret-key-my-super-secret-key-my-super-secret-key

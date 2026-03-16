@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.russify.models.AlbumDto;
+import ru.russify.models.PlaylistWithTracks;
 import ru.russify.models.request.CreateAlbumDto;
 import ru.russify.models.request.UpdateAlbumDto;
 import ru.russify.russifyservice.mapper.AlbumMapper;
@@ -35,9 +36,9 @@ public class AlbumController {
         return service.findAllWithRelations();
     }
 
-    @GetMapping("/{id}")
-    public AlbumDto findById(@PathVariable Long id) {
-        return service.findDtoById(id);
+    @GetMapping("/{albumId}")
+    public AlbumDto getAlbum(@PathVariable Long albumId) {
+        return service.getAlbumById(albumId);
     }
 
     @PostMapping

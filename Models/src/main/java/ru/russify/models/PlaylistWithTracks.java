@@ -13,6 +13,7 @@ public class PlaylistWithTracks {
     private String name;
     private Long userId;
     private Boolean isSystem;
+    private String coverHash;
 
     private List<PlaylistTrackDto> tracks;
 

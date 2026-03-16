@@ -17,6 +17,53 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
     const [menuTrack, setMenuTrack] = useState(null);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [isPositionCalculated, setIsPositionCalculated] = useState(false);
+    const [cover, setCover] = useState<string>("");
+    const playlistManager = new PlaylistManager();
+    const fileManager = new FileManager();
+
+    const [formData, setFormData] = useState<PlaylistWithTracks>({
+        id: 0n,
+        userId: 0n,
+        name: "",
+        isSystem: false,
+        coverHash: "",
+        tracks: []
+    });
+
+    useEffect(() => {
+        const loadPlaylist = async () => {
+            if (!isOpen) return;
+
+            try {
+                const playlistWithTracks = await playlistManager.findById(selectedId);
+                setFormData(playlistWithTracks);
+
+                const coverHash = playlistWithTracks.coverHash;
+
+                if (coverHash) {
+                    const fileGetRequest: FileGetRequest = {
+                        bucket: "covers",
+                        hash: coverHash
+                    };
+                    const coverSrc = await fileManager.getFileUrl(fileGetRequest) ?? "";
+                    if (coverSrc) setCover(coverSrc);
+                }
+            }
+            catch (err) {
+                console.log('Error', err);
+            }
+        };
+
+        loadPlaylist();
+
+        return () => {
+            if (cover) {
+                console.log('Cleaning up cover URL:', cover);
+                fileManager.revokeFileUrl(cover);
+                setCover("");
+            }
+        };
+    }, [isOpen, selectedId]);
 
     // Обложку берем сразу из данных, если она там есть (или можно передать URL из родителя)
     const [cover, setCover] = useState<string>("");
@@ -117,6 +164,7 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
                         <div className="pml-title">{playlistData.name}</div>
                         <div className="pml-meta">{playlistData.tracks?.length || 0} треков</div>
                     </div>
+
 
                     <div className="pml-playlist-actions">
                         <button className="pml-btn pml-btn-play" title="Воспроизвести" onClick={() => console.log("Play")}>

@@ -31,9 +31,7 @@
     <last-used-providers />
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
-    <open-files>
-      <object connection-id="e2a8ec6f-ae61-4ce1-9efe-cde7e9ab6e11" object-ref="schemas/app/tables/users" />
-    </open-files>
+    <open-files />
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
     <connection id="e2a8ec6f-ae61-4ce1-9efe-cde7e9ab6e11" />
@@ -54,6 +52,9 @@
       <filter id="a60c6802-1ecc-43ea-a751-70b26e87690a" name="Filter" temporary="false" custom-name="false" type="basic" join-type="AND" />
     </filter-actions>
     <filter-actions connection-id="e2a8ec6f-ae61-4ce1-9efe-cde7e9ab6e11" dataset="app.albums" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="e2a8ec6f-ae61-4ce1-9efe-cde7e9ab6e11" dataset="app.authors" active-filter-id="6032aab0-f1b8-469d-88b1-0eaf13525b3f">
+      <filter id="6032aab0-f1b8-469d-88b1-0eaf13525b3f" name="Filter" temporary="false" custom-name="false" type="basic" join-type="AND" />
+    </filter-actions>
   </component>
   <component name="DBNavigator.Project.ObjectQuickFilterManager">
     <last-used-operator value="EQUAL" />
