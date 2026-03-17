@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.russify.models.AlbumDto;
 import ru.russify.models.FavouriteTrackDto;
-import ru.russify.models.PlaylistTrackDto;
 import ru.russify.models.request.AddFavouriteAlbumRequest;
 import ru.russify.models.request.AddFavouriteTrackRequest;
 import ru.russify.russifyservice.service.implementation.AlbumServiceImpl;

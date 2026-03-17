@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.russify.models.FavouriteTrackDto;
-import ru.russify.models.PlaylistTrackDto;
 import ru.russify.russifyservice.exception.AlbumAlreadyInFavouritesException;
 import ru.russify.russifyservice.exception.AlbumNotFoundException;
 import ru.russify.russifyservice.exception.TrackAlreadyInFavouritesException;
