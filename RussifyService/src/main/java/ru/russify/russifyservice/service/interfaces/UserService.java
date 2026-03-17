@@ -1,10 +1,8 @@
 package ru.russify.russifyservice.service.interfaces;
 
-import ru.russify.models.TrackDto;
+import ru.russify.models.request.UserSettingsUpdateRequest;
 import ru.russify.models.response.UserProfileResponse;
 import ru.russify.models.response.UserSettingsResponse;
-
-import java.util.List;
 
 public interface UserService {
 
@@ -12,14 +10,6 @@ public interface UserService {
 
     UserSettingsResponse getSettings(String email);
 
+    void updateSettings(String email, UserSettingsUpdateRequest request);
 
-//    TrackDto create(TrackDto album);
-//
-//    TrackDto update(Long id, TrackDto album);
-//
-//    List<TrackDto> findAll();
-//
-//    TrackDto findById(Long id);
-//
-//    void deleteById(Long id);
 }

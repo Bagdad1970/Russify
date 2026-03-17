@@ -2,6 +2,9 @@ package ru.russify.russifyservice.service.implementation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.russify.models.Language;
+import ru.russify.models.Theme;
+import ru.russify.models.request.UserSettingsUpdateRequest;
 import ru.russify.models.response.UserProfileResponse;
 import ru.russify.models.response.UserSettingsResponse;
 import ru.russify.russifyservice.exception.UserNotFoundException;
@@ -45,8 +48,8 @@ public class UserServiceImpl implements UserService {
 
                     UserSettings newSettings = UserSettings.builder()
                             .user(user)
-                            .theme("LIGHT")
-                            .language("RU")
+                            .theme(Theme.LIGHT)
+                            .language(Language.RU)
                             .build();
 
                     return userSettingsRepository.save(newSettings);
@@ -56,5 +59,22 @@ public class UserServiceImpl implements UserService {
                 settings.getTheme(),
                 settings.getLanguage()
         );
+    }
+
+    @Override
+    public void updateSettings(String email, UserSettingsUpdateRequest request) {
+
+        UserSettings settings = userSettingsRepository.findByUserEmail(email)
+                .orElseThrow(() -> new RuntimeException("Settings not found"));
+
+        if (request.getTheme() != null) {
+            settings.setTheme(request.getTheme());
+        }
+
+        if (request.getLanguage() != null) {
+            settings.setLanguage(request.getLanguage());
+        }
+
+        userSettingsRepository.save(settings);
     }
 }
