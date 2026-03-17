@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.russify.models.AlbumDto;
 import ru.russify.models.request.AlbumCreateRequest;
 import ru.russify.models.request.AlbumUpdateRequest;
-import ru.russify.russifyservice.mapper.AlbumMapper;
 import ru.russify.russifyservice.service.implementation.AlbumServiceImpl;
 
 import java.util.List;
@@ -30,7 +29,6 @@ import java.util.List;
 public class AlbumController {
 
     private final AlbumServiceImpl service;
-    private final AlbumMapper mapper;
 
     @GetMapping
     public List<AlbumDto> findAll() {

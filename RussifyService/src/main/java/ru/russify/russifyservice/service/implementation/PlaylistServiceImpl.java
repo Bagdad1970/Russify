@@ -64,7 +64,7 @@ public class PlaylistServiceImpl implements PlaylistService {
                 .orElseThrow(() -> new PlaylistNotFoundException(id));
 
         if (existing.getCoverHash() != null) {
-            fileService.removeObject("covers", existing.getCoverHash());
+            fileService.removeObject("images", existing.getCoverHash());
         }
 
         playlistRepository.deleteById(id);
@@ -121,7 +121,7 @@ public class PlaylistServiceImpl implements PlaylistService {
         }
 
         String coverHash = fileService.uploadFile(
-                "covers",
+                "images",
                 request.getCoverFile()
         );
 
@@ -163,7 +163,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 
         if (request.getCoverFile() != null && !request.getCoverFile().isEmpty()) {
 
-            String hash = fileService.uploadFile("covers", request.getCoverFile());
+            String hash = fileService.uploadFile("images", request.getCoverFile());
             playlist.setCoverHash(hash);
         }
 

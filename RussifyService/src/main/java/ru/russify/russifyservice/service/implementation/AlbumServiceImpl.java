@@ -1,9 +1,9 @@
 package ru.russify.russifyservice.service.implementation;
 
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.russify.models.AlbumDto;
 import ru.russify.models.AlbumStatus;
 import ru.russify.models.AlbumTypeDto;
@@ -13,12 +13,10 @@ import ru.russify.models.projection.AlbumFlatDto;
 import ru.russify.models.request.AlbumCreateRequest;
 import ru.russify.models.request.AlbumUpdateRequest;
 import ru.russify.russifyservice.exception.AlbumNotFoundException;
-import ru.russify.russifyservice.exception.PlaylistNotFoundException;
 import ru.russify.russifyservice.exception.UserNotFoundException;
 import ru.russify.russifyservice.model.Album;
 import ru.russify.russifyservice.model.Author;
 import ru.russify.russifyservice.model.AuthorAlbum;
-import ru.russify.russifyservice.model.Playlist;
 import ru.russify.russifyservice.model.TrackAlbum;
 import ru.russify.russifyservice.model.User;
 import ru.russify.russifyservice.model.compositekey.AuthorAlbumPK;
@@ -31,7 +29,6 @@ import ru.russify.russifyservice.repository.UserRepository;
 import ru.russify.russifyservice.service.interfaces.AlbumService;
 import ru.russify.russifyservice.service.interfaces.FileService;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -84,7 +81,7 @@ public class AlbumServiceImpl implements AlbumService {
         album.setStatus(AlbumStatus.IN_PROGRESS);
 
         if (request.getCoverFile() != null) {
-            String coverHash = fileService.putObject("covers", request.getCoverFile());
+            String coverHash = fileService.uploadFile("images", request.getCoverFile());
             album.setCoverHash(coverHash);
         }
 
@@ -149,7 +146,7 @@ public class AlbumServiceImpl implements AlbumService {
 
         if (request.getCoverFile() != null) {
 
-            String coverHash = fileService.putObject("covers", request.getCoverFile());
+            String coverHash = fileService.uploadFile("images", request.getCoverFile());
 
             album.setCoverHash(coverHash);
         }
@@ -291,7 +288,7 @@ public class AlbumServiceImpl implements AlbumService {
         }
 
         if (request.getCoverFile() != null) {
-            String coverHash = fileService.putObject("covers", request.getCoverFile());
+            String coverHash = fileService.uploadFile("images", request.getCoverFile());
             album.setCoverHash(coverHash);
         }
 
@@ -391,7 +388,7 @@ public class AlbumServiceImpl implements AlbumService {
         album.setStatus(AlbumStatus.IN_PROGRESS);
 
         if (request.getCoverFile() != null) {
-            String coverHash = fileService.putObject("covers", request.getCoverFile());
+            String coverHash = fileService.uploadFile("images", request.getCoverFile());
             album.setCoverHash(coverHash);
         }
 

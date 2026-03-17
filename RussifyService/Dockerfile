@@ -12,13 +12,13 @@ FROM maven:3.9.12 as BUILDER
 
 WORKDIR /app
 
-COPY --from=deps /root/.m2 /root/.m2
-COPY --from=deps /app/ /app
+COPY --from=DEPS /root/.m2 /root/.m2
+COPY --from=DEPS /app/ /app
 
 COPY Models/src /app/Models/src
 COPY RussifyService/src /app/RussifyService/src
 
-RUN mvn -B -e -o clean install -DskipTests=true
+RUN mvn -B -e clean install -DskipTests=true
 
 FROM eclipse-temurin:24
 
@@ -26,6 +26,6 @@ WORKDIR /app
 
 RUN mkdir /app/data
 
-COPY --from=builder /app/RussifyService/target/RussifyService-0.0.1-SNAPSHOT.jar .
+COPY --from=BUILDER /app/RussifyService/target/RussifyService-0.0.1-SNAPSHOT.jar .
 
 CMD [ "java", "-jar", "/app/RussifyService-0.0.1-SNAPSHOT.jar" ]
