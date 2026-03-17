@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
 
-    <changeSet id="18" author="Bagdad1970">
+    <changeSet id="19" author="Bagdad1970">
         <insert tableName="album_types" schemaName="app">
             <column name="name" value="album"/>
         </insert>
@@ -14,7 +14,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="19" author="Bagdad1970">
+    <changeSet id="20" author="Bagdad1970">
         <insert tableName="genres" schemaName="app">
             <column name="name" value="pop"/>
         </insert>
@@ -26,7 +26,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="20" author="LittleBlBb">
+    <changeSet id="21" author="LittleBlBb">
         <insert tableName="roles" schemaName="app">
             <column name="role_name" value="ADMIN"/>
         </insert>
@@ -38,7 +38,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="21" author="LittleBlBb">
+    <changeSet id="22" author="LittleBlBb">
         <insert tableName="users" schemaName="app">
             <column name="username" value="root"/>
             <column name="role_id" value="1"/>
@@ -76,7 +76,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="22" author="LittleBlBb">
+    <changeSet id="23" author="LittleBlBb">
         <insert tableName="playlists" schemaName="app">
             <column name="user_id" value="3"/>
             <column name="name" value="first_system_playlist"/>
@@ -94,7 +94,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="23" author="LittleBlBb">
+    <changeSet id="24" author="LittleBlBb">
         <insert tableName="albums" schemaName="app">
             <column name="album_type_id" value="1"/>
             <column name="title" value="Most valuable pirate"/>
@@ -125,7 +125,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="24" author="LittleBlBb">
+    <changeSet id="25" author="LittleBlBb">
         <insert tableName="authors" schemaName="app">
             <column name="name" value="Friendly Thug 52 NGG"/>
             <column name="photo_hash" value="photo1"/>
@@ -143,7 +143,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="25" author="LittleBlBb">
+    <changeSet id="26" author="LittleBlBb">
         <insert tableName="tracks" schemaName="app">
             <column name="track_name" value="2 Goyard"></column>
             <column name="genre_id" value="1"></column>
@@ -164,7 +164,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="26" author="LittleBlBb">
+    <changeSet id="27" author="LittleBlBb">
         <insert tableName="favourite_albums" schemaName="app">
             <column name="album_id" value="1"></column>
             <column name="user_id" value="1"></column>
@@ -179,7 +179,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="27" author="LittleBlBb">
+    <changeSet id="28" author="LittleBlBb">
         <insert tableName="track_of_playlist" schemaName="app">
             <column name="playlist_id" value="1"></column>
             <column name="track_id" value="1"></column>
@@ -194,7 +194,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="28" author="LittleBlBb">
+    <changeSet id="29" author="LittleBlBb">
         <insert tableName="track_of_album" schemaName="app">
             <column name="album_id" value="1"></column>
             <column name="track_id" value="1"></column>
@@ -209,7 +209,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="29" author="LittleBlBb">
+    <changeSet id="30" author="LittleBlBb">
         <insert tableName="author_of_album" schemaName="app">
             <column name="album_id" value="1"/>
             <column name="author_id" value="1"/>
@@ -228,7 +228,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="30" author="LittleBlBb">
+    <changeSet id="31" author="LittleBlBb">
         <insert tableName="author_of_track" schemaName="app">
             <column name="author_id" value="1"></column>
             <column name="track_id" value="1"></column>
@@ -243,7 +243,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="31" author="LittleBlBb">
+    <changeSet id="32" author="LittleBlBb">
         <insert tableName="favourite_tracks" schemaName="app">
             <column name="track_id" value="1"></column>
             <column name="user_id" value="1"></column>

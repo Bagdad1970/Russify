@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.russify.models.AlbumStatus;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Data
 public class AlbumUpdateRequest {
@@ -20,5 +21,7 @@ public class AlbumUpdateRequest {
     private Long typeId;
 
     private AlbumStatus status;
+
+    private List<Long> trackIds;
 
 }

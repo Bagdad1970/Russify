@@ -21,6 +21,7 @@ import SystemPlaylistsPage from "./pages/SystemPlaylistPage.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
 
 import { ThemeProvider } from './context/ThemeContext';
+import {favoriteStore} from "./store/useFavoriteStore.ts";
 
 
 function App() {
@@ -32,6 +33,11 @@ function App() {
 
     const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+
+    useEffect(() => {
+        favoriteStore.loadFavorites();
+    }, []);
 
     const albums = [
         {

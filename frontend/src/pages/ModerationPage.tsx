@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import '../assets/styles/pages/ModerationPage.css';
 import {
     type ColumnDef,
@@ -14,27 +14,20 @@ import GridContainer from '../components/GridContainer.tsx';
 import AlbumCard from '../components/AlbumCard.tsx';
 import AlbumModalModeration from '../components/AlbumModalModeration.tsx';
 import {AlbumStatus} from "../types/AlbumStatus.ts";
-
-export interface Album {
-    id: bigint;
-    title: string;
-    artist: string;
-    year: string;
-    cover: string | null;
-    status: AlbumStatus;
-}
+import { AlbumManager } from '../api/AlbumManager.ts'; // Добавляем менеджер
+import type { Album } from '../types/Album.ts'; // Импортируем тип Album
 
 interface ModerationPageProps {
     onModerateAlbum?: (album: Album, action: AlbumStatus) => void;
 }
 
-// 2. Кастомный фильтр для поиска по нескольким полям
+// Кастомный фильтр для поиска по нескольким полям
 const fuzzyTextFilterFn: FilterFn<Album> = (row, columnId, filterValue) => {
     const search = filterValue.toLowerCase();
     return (
         row.original.title.toLowerCase().includes(search) ||
-        row.original.artist.toLowerCase().includes(search) ||
-        row.original.year.includes(filterValue)
+        row.original.artist?.toLowerCase().includes(search) ||
+        row.original.year?.includes(filterValue)
     );
 };
 
@@ -44,22 +37,36 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [globalFilter, setGlobalFilter] = useState<string>('');
     const [sorting, setSorting] = useState<SortingState>([]);
+    const [albumsForModeration, setAlbumsForModeration] = useState<Album[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
-    // Моковые данные
-    const albumsForModeration: Album[] = useMemo(() => [
-        { id: 1, title: 'Альбом', artist: 'Исполнитель', year: '2024', cover: null, status: 'pending' },
-        { id: 2, title: 'Альбом', artist: 'Исполнитель', year: '2023', cover: null, status: 'pending' },
-        { id: 3, title: 'Альбром', artist: 'Исполнитель', year: '2024', cover: null, status: 'pending' },
-        { id: 4, title: 'Вечерний', artist: 'Лунный свет', year: '2024', cover: null, status: 'pending' },
-        { id: 5, title: 'Ночной дозор', artist: 'Мечтатели', year: '2023', cover: null, status: 'pending' },
-        { id: 6, title: 'Рассвет', artist: 'Новое утро', year: '2024', cover: null, status: 'pending' },
-        { id: 7, title: 'Классика', artist: 'Оркестр', year: '2022', cover: null, status: 'pending' },
-        { id: 8, title: 'Электроника', artist: 'DJ Cool', year: '2024', cover: null, status: 'pending' },
-        { id: 9, title: 'Джаз', artist: 'Саксофон', year: '2023', cover: null, status: 'pending' },
-        { id: 10, title: 'Рок', artist: 'Группа', year: '2024', cover: null, status: 'pending' },
-    ], []);
+    const albumManager = new AlbumManager();
 
-    // 3. Обработчики модального окна
+    // Загружаем альбомы со статусом IN_PROGRESS
+    useEffect(() => {
+        const loadAlbumsForModeration = async () => {
+            try {
+                setLoading(true);
+                // Получаем все альбомы
+                const allAlbums = await albumManager.findAll();
+
+                // Фильтруем только те, что в статусе IN_PROGRESS
+                const inProgressAlbums = allAlbums.filter(
+                    album => album.status === 'IN_PROGRESS'
+                );
+
+                setAlbumsForModeration(inProgressAlbums);
+            } catch (error) {
+                console.error('Error loading albums for moderation:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadAlbumsForModeration();
+    }, []);
+
+    // Обработчики модального окна
     const handleOpenModal = useCallback((album: Album) => {
         setSelectedAlbum(album);
         setIsModalOpen(true);
@@ -71,21 +78,25 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
     }, []);
 
     const handleApprove = useCallback((album: Album) => {
-        onModerateAlbum?.(album, 'approved');
+        onModerateAlbum?.(album, 'APPROVED'); // Используем APPROVED как в БД
+        // Обновляем список, убирая одобренный альбом
+        setAlbumsForModeration(prev => prev.filter(a => a.id !== album.id));
         handleCloseModal();
     }, [onModerateAlbum, handleCloseModal]);
 
     const handleReject = useCallback((album: Album) => {
-        onModerateAlbum?.(album, 'rejected');
+        onModerateAlbum?.(album, 'REJECTED'); // Используем REJECTED как в БД
+        // Обновляем список, убирая отклонённый альбом
+        setAlbumsForModeration(prev => prev.filter(a => a.id !== album.id));
         handleCloseModal();
     }, [onModerateAlbum, handleCloseModal]);
 
-    // 4. Колонки (для сортировки и фильтрации)
+    // Колонки (для сортировки и фильтрации)
     const columns = useMemo<ColumnDef<Album>[]>(() => [
         { accessorKey: 'id', header: 'ID' },
         { accessorKey: 'title', header: 'Название' },
         { accessorKey: 'artist', header: 'Исполнитель' },
-        { accessorKey: 'year', header: 'Год' },
+        { accessorKey: 'releasedAt', header: 'Дата релиза' },
         { accessorKey: 'status', header: 'Статус' },
     ], []);
 
@@ -101,8 +112,18 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
         getSortedRowModel: getSortedRowModel()
     });
 
-    // 6. Получаем отфильтрованные данные для рендера
+    // Получаем отфильтрованные данные для рендера
     const albumsToShow = table.getRowModel().rows.map(row => row.original);
+
+    if (loading) {
+        return (
+            <div className="moderation-page-container">
+                <div className="moderation-content">
+                    <div className="loading-spinner">Загрузка альбомов...</div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="moderation-page-container">
@@ -130,16 +151,23 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
                 </div>
 
                 <div className="scrollable-grid-container">
-                    <GridContainer children={undefined}>
-                        {albumsToShow.map((album) => (
-                            <AlbumCard
-                                title={album.title}
-                                artist={album.artist}
-                                year={album.year}
-                                cover={album.cover}
-                                onClick={() => handleOpenModal(album)}
-                            />
-                        ))}
+                    <GridContainer>
+                        {albumsToShow.length > 0 ? (
+                            albumsToShow.map((album) => (
+                                <AlbumCard
+                                    key={album.id.toString()}
+                                    title={album.title}
+                                    artist={album.artist || "Исполнитель"}
+                                    year={new Date(album.releasedAt).getFullYear().toString()}
+                                    cover={album.coverHash}
+                                    onClick={() => handleOpenModal(album)}
+                                />
+                            ))
+                        ) : (
+                            <div className="no-albums-message">
+                                Нет альбомов на модерации
+                            </div>
+                        )}
                     </GridContainer>
                 </div>
             </div>

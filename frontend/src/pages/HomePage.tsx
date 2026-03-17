@@ -298,6 +298,7 @@ const HomePage = ({
                     authorName={selectedAlbum.authors?.[0]?.name || "Исполнитель"}
                     tracks={selectedAlbum.tracks || []}
                     albumAuthors={selectedAlbum.authors || []}
+                    albumId={selectedAlbum.id}
                 />
             )}
         </div>

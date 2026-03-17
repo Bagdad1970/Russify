@@ -2,9 +2,11 @@ import { useState, useRef, useEffect } from 'react';
 import '../assets/styles/components/PlaylistModal.css';
 import noCoverPlaylist from '../assets/images/no-cover-playlist.svg';
 import type { PlaylistWithTracks } from "../types/PlaylistWithTracks.ts";
+import type { Track } from '../types/Track.ts';
 import { PlaylistManager } from '../api/PlaylistManager';
 import { FileManager } from '../api/FileManager';
 import type { FileGetRequest } from '../types/request/FileGetRequest';
+import { useFavorites } from '../hooks/useFavorites'; // Добавляем хук
 
 const PlaylistModal = ({ isOpen, onClose, playlistData }: {
     isOpen: boolean;
@@ -16,12 +18,16 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isPlaylistFavorite, setIsPlaylistFavorite] = useState(false);
-    const [menuTrack, setMenuTrack] = useState(null);
+    const [menuTrack, setMenuTrack] = useState<Track | null>(null);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [isPositionCalculated, setIsPositionCalculated] = useState(false);
-    const [cover, setCover] = useState<string>(""); // ✅ ОДНО объявление
+    const [cover, setCover] = useState<string>("");
+
     const playlistManager = new PlaylistManager();
     const fileManager = new FileManager();
+
+    // Используем хук избранного
+    const { favoriteTrackIds, addFavoriteTrack, removeFavoriteTrack } = useFavorites();
 
     const [formData, setFormData] = useState<PlaylistWithTracks>({
         id: 0n,
@@ -34,10 +40,9 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
 
     useEffect(() => {
         const loadPlaylist = async () => {
-            if (!isOpen || !playlistData?.id) return; // ✅ Используем playlistData.id
+            if (!isOpen || !playlistData?.id) return;
 
             try {
-                // Если нужно загрузить дополнительные данные
                 const playlistWithTracks = await playlistManager.findById(playlistData.id);
                 setFormData(playlistWithTracks);
 
@@ -66,7 +71,7 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
                 setCover("");
             }
         };
-    }, [isOpen, playlistData?.id]); // ✅ Зависимость от playlistData.id
+    }, [isOpen, playlistData?.id]);
 
     useEffect(() => {
         if (!isOpen) {
@@ -153,15 +158,13 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
             >
                 <div className="pml-header">
                     <div className="pml-playlist-cover-wrapper">
-                        {/* Здесь можно использовать cover из playlistData, если передашь */}
-                        <img src={noCoverPlaylist} alt="No cover of playlist" />
+                        <img src={cover || noCoverPlaylist} alt="No cover of playlist" />
                     </div>
 
                     <div className="pml-playlist-info">
                         <div className="pml-title">{playlistData.name}</div>
                         <div className="pml-meta">{playlistData.tracks?.length || 0} треков</div>
                     </div>
-
 
                     <div className="pml-playlist-actions">
                         <button className="pml-btn pml-btn-play" title="Воспроизвести" onClick={() => console.log("Play")}>
@@ -188,10 +191,13 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
                 <div className="pml-track-list">
                     {playlistData.tracks.map((track, idx) => (
                         <TrackItem
-                            key={track.id || idx}
+                            key={track.id ? Number(track.id) : idx}
                             index={idx + 1}
                             track={track}
                             isMobile={isMobile}
+                            isFavorite={favoriteTrackIds.has(Number(track.id))}
+                            onAddFavorite={() => addFavoriteTrack(Number(track.id))}
+                            onRemoveFavorite={() => removeFavoriteTrack(Number(track.id))}
                             onMoreClick={() => setMenuTrack(track)}
                         />
                     ))}
@@ -202,7 +208,21 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
                         <div className={`pml-context-menu ${menuTrack ? 'active' : ''}`} onClick={(e) => e.stopPropagation()}>
                             <div className="pml-context-item" onClick={() => { console.log("Next:", menuTrack.name); setMenuTrack(null); }}>Играть следующим</div>
                             <div className="pml-context-divider" />
-                            <div className="pml-context-item" onClick={() => { console.log("Fav:", menuTrack.name); setMenuTrack(null); }}>В избранное</div>
+                            <div className="pml-context-item" onClick={() => {
+                                if (menuTrack.id) {
+                                    const trackId = Number(menuTrack.id);
+                                    if (favoriteTrackIds.has(trackId)) {
+                                        removeFavoriteTrack(trackId);
+                                    } else {
+                                        addFavoriteTrack(trackId);
+                                    }
+                                }
+                                setMenuTrack(null);
+                            }}>
+                                {menuTrack.id && favoriteTrackIds.has(Number(menuTrack.id))
+                                    ? "Удалить из избранного"
+                                    : "Добавить в избранное"}
+                            </div>
                             <div className="pml-context-divider" />
                             <div className="pml-context-item" onClick={() => { console.log("Add:", menuTrack.name); setMenuTrack(null); }}>В плейлист</div>
                         </div>
@@ -213,8 +233,33 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
     );
 };
 
-const TrackItem = ({ index, track, isMobile, onMoreClick }) => {
-    const [isFavorite, setIsFavorite] = useState(false);
+interface TrackItemProps {
+    index: number;
+    track: Track;
+    isMobile: boolean;
+    isFavorite: boolean;
+    onAddFavorite: () => void;
+    onRemoveFavorite: () => void;
+    onMoreClick: () => void;
+}
+
+const TrackItem = ({
+                       index,
+                       track,
+                       isMobile,
+                       isFavorite,
+                       onAddFavorite,
+                       onRemoveFavorite,
+                       onMoreClick
+                   }: TrackItemProps) => {
+
+    const handleFavoriteClick = () => {
+        if (isFavorite) {
+            onRemoveFavorite();
+        } else {
+            onAddFavorite();
+        }
+    };
 
     return (
         <div className={`pml-track-item ${isMobile ? 'mobile' : ''}`}>
@@ -233,22 +278,47 @@ const TrackItem = ({ index, track, isMobile, onMoreClick }) => {
             </div>
             {!isMobile && (<div className="pml-track-album">{track.album || "Альбом"}</div>)}
             <div className="pml-track-duration">
-                {track.duration ? `${Math.floor(track.duration / 60)}:${(track.duration % 60).toString().padStart(2, '0')}` : "01:00"}
+                {track.duration ? `${Math.floor(track.duration / 60)}:${(track.duration % 60).toString().padStart(2, '0')}` : "0:00"}
             </div>
             <div className="pml-track-actions">
                 {isMobile ? (
                     <>
-                        <button className="pml-btn pml-btn-play"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2"><path d="M8 5v14l11-7z"/></svg></button>
-                        <button className="pml-btn pml-btn-more" onClick={(e) => { e.stopPropagation(); onMoreClick(); }}><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+                        <button className="pml-btn pml-btn-play">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                        </button>
+                        <button className="pml-btn pml-btn-more" onClick={(e) => { e.stopPropagation(); onMoreClick(); }}>
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
                     </>
                 ) : (
                     <>
-                        <button className="pml-btn pml-btn-play"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2"><path d="M8 5v14l11-7z"/></svg></button>
-                        <button className="pml-btn pml-btn-next"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2"><path d="M8 5v14l11-7z"/><path d="M18 5v14"/></svg></button>
-                        <button className={`pml-btn pml-btn-heart ${isFavorite ? 'active' : ''}`} onClick={() => setIsFavorite(!isFavorite)}>
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill={isFavorite ? "#ff2d55" : "none"} stroke="#aaa" strokeWidth="2"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        <button className="pml-btn pml-btn-play">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
                         </button>
-                        <button className="pml-btn pml-btn-more" onClick={(e) => { e.stopPropagation(); onMoreClick(); }}><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M14 10H2v2h12v-2zm0-4H2v2h12V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM2 16h8v-2H2v2z"/></svg></button>
+                        <button className="pml-btn pml-btn-next">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2">
+                                <path d="M8 5v14l11-7z"/><path d="M18 5v14"/>
+                            </svg>
+                        </button>
+                        <button
+                            className={`pml-btn pml-btn-heart ${isFavorite ? 'active' : ''}`}
+                            onClick={handleFavoriteClick}
+                        >
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill={isFavorite ? "#ff2d55" : "none"} stroke="#aaa" strokeWidth="2">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                        </button>
+                        <button className="pml-btn pml-btn-more" onClick={(e) => { e.stopPropagation(); onMoreClick(); }}>
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                <path d="M14 10H2v2h12v-2zm0-4H2v2h12V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM2 16h8v-2H2v2z"/>
+                            </svg>
+                        </button>
                     </>
                 )}
             </div>

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import ru.russify.russifyservice.model.compositekey.FavouriteTrackPK;
 
-@Entity(name = "favourite_track")
+@Entity
 @Table(name = "favourite_tracks")
 @Getter
 @Setter

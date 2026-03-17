@@ -1,38 +1,90 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import '../assets/styles/pages/ProfilePage.css';
 
 import ProfileHeader from '../components/ProfileHeader.tsx';
 import AlbumModal from '../components/AlbumModal.tsx';
 import CreateAlbumOrTrackModal from '../components/CreateAlbumOrTrackModal.tsx';
+import { UserManager } from '../api/UserManager.ts';
+import { AlbumManager } from '../api/AlbumManager.ts';
+import { FileManager } from '../api/FileManager.ts';
+import type { Album } from '../types/Album.ts';
+import type { FileGetRequest } from '../types/request/FileGetRequest.ts';
+import noCoverPlaylist from '../assets/images/no-cover-playlist.svg';
 
 const ProfilePage = () => {
-    const albums = [
-        { id: 1, title: "Альбом 1", date: "2025-01-15", color: "#00f0ff", tracks: [
-                { title: "Трек 1", artist: "Исполнитель A", duration: 180 },
-                { title: "Трек 2", artist: "Исполнитель B", duration: 210 },
-                { title: "Трек 3", artist: "Исполнитель C", duration: 150 },
-            ]},
-        { id: 2, title: "Альбом 2", date: "2025-02-01", color: "#ff0000", tracks: [
-                { title: "Трек 4", artist: "Исполнитель D", duration: 200 },
-                { title: "Трек 5", artist: "Исполнитель E", duration: 170 },
-            ]},
-        { id: 3, title: "Альбом 3", date: "2025-02-10", color: "#8000ff", tracks: [
-                { title: "Трек 6", artist: "Исполнитель F", duration: 190 },
-            ]},
-        { id: 4, title: "Альбом 4", date: "2025-02-18", color: "#7fff7f", tracks: []},
-        { id: 5, title: "Альбом 5", date: "2025-02-20", color: "#00f0ff", tracks: []},
-        { id: 6, title: "Альбом 6", date: "2025-02-22", color: "#ff0000", tracks: []},
-        { id: 7, title: "Альбом 7", date: "2025-02-25", color: "#8000ff", tracks: []},
-        { id: 8, title: "Альбом 8", date: "2025-02-28", color: "#7fff7f", tracks: []},
-    ];
+    const [albums, setAlbums] = useState<Album[]>([]);
+    const [covers, setCovers] = useState<Record<string, string>>({});
+    const [loading, setLoading] = useState(false);
 
-    const [selectedAlbum, setSelectedAlbum] = useState(null);
+    const userManager = new UserManager();
+    const albumManager = new AlbumManager();
+    const fileManager = new FileManager();
+
+    const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
     const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-    const openAlbumModal = (album) => {
-        setSelectedAlbum(album);
-        setIsAlbumModalOpen(true);
+    // Загрузка реальных альбомов пользователя
+    useEffect(() => {
+        const loadUserAlbums = async () => {
+            try {
+                setLoading(true);
+                const userAlbums = await userManager.getUserAlbums();
+                setAlbums(userAlbums);
+
+                // Загружаем обложки для альбомов
+                const coversMap: Record<string, string> = {};
+
+                if (userAlbums.length > 0) {
+                    await Promise.all(userAlbums.map(async (album) => {
+                        if (album.coverHash) {
+                            try {
+                                const fileGetRequest: FileGetRequest = {
+                                    bucket: "covers",
+                                    hash: album.coverHash
+                                };
+                                const coverSrc = await fileManager.getFileUrl(fileGetRequest);
+                                if (coverSrc) {
+                                    coversMap[album.id.toString()] = coverSrc;
+                                }
+                            } catch (err) {
+                                console.log(`Error loading cover for album ${album.id}:`, err);
+                            }
+                        }
+                    }));
+                }
+                setCovers(coversMap);
+
+            } catch (err) {
+                console.error('Error loading user albums:', err);
+                setAlbums([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadUserAlbums();
+
+        // Очистка URL при размонтировании
+        return () => {
+            Object.values(covers).forEach(url => {
+                if (url) fileManager.revokeFileUrl(url);
+            });
+        };
+    }, []);
+
+    const openAlbumModal = async (album: Album) => {
+        try {
+            setLoading(true);
+            // Загружаем полные данные альбома с треками (как в HomePage)
+            const fullAlbum = await albumManager.findAllTrackById(album.id);
+            setSelectedAlbum(fullAlbum);
+            setIsAlbumModalOpen(true);
+        } catch (err) {
+            console.error('Error loading album details:', err);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const closeAlbumModal = () => {
@@ -48,7 +100,7 @@ const ProfilePage = () => {
         setIsCreateModalOpen(false);
     };
 
-    const formatDate = (dateStr) => {
+    const formatDate = (dateStr: string | Date) => {
         const months = [
             "января", "февраля", "марта", "апреля", "мая", "июня",
             "июля", "августа", "сентября", "октября", "ноября", "декабря"
@@ -74,19 +126,27 @@ const ProfilePage = () => {
                     </button>
                 </div>
 
+                {loading && <div className="profile-loading">Загрузка...</div>}
+
                 <div className="profile-albums-grid">
                     {albums.map((album) => (
-                        <div key={album.id} className="profile-album-card">
+                        <div key={album.id.toString()} className="profile-album-card">
                             <div
                                 className="album-cover"
-                                style={{ backgroundColor: album.color }}
                                 onClick={() => openAlbumModal(album)}
                             >
+                                <img
+                                    src={covers[album.id.toString()] || noCoverPlaylist}
+                                    alt={album.title}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    onError={(e) => {
+                                        e.currentTarget.src = noCoverPlaylist;
+                                    }}
+                                />
                                 <div
                                     className="album-cover-play-button"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        console.log("Воспроизвести альбом:", album.title);
                                         openAlbumModal(album);
                                     }}
                                 >
@@ -99,7 +159,7 @@ const ProfilePage = () => {
                                 <div className="album-info-text">
                                     <div className="album-title">{album.title}</div>
                                     <div className="album-meta">
-                                        <span>{formatDate(album.date)}</span>
+                                        <span>{formatDate(album.releasedAt)}</span>
                                     </div>
                                 </div>
                                 <div className="album-trash-icon">
@@ -117,9 +177,11 @@ const ProfilePage = () => {
                 <AlbumModal
                     isOpen={true}
                     onClose={closeAlbumModal}
-                    albumName={selectedAlbum.title}
-                    authorName="Автор"
-                    tracks={selectedAlbum.tracks}
+                    albumName={String(selectedAlbum.title)}
+                    authorName={selectedAlbum.authors?.[0]?.name || "Автор"}
+                    tracks={selectedAlbum.tracks || []}
+                    albumAuthors={selectedAlbum.authors || []}
+                    albumId={selectedAlbum.id}
                 />
             )}
 

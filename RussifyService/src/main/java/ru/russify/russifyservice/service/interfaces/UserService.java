@@ -1,21 +1,15 @@
 package ru.russify.russifyservice.service.interfaces;
 
-import ru.russify.models.TrackDto;
+import ru.russify.models.request.UserSettingsUpdateRequest;
 import ru.russify.models.response.UserProfileResponse;
-
-import java.util.List;
+import ru.russify.models.response.UserSettingsResponse;
 
 public interface UserService {
 
     UserProfileResponse getProfile(String email);
 
-//    TrackDto create(TrackDto album);
-//
-//    TrackDto update(Long id, TrackDto album);
-//
-//    List<TrackDto> findAll();
-//
-//    TrackDto findById(Long id);
-//
-//    void deleteById(Long id);
+    UserSettingsResponse getSettings(String email);
+
+    void updateSettings(String email, UserSettingsUpdateRequest request);
+
 }

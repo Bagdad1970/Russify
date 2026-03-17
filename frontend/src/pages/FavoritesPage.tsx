@@ -6,29 +6,48 @@ import PlaylistModal from '../components/PlaylistModal.tsx';
 import CreatePlaylistModal from '../components/CreatePlaylistModal.tsx';
 import AlbumModal from '../components/AlbumModal.tsx';
 import type {Playlist} from "../types/Playlist.ts";
+import type {Track} from "../types/Track.ts";
+import type {Album} from "../types/Album.ts";
 import {PlaylistManager} from "../api/PlaylistManager.ts";
+import {FavoriteManager} from "../api/FavoriteManager.ts";
 import {FileManager} from "../api/FileManager.ts";
 import type {FileGetRequest} from "../types/request/FileGetRequest.ts";
 import noCoverPlaylist from '../assets/images/no-cover-playlist.svg';
+import {useFavorites} from "../hooks/useFavorites.ts";
 
 const FavoritesPage = () => {
     const [category, setCategory] = useState("Треки");
     const playlistManager = new PlaylistManager();
+    const favoriteManager = new FavoriteManager();
     const fileManager = new FileManager();
+
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
+    const [tracks, setTracks] = useState<Track[]>([]);
+    const [albums, setAlbums] = useState<Album[]>([]);
     const [covers, setCovers] = useState<Record<number, string>>({});
 
+    const { favoriteTrackIds, favoriteAlbumIds, removeFavoriteTrack, removeFavoriteAlbum } = useFavorites();
+
+    // Загрузка всех данных при монтировании
     useEffect(() => {
-        const loadPlaylists = async () => {
+        const loadAllData = async () => {
             try {
-                const playlists = await playlistManager.findAll();
-                setPlaylists(playlists);
+                // Загружаем плейлисты (как и было)
+                const userPlaylists = await playlistManager.findAll();
+                setPlaylists(userPlaylists);
 
+                // Загружаем избранные треки
+                const favoriteTracks = await favoriteManager.getFavoriteTracks();
+                setTracks(favoriteTracks);
+
+                // Загружаем избранные альбомы
+                const favoriteAlbums = await favoriteManager.getFavoriteAlbums();
+                setAlbums(favoriteAlbums);
+
+                // Загружаем обложки для плейлистов
                 const coversMap: Record<string, string> = {};
-
-                await Promise.all(playlists.map(async (playlist) => {
+                await Promise.all(userPlaylists.map(async (playlist) => {
                     const coverHash = playlist.coverHash;
-
                     if (coverHash) {
                         try {
                             const fileGetRequest: FileGetRequest = {
@@ -44,15 +63,14 @@ const FavoritesPage = () => {
                         }
                     }
                 }));
-
                 setCovers(coversMap);
 
             } catch (err) {
-                console.log('Error loading playlists:', err);
+                console.log('Error loading data:', err);
             }
         };
 
-        loadPlaylists();
+        loadAllData();
 
         return () => {
             Object.values(covers).forEach(url => {
@@ -61,65 +79,47 @@ const FavoritesPage = () => {
         };
     }, []);
 
-    // Данные альбомов
-    const albums = [
-        { id: 1, title: "Альбом 1", date: "2025-01-15", color: "#00f0ff", creator: "Артур", tracks: [
-                { title: "Трек 1", artist: "Исполнитель A", duration: 180 },
-                { title: "Трек 2", artist: "Исполнитель B", duration: 210 },
-                { title: "Трек 3", artist: "Исполнитель C", duration: 150 },
-            ]},
-        { id: 2, title: "Альбом 2", date: "2025-02-01", color: "#ff0000", creator: "Мария", tracks: [
-                { title: "Трек 4", artist: "Исполнитель D", duration: 200 },
-                { title: "Трек 5", artist: "Исполнитель E", duration: 170 },
-            ]},
-        { id: 3, title: "Альбом 3", date: "2025-02-10", color: "#8000ff", creator: "Иван", tracks: [
-                { title: "Трек 6", artist: "Исполнитель F", duration: 190 },
-            ]},
-        { id: 4, title: "Альбом 4", date: "2025-02-18", color: "#7fff7f", creator: "Ольга", tracks: []},
-        { id: 5, title: "Альбом 5", date: "2025-02-20", color: "#00f0ff", creator: "Петр", tracks: []},
-        { id: 6, title: "Альбом 6", date: "2025-02-22", color: "#ff0000", creator: "Анна", tracks: []},
-        { id: 7, title: "Альбом 7", date: "2025-02-25", color: "#8000ff", creator: "Дмитрий", tracks: []},
-        { id: 8, title: "Альбом 8", date: "2025-02-28", color: "#7fff7f", creator: "Елена", tracks: []},
-    ];
-
-    // Все треки — в избранном
-    const [tracks, setTracks] = useState([
-        { id: 1, title: "Трек 1", artist: "Исполнитель A", duration: 180 },
-        { id: 2, title: "Трек 2", artist: "Исполнитель B", duration: 210 },
-        { id: 3, title: "Трек 3", artist: "Исполнитель C", duration: 150 },
-        { id: 4, title: "Трек 4", artist: "Исполнитель D", duration: 200 },
-        { id: 5, title: "Трек 5", artist: "Исполнитель E", duration: 170 },
-        { id: 6, title: "Трек 6", artist: "Исполнитель F", duration: 190 },
-        { id: 7, title: "Трек 7", artist: "Исполнитель G", duration: 220 },
-        { id: 8, title: "Трек 8", artist: "Исполнитель H", duration: 160 },
-        { id: 9, title: "Трек 9", artist: "Исполнитель I", duration: 200 },
-        { id: 10, title: "Трек 10", artist: "Исполнитель J", duration: 180 },
-        { id: 11, title: "Трек 11", artist: "Исполнитель K", duration: 180 },
-        { id: 12, title: "Трек 12", artist: "Исполнитель L", duration: 210 },
-        { id: 13, title: "Трек 13", artist: "Исполнитель M", duration: 150 },
-        { id: 14, title: "Трек 14", artist: "Исполнитель N", duration: 200 },
-        { id: 15, title: "Трек 15", artist: "Исполнитель O", duration: 170 },
-    ]);
-
-    const [menuVisible, setMenuVisible] = useState(null); // id трека
+    const [menuVisible, setMenuVisible] = useState<number | null>(null);
     const [startY, setStartY] = useState(0);
     const menuRef = useRef(null);
 
     const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist>();
-    const [selectedAlbum, setSelectedAlbum] = useState(null);
+    const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
 
-    const handleCategoryChange = (cat) => {
+    const handleCategoryChange = (cat: string) => {
         setCategory(cat);
     };
 
-    const removeTrack = (id) => {
-        setTracks(tracks.filter(t => t.id !== id));
+    const removeTrack = async (trackId: bigint) => {
+        try {
+            const numericId = Number(trackId);
+            await removeFavoriteTrack(numericId); // Используем стор
+            setTracks(tracks.filter(t => t.id !== trackId));
+        } catch (err) {
+            console.error('Error removing track from favorites:', err);
+            alert('Не удалось удалить трек из избранного');
+        }
     };
 
-    const showMenu = (e, trackId) => {
+    const removeAlbum = async (albumId: bigint) => {
+        if (!window.confirm('Удалить этот альбом из избранного?')) {
+            return;
+        }
+
+        try {
+            const numericId = Number(albumId);
+            await removeFavoriteAlbum(numericId); // Используем стор вместо прямого вызова
+            setAlbums(prev => prev.filter(a => a.id !== albumId));
+        } catch (err) {
+            console.error('Error removing album from favorites:', err);
+            alert('Не удалось удалить альбом из избранного');
+        }
+    };
+
+    const showMenu = (e: React.MouseEvent, trackId: number) => {
         e.stopPropagation();
         setMenuVisible(trackId);
     };
@@ -128,11 +128,11 @@ const FavoritesPage = () => {
         setMenuVisible(null);
     };
 
-    const handleTouchStart = (e) => {
+    const handleTouchStart = (e: React.TouchEvent) => {
         setStartY(e.touches[0].clientY);
     };
 
-    const handleTouchMove = (e) => {
+    const handleTouchMove = (e: React.TouchEvent) => {
         if (!menuVisible) return;
         const touchY = e.touches[0].clientY;
         const diff = touchY - startY;
@@ -142,17 +142,17 @@ const FavoritesPage = () => {
         }
     };
 
-    const handlePlayNext = (trackId) => {
+    const handlePlayNext = (trackId: number) => {
         console.log("Играть следующим:", trackId);
         hideMenu();
     };
 
-    const handleRemoveFromFavorites = (trackId) => {
-        removeTrack(trackId);
+    const handleRemoveFromFavorites = (trackId: number) => {
+        removeTrack(BigInt(trackId));
         hideMenu();
     };
 
-    const handleAddToPlaylist = (trackId) => {
+    const handleAddToPlaylist = (trackId: number) => {
         console.log("Добавить в плейлист:", trackId);
         hideMenu();
     };
@@ -164,7 +164,7 @@ const FavoritesPage = () => {
 
     const closePlaylistModal = () => {
         setIsModalOpen(false);
-        setSelectedPlaylist(null);
+        setSelectedPlaylist(undefined);
     };
 
     const openCreatePlaylistModal = () => {
@@ -175,7 +175,7 @@ const FavoritesPage = () => {
         setIsCreateModalOpen(false);
     };
 
-    const openAlbumModal = (album) => {
+    const openAlbumModal = (album: Album) => {
         setSelectedAlbum(album);
         setIsAlbumModalOpen(true);
     };
@@ -185,12 +185,20 @@ const FavoritesPage = () => {
         setSelectedAlbum(null);
     };
 
-    const formatDate = (dateStr) => {
+    const formatDate = (dateStr: string | Date) => {
         const d = new Date(dateStr);
         const day = String(d.getDate()).padStart(2, '0');
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const year = d.getFullYear();
         return `${day}.${month}.${year}`;
+    };
+
+    // Функция для форматирования длительности трека (если есть)
+    const formatDuration = (seconds?: number) => {
+        if (!seconds) return '--:--';
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
     return (
@@ -212,23 +220,33 @@ const FavoritesPage = () => {
                     <div className="favorites-track-list">
                         {tracks.map((track, index) => (
                             <div
-                                key={track.id}
+                                key={track.id.toString()}
                                 className="favorites-track-row"
                                 onMouseEnter={(e) => e.currentTarget.classList.add('hover')}
                                 onMouseLeave={(e) => e.currentTarget.classList.remove('hover')}
                             >
                                 <div className="favorites-track-number">{index + 1}</div>
                                 <div className="favorites-track-cover">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="#f1f1f1" strokeWidth="1.2">
-                                        <rect x="4" y="4" width="24" height="24" rx="2" />
-                                        <path d="M12 12v8" />
-                                        <path d="M16 12v8" />
-                                        <path d="M20 12v8" />
-                                    </svg>
+                                    {track.coverHash ? (
+                                        <img
+                                            src={`/api/files/covers/${track.coverHash}`}
+                                            alt={track.name}
+                                            style={{ width: '32px', height: '32px', objectFit: 'cover' }}
+                                        />
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="#f1f1f1" strokeWidth="1.2">
+                                            <rect x="4" y="4" width="24" height="24" rx="2" />
+                                            <path d="M12 12v8" />
+                                            <path d="M16 12v8" />
+                                            <path d="M20 12v8" />
+                                        </svg>
+                                    )}
                                 </div>
                                 <div className="favorites-track-info">
-                                    <div className="favorites-track-title">{track.title}</div>
-                                    <div className="favorites-track-artist">{track.artist}</div>
+                                    <div className="favorites-track-title">{track.name}</div>
+                                    <div className="favorites-track-artist">
+                                        {Array.from(track.authorIds || []).join(', ')}
+                                    </div>
                                 </div>
                                 <div className="favorites-track-actions-desktop">
                                     <button className="favorites-action-btn">
@@ -243,10 +261,20 @@ const FavoritesPage = () => {
                                         </svg>
                                     </button>
                                 </div>
-                                <div className="favorites-track-duration">{Math.floor(track.duration / 60)}:{(track.duration % 60).toString().padStart(2, '0')}</div>
+                                <div className="favorites-track-duration">{formatDuration(track.duration)}</div>
                                 <div className="favorites-track-favorite">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="#ff2d55" stroke="#aaa" strokeWidth="2" onClick={() => removeTrack(track.id)} style={{ cursor: 'pointer' }}>
-                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24"
+                                        width="18"
+                                        height="18"
+                                        fill="none"
+                                        stroke="#ff2d55"
+                                        strokeWidth="2"
+                                        onClick={() => removeTrack(track.id)}
+                                        style={{ cursor: 'pointer' }}
+                                    >
+                                        <path d="M3 6h18M19 6v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                     </svg>
                                 </div>
                                 <div className="favorites-track-add-to-playlist">
@@ -260,7 +288,7 @@ const FavoritesPage = () => {
                                             <path d="M8 5v14l11-7z" />
                                         </svg>
                                     </button>
-                                    <button className="favorites-dots-btn" onClick={(e) => showMenu(e, track.id)}>
+                                    <button className="favorites-dots-btn" onClick={(e) => showMenu(e, Number(track.id))}>
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#aaa" strokeWidth="2">
                                             <circle cx="12" cy="12" r="1" />
                                             <circle cx="12" cy="5" r="1" />
@@ -276,14 +304,13 @@ const FavoritesPage = () => {
                 {category === "Плейлисты" && (
                     <div className="favorites-playlist-grid">
                         {playlists.map((playlist) => (
-                            <div key={playlist.id} className="favorites-playlist-card">
+                            <div key={playlist.id.toString()} className="favorites-playlist-card">
                                 <div
                                     className="playlist-cover"
-                                    style={{ backgroundColor: playlist.color }}
                                     onClick={() => openPlaylistModal(playlist)}
                                 >
                                     <img
-                                        src={covers[playlist.id] || noCoverPlaylist}
+                                        src={covers[Number(playlist.id)] || noCoverPlaylist}
                                         alt={playlist.name}
                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                         onError={(e) => {
@@ -294,7 +321,6 @@ const FavoritesPage = () => {
                                         className="playlist-cover-play-button"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            console.log("Воспроизвести плейлист:", playlist.name);
                                             openPlaylistModal(playlist);
                                         }}
                                     >
@@ -307,8 +333,7 @@ const FavoritesPage = () => {
                                     <div className="playlist-info-text">
                                         <div className="playlist-title">{playlist.name}</div>
                                         <div className="playlist-meta">
-                                            <span>{playlist.creator}</span>
-                                            <span>{formatDate(playlist.date)}</span>
+                                            <span>Пользователь</span>
                                         </div>
                                     </div>
                                     <div className="playlist-trash-icon">
@@ -330,17 +355,24 @@ const FavoritesPage = () => {
                 {category === "Альбомы" && (
                     <div className="favorites-album-grid">
                         {albums.map((album) => (
-                            <div key={album.id} className="favorites-album-card">
+                            <div key={album.id.toString()} className="favorites-album-card">
                                 <div
                                     className="album-cover"
-                                    style={{ backgroundColor: album.color }}
                                     onClick={() => openAlbumModal(album)}
                                 >
+                                    {album.coverHash ? (
+                                        <img
+                                            src={`/api/files/covers/${album.coverHash}`}
+                                            alt={album.title}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        />
+                                    ) : (
+                                        <div style={{ width: '100%', height: '100%', backgroundColor: '#333' }} />
+                                    )}
                                     <div
                                         className="album-fav-cover-play-button"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            console.log("Воспроизвести альбом:", album.title);
                                             openAlbumModal(album);
                                         }}
                                     >
@@ -353,11 +385,13 @@ const FavoritesPage = () => {
                                     <div className="album-info-text">
                                         <div className="album-title-FP">{album.title}</div>
                                         <div className="album-meta">
-                                            <span>{album.creator}</span>
-                                            <span>{formatDate(album.date)}</span>
+                                            <span>{formatDate(album.releasedAt)}</span>
                                         </div>
                                     </div>
-                                    <div className="album-trash-icon">
+                                    <div
+                                        className="album-trash-icon"
+                                        onClick={() => removeAlbum(album.id)}
+                                    >
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#aaa" strokeWidth="2">
                                             <path d="M3 6h18M19 6v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                         </svg>
@@ -414,9 +448,11 @@ const FavoritesPage = () => {
                     <AlbumModal
                         isOpen={true}
                         onClose={closeAlbumModal}
-                        albumName={selectedAlbum.title}
-                        authorName={selectedAlbum.creator}
-                        tracks={selectedAlbum.tracks}
+                        albumName={String(selectedAlbum.title)}
+                        authorName={selectedAlbum.authors?.[0]?.name || "Исполнитель"}
+                        tracks={selectedAlbum.tracks || []}
+                        albumAuthors={selectedAlbum.authors || []}
+                        albumId={selectedAlbum.id}
                     />
                 )}
             </div>
