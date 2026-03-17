@@ -18,6 +18,7 @@ import ru.russify.models.AlbumDto;
 import ru.russify.models.request.AlbumCreateRequest;
 import ru.russify.models.request.AlbumUpdateRequest;
 import ru.russify.models.response.UserProfileResponse;
+import ru.russify.models.response.UserSettingsResponse;
 import ru.russify.russifyservice.service.implementation.AlbumServiceImpl;
 import ru.russify.russifyservice.service.interfaces.UserService;
 
@@ -72,5 +73,10 @@ public class UserController {
             Authentication authentication
     ) {
         return albumService.publishAlbum(authentication.getName(), request);
+    }
+
+    @GetMapping("/settings")
+    public UserSettingsResponse getSettings(Authentication authentication) {
+        return userService.getSettings(authentication.getName());
     }
 }
