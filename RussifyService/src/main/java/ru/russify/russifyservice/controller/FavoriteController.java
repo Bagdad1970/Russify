@@ -105,4 +105,15 @@ public class FavoriteController {
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    @DeleteMapping("/playlists")
+    public ResponseEntity<Void> removePlaylistFromFavourites(
+            @RequestParam Long playlistId,
+            Authentication authentication
+    ) {
+
+        favouriteService.removePlaylistFromFavourites(authentication.getName(), playlistId);
+
+        return ResponseEntity.ok().build();
+    }
 }

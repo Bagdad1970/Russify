@@ -27,4 +27,6 @@ public interface FavouritePlaylistRepository
     List<PlaylistDto> findFavouritePlaylistsByUserEmail(String email);
 
     boolean existsByUserIdAndPlaylistId(Long userId, Long playlistId);
+
+    void deleteByUserIdAndPlaylistId(Long userId, Long playlistId);
 }

@@ -187,4 +187,20 @@ public class FavouritesServiceImpl {
 
         favouritePlaylistRepository.save(favourite);
     }
+
+    @Transactional
+    public void removePlaylistFromFavourites(String email, Long playlistId) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
+
+        boolean exists = favouritePlaylistRepository
+                .existsByUserIdAndPlaylistId(user.getId(), playlistId);
+
+        if (!exists) {
+            throw new PlaylistNotFoundException(playlistId);
+        }
+
+        favouritePlaylistRepository.deleteByUserIdAndPlaylistId(user.getId(), playlistId);
+    }
 }
