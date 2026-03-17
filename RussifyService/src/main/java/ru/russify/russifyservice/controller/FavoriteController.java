@@ -3,6 +3,7 @@ package ru.russify.russifyservice.controller;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,10 +11,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.russify.models.AlbumDto;
 import ru.russify.models.FavouriteTrackDto;
+import ru.russify.models.PlaylistDto;
 import ru.russify.models.request.AddFavouriteAlbumRequest;
 import ru.russify.models.request.AddFavouriteTrackRequest;
 import ru.russify.russifyservice.service.implementation.AlbumServiceImpl;
@@ -82,5 +85,35 @@ public class FavoriteController {
         String email = authentication.getName();
 
         favouriteService.deleteTrackFromFavoritesById(email, trackId);
+    }
+
+    @GetMapping("/playlists")
+    public List<PlaylistDto> getFavouritePlaylists(Authentication authentication) {
+
+        String email = authentication.getName();
+
+        return favouriteService.getFavouritePlaylists(email);
+    }
+
+    @PostMapping("/playlists")
+    public ResponseEntity<Void> addPlaylistToFavourites(
+            @RequestParam Long playlistId,
+            Authentication authentication
+    ) {
+
+        favouriteService.addPlaylistToFavourites(authentication.getName(), playlistId);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @DeleteMapping("/playlists")
+    public ResponseEntity<Void> removePlaylistFromFavourites(
+            @RequestParam Long playlistId,
+            Authentication authentication
+    ) {
+
+        favouriteService.removePlaylistFromFavourites(authentication.getName(), playlistId);
+
+        return ResponseEntity.ok().build();
     }
 }

@@ -29,7 +29,7 @@
     </changeSet>
 
 
-<!--        TABLE USER-->
+    <!--        TABLE USER-->
     <changeSet id="5" author="LittleBlBb">
         <createTable tableName="users" schemaName="app">
             <column name="user_id" type="BIGINT" autoIncrement="true">
@@ -56,7 +56,7 @@
         </createTable>
     </changeSet>
 
-<!--        TABLE PLAYLIST-->
+    <!--        TABLE PLAYLIST-->
     <changeSet id="6" author="LittleBlBb">
         <createTable tableName="playlists" schemaName="app">
             <column name="playlist_id" type="BIGINT" autoIncrement="true">
@@ -104,7 +104,7 @@
     </changeSet>
 
 
-<!--        TABLE AUTHOR-->
+    <!--        TABLE AUTHOR-->
     <changeSet id="8" author="LittleBlBb">
         <createTable tableName="authors" schemaName="app">
             <column name="author_id" type="BIGINT" autoIncrement="true">
@@ -137,7 +137,7 @@
     </changeSet>
 
 
-<!--        TABLE TRACK-->
+    <!--        TABLE TRACK-->
     <changeSet id="9" author="LittleBlBb">
         <createTable tableName="tracks" schemaName="app">
             <column name="track_id" type="BIGINT" autoIncrement="true">
@@ -170,9 +170,9 @@
     </changeSet>
 
 
-<!--        JOIN TABLES-->
+    <!--        JOIN TABLES-->
 
-<!--        TABLE FAVOURITE_ALBUMS-->
+    <!--        TABLE FAVOURITE_ALBUMS-->
     <changeSet id="11" author="LittleBlBb">
         <createTable tableName="favourite_albums" schemaName="app">
             <column name="album_id" type="BIGINT">
@@ -197,7 +197,7 @@
         </createTable>
     </changeSet>
 
-<!--        TABLE TRACK_OF_ALBUM-->
+    <!--        TABLE TRACK_OF_ALBUM-->
     <changeSet id="13" author="LittleBlBb">
         <createTable tableName="track_of_album" schemaName="app">
             <column name="track_id" type="BIGINT">
@@ -209,7 +209,7 @@
         </createTable>
     </changeSet>
 
-<!--        TABLE AUTHOR_OF_ALBUM-->
+    <!--        TABLE AUTHOR_OF_ALBUM-->
 
     <changeSet id="14" author="LittleBlBb">
         <createTable tableName="author_of_album" schemaName="app">
@@ -222,7 +222,7 @@
         </createTable>
     </changeSet>
 
-<!--        TABLE AUTHOR_OF_TRACK-->
+    <!--        TABLE AUTHOR_OF_TRACK-->
 
     <changeSet id="15" author="LittleBlBb">
         <createTable tableName="author_of_track" schemaName="app">
@@ -235,7 +235,7 @@
         </createTable>
     </changeSet>
 
-<!--        TABLE FAVOURITE_TRACKS-->
+    <!--        TABLE FAVOURITE_TRACKS-->
     <changeSet id="16" author="LittleBlBb">
         <createTable tableName="favourite_tracks" schemaName="app">
             <column name="track_id" type="BIGINT">
@@ -268,8 +268,19 @@
         </createTable>
     </changeSet>
 
-<!--CONSTRAINTS-->
     <changeSet id="18" author="LittleBlBb">
+        <createTable tableName="favourite_playlists" schemaName="app">
+            <column name="playlist_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!--CONSTRAINTS-->
+    <changeSet id="19" author="LittleBlBb">
         <!--        CONSTRAINT FK_FAVOURITE_TRACKS_TRACK-->
 
         <addForeignKeyConstraint baseTableSchemaName="app"
@@ -445,5 +456,22 @@
                                  referencedTableName="users"
                                  referencedColumnNames="user_id"
                                  onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="favourite_playlists"
+                                 baseColumnNames="playlist_id"
+                                 constraintName="fk_favourite_playlists_playlist"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="playlists"
+                                 referencedColumnNames="playlist_id"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableSchemaName="app"
+                                 baseTableName="favourite_playlists"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_favourite_playlists_user"
+                                 referencedTableSchemaName="app"
+                                 referencedTableName="users"
+                                 referencedColumnNames="user_id"/>
     </changeSet>
 </databaseChangeLog>

@@ -4,21 +4,29 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.russify.models.FavouriteTrackDto;
+import ru.russify.models.PlaylistDto;
 import ru.russify.russifyservice.exception.AlbumAlreadyInFavouritesException;
 import ru.russify.russifyservice.exception.AlbumNotFoundException;
+import ru.russify.russifyservice.exception.PlaylistAlreadyInFavouritesException;
+import ru.russify.russifyservice.exception.PlaylistNotFoundException;
 import ru.russify.russifyservice.exception.TrackAlreadyInFavouritesException;
 import ru.russify.russifyservice.exception.TrackNotFoundException;
 import ru.russify.russifyservice.exception.UserNotFoundException;
 import ru.russify.russifyservice.model.Album;
 import ru.russify.russifyservice.model.FavouriteAlbum;
+import ru.russify.russifyservice.model.FavouritePlaylist;
 import ru.russify.russifyservice.model.FavouriteTrack;
+import ru.russify.russifyservice.model.Playlist;
 import ru.russify.russifyservice.model.Track;
 import ru.russify.russifyservice.model.User;
 import ru.russify.russifyservice.model.compositekey.FavouriteAlbumPK;
+import ru.russify.russifyservice.model.compositekey.FavouritePlaylistPK;
 import ru.russify.russifyservice.model.compositekey.FavouriteTrackPK;
 import ru.russify.russifyservice.repository.AlbumRepository;
 import ru.russify.russifyservice.repository.FavouriteAlbumRepository;
+import ru.russify.russifyservice.repository.FavouritePlaylistRepository;
 import ru.russify.russifyservice.repository.FavouriteTrackRepository;
+import ru.russify.russifyservice.repository.PlaylistRepository;
 import ru.russify.russifyservice.repository.TrackRepository;
 import ru.russify.russifyservice.repository.UserRepository;
 
@@ -32,6 +40,8 @@ public class FavouritesServiceImpl {
     private final FavouriteAlbumRepository favouriteAlbumRepository;
     private final TrackRepository trackRepository;
     private final FavouriteTrackRepository favouriteTrackRepository;
+    private final FavouritePlaylistRepository favouritePlaylistRepository;
+    private final PlaylistRepository playlistRepository;
 
     @Transactional
     public void deleteAlbumFromFavoritesById(String email, Long albumId){
@@ -138,5 +148,59 @@ public class FavouritesServiceImpl {
         }
 
         favouriteTrackRepository.deleteById(pk);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PlaylistDto> getFavouritePlaylists(String email) {
+
+        userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
+
+        return favouritePlaylistRepository.findFavouritePlaylistsByUserEmail(email);
+    }
+
+    @Transactional
+    public void addPlaylistToFavourites(String email, Long playlistId) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
+
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new PlaylistNotFoundException(playlistId));
+
+        boolean exists = favouritePlaylistRepository
+                .existsByUserIdAndPlaylistId(user.getId(), playlistId);
+
+        if (exists) {
+            throw new PlaylistAlreadyInFavouritesException(playlistId);
+        }
+
+        FavouritePlaylistPK pk = new FavouritePlaylistPK();
+        pk.setUserId(user.getId());
+        pk.setPlaylistId(playlist.getId());
+
+        FavouritePlaylist favourite = FavouritePlaylist.builder()
+                .id(pk)
+                .user(user)
+                .playlist(playlist)
+                .build();
+
+        favouritePlaylistRepository.save(favourite);
+    }
+
+    @Transactional
+    public void removePlaylistFromFavourites(String email, Long playlistId) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
+
+        boolean exists = favouritePlaylistRepository
+                .existsByUserIdAndPlaylistId(user.getId(), playlistId);
+
+        if (!exists) {
+            throw new PlaylistNotFoundException(playlistId);
+        }
+
+        favouritePlaylistRepository.deleteByUserIdAndPlaylistId(user.getId(), playlistId);
     }
 }
