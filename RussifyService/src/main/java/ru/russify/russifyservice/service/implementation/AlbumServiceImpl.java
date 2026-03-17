@@ -361,4 +361,68 @@ public class AlbumServiceImpl implements AlbumService {
 
         throw new AccessDeniedException("Access denied");
     }
+
+    @Transactional
+    public AlbumDto publishAlbum(String email, AlbumCreateRequest request) {
+
+        Author author = authorRepository.findById(request.getAuthorId())
+                .orElseThrow(() -> new RuntimeException("Author not found"));
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(user.getRole().getName());
+        boolean isOwner = author.getUser().getId().equals(user.getId());
+
+        if (!isAdmin && !isOwner) {
+            throw new AccessDeniedException("Access denied");
+        }
+
+        Album album = new Album();
+
+        album.setTitle(request.getTitle());
+        album.setReleasedAt(request.getReleasedAt());
+
+        album.setAlbumType(
+                albumTypeRepository.findById(request.getTypeId())
+                        .orElseThrow()
+        );
+
+        album.setStatus(AlbumStatus.IN_PROGRESS);
+
+        if (request.getCoverFile() != null) {
+            String coverHash = fileService.putObject("covers", request.getCoverFile());
+            album.setCoverHash(coverHash);
+        }
+
+        album.setTrackAlbums(new HashSet<>());
+        album.setAuthorAlbums(new HashSet<>());
+
+        Album savedAlbum = albumRepository.save(album);
+
+        if (request.getTrackIds() != null) {
+            for (Long trackId : request.getTrackIds()) {
+
+                TrackAlbum ta = new TrackAlbum(
+                        new TrackAlbumPK(trackId, savedAlbum.getId()),
+                        trackRepository.getReferenceById(trackId),
+                        savedAlbum
+                );
+
+                savedAlbum.getTrackAlbums().add(ta);
+            }
+        }
+
+        AuthorAlbum authorAlbum = new AuthorAlbum(
+                new AuthorAlbumPK(author.getId(), savedAlbum.getId()),
+                author,
+                savedAlbum
+        );
+
+        savedAlbum.getAuthorAlbums().add(authorAlbum);
+
+        Album result = albumRepository.save(savedAlbum);
+
+        return getAlbumById(result.getId());
+    }
 }
