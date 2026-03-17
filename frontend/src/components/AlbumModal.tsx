@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import '../assets/styles/components/AlbumModal.css';
 import type { Track } from '../types/Track.ts';
-
+import type { Album } from '../types/Album.ts';
+import { useFavorites } from '../hooks/useFavorites';
 
 interface AlbumModalProps {
     isOpen: boolean;
@@ -9,7 +10,9 @@ interface AlbumModalProps {
     albumName: string;
     authorName?: string;
     tracks: Track[];
-    albumAuthors?: Array<{ id: number; name: string }>; // Добавляем авторов альбома
+    albumAuthors?: Array<{ id: number; name: string }>;
+    albumId?: number | bigint;
+    album?: Album;
 }
 
 const AlbumModal = ({
@@ -18,21 +21,25 @@ const AlbumModal = ({
                         albumName,
                         authorName = "Исполнитель",
                         tracks = [],
-                        albumAuthors = []
+                        albumAuthors = [],
+                        albumId,
+                        album
                     }: AlbumModalProps) => {
     const modalRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [isAlbumFavorite, setIsAlbumFavorite] = useState(false);
-    const [menuTrack, setMenuTrack] = useState<Track | null>(null);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [isPositionCalculated, setIsPositionCalculated] = useState(false);
+    const [menuTrack, setMenuTrack] = useState<Track | null>(null);
 
+    const { favoriteTrackIds, favoriteAlbumIds, addFavoriteTrack, removeFavoriteTrack, addFavoriteAlbum, removeFavoriteAlbum } = useFavorites();
+    const actualAlbumId = albumId || album?.id;
+
+    // Проверяем, в избранном ли альбом
+    const isAlbumFavorite = actualAlbumId ? favoriteAlbumIds.has(Number(actualAlbumId)) : false;
 
     useEffect(() => {
-        console.log('Tracks received:', tracks);
-        console.log('Album authors:', albumAuthors);
         if (!isOpen) {
             setIsPositionCalculated(false);
             return;
@@ -51,7 +58,6 @@ const AlbumModal = ({
             const top = Math.max(56, (window.innerHeight - modalHeight) / 2);
 
             setPosition({ x: left, y: top });
-
             setIsPositionCalculated(true);
         };
 
@@ -100,6 +106,20 @@ const AlbumModal = ({
         }
     }, [isDragging]);
 
+    const toggleAlbumFavorite = () => {
+        if (!actualAlbumId) {
+            console.warn('Нет actualAlbumId');
+            return;
+        }
+
+        const id = Number(actualAlbumId);
+        if (isAlbumFavorite) {
+            removeFavoriteAlbum(id);
+        } else {
+            addFavoriteAlbum(id);
+        }
+    };
+
     if (!isOpen) return null;
 
     // Подсчёт длительности
@@ -117,11 +137,6 @@ const AlbumModal = ({
         durationStr = `${seconds} сек`;
     }
 
-    const toggleAlbumFavorite = () => {
-        setIsAlbumFavorite(!isAlbumFavorite);
-    };
-
-    // Получаем имя первого автора альбома
     const albumAuthorName = albumAuthors.length > 0 ? albumAuthors[0].name : authorName;
 
     return (
@@ -185,11 +200,8 @@ const AlbumModal = ({
                         </button>
                         <button
                             className={`alm-btn alm-btn-heart ${isAlbumFavorite ? 'active' : ''}`}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                toggleAlbumFavorite();
-                            }}
-                            title="Добавить в избранное"
+                            onClick={toggleAlbumFavorite}
+                            title={isAlbumFavorite ? "Удалить из избранного" : "Добавить в избранное"}
                         >
                             <svg viewBox="0 0 24 24" width="20" height="20" fill={isAlbumFavorite ? "#ff2d55" : "none"} stroke="#aaa" strokeWidth="2">
                                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -215,9 +227,11 @@ const AlbumModal = ({
                                 key={track.id ? Number(track.id) : idx}
                                 index={idx + 1}
                                 track={track}
-                                albumName={albumName}
-                                authorName={albumAuthorName} // Передаем имя автора альбома
+                                authorName={albumAuthorName}
                                 isMobile={isMobile}
+                                isFavorite={favoriteTrackIds.has(Number(track.id))}
+                                onAddFavorite={() => addFavoriteTrack(Number(track.id))}
+                                onRemoveFavorite={() => removeFavoriteTrack(Number(track.id))}
                                 onMoreClick={() => setMenuTrack(track)}
                             />
                         ))
@@ -253,11 +267,20 @@ const AlbumModal = ({
                             <div
                                 className="alm-context-item"
                                 onClick={() => {
-                                    console.log("Добавить в избранное:", menuTrack.name);
+                                    if (menuTrack.id) {
+                                        const trackId = Number(menuTrack.id);
+                                        if (favoriteTrackIds.has(trackId)) {
+                                            removeFavoriteTrack(trackId);
+                                        } else {
+                                            addFavoriteTrack(trackId);
+                                        }
+                                    }
                                     setMenuTrack(null);
                                 }}
                             >
-                                Добавить в избранное
+                                {menuTrack.id && favoriteTrackIds.has(Number(menuTrack.id))
+                                    ? "Удалить из избранного"
+                                    : "Добавить в избранное"}
                             </div>
 
                             <div className="alm-context-divider" />
@@ -282,16 +305,33 @@ const AlbumModal = ({
 interface TrackItemProps {
     index: number;
     track: Track;
-    albumName: string;
     authorName: string;
     isMobile: boolean;
+    isFavorite: boolean;
+    onAddFavorite: () => void;
+    onRemoveFavorite: () => void;
     onMoreClick: () => void;
 }
 
-const TrackItem = ({ index, track, albumName, authorName, isMobile, onMoreClick }: TrackItemProps) => {
-    const [isFavorite, setIsFavorite] = useState(false);
+const TrackItem = ({
+                       index,
+                       track,
+                       authorName,
+                       isMobile,
+                       isFavorite,
+                       onAddFavorite,
+                       onRemoveFavorite,
+                       onMoreClick
+                   }: TrackItemProps) => {
 
-    // Форматирование длительности
+    const handleFavoriteClick = () => {
+        if (isFavorite) {
+            onRemoveFavorite();
+        } else {
+            onAddFavorite();
+        }
+    };
+
     const formatDuration = (seconds?: number) => {
         if (!seconds) return "0:00";
         const mins = Math.floor(seconds / 60);
@@ -320,7 +360,6 @@ const TrackItem = ({ index, track, albumName, authorName, isMobile, onMoreClick 
                 <div className="alm-track-title">{track.name || "Название трека"}</div>
                 <div className="alm-track-artist">{authorName || "Исполнитель"}</div>
             </div>
-
 
             {/* Длительность */}
             <div className="alm-track-duration">
@@ -367,7 +406,7 @@ const TrackItem = ({ index, track, albumName, authorName, isMobile, onMoreClick 
 
                         <button
                             className={`alm-btn alm-btn-heart ${isFavorite ? 'active' : ''}`}
-                            onClick={() => setIsFavorite(!isFavorite)}
+                            onClick={handleFavoriteClick}
                         >
                             <svg
                                 viewBox="0 0 24 24"
@@ -384,7 +423,10 @@ const TrackItem = ({ index, track, albumName, authorName, isMobile, onMoreClick 
                         </button>
                         <button
                             className="alm-btn alm-btn-more"
-                            onClick={onMoreClick}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onMoreClick();
+                            }}
                         >
                             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                                 <path

@@ -15,7 +15,7 @@ export class FavoriteManager {
 
     async addFavoriteTrack(trackId: bigint): Promise<void> {
         try {
-            await apiClient.post("favorites/tracks", { trackId });
+            await apiClient.post("favorites/tracks", { trackId: Number(trackId) });
         } catch (error) {
             console.error("Error adding favorite track:", error);
             throw error;
@@ -24,7 +24,7 @@ export class FavoriteManager {
 
     async deleteFavoriteTrack(trackId: bigint): Promise<void> {
         try {
-            await apiClient.delete(`favorites/tracks/${trackId}`);
+            await apiClient.delete(`favorites/tracks/${Number(trackId)}`);
         } catch (error) {
             console.error("Error deleting favorite track:", error);
             throw error;
@@ -43,7 +43,7 @@ export class FavoriteManager {
 
     async addFavoriteAlbum(albumId: bigint): Promise<void> {
         try {
-            await apiClient.post("favorites/albums", { albumId });
+            await apiClient.post("favorites/albums", { albumId: Number(albumId) });
         } catch (error) {
             console.error("Error adding favorite album:", error);
             throw error;
@@ -52,7 +52,7 @@ export class FavoriteManager {
 
     async deleteFavoriteAlbum(albumId: bigint): Promise<void> {
         try {
-            await apiClient.delete(`favorites/albums/${albumId}`);
+            await apiClient.delete(`favorites/albums/${Number(albumId)}`);
         } catch (error) {
             console.error("Error deleting favorite album:", error);
             throw error;

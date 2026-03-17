@@ -13,6 +13,7 @@ import {FavoriteManager} from "../api/FavoriteManager.ts";
 import {FileManager} from "../api/FileManager.ts";
 import type {FileGetRequest} from "../types/request/FileGetRequest.ts";
 import noCoverPlaylist from '../assets/images/no-cover-playlist.svg';
+import {useFavorites} from "../hooks/useFavorites.ts";
 
 const FavoritesPage = () => {
     const [category, setCategory] = useState("Треки");
@@ -24,6 +25,8 @@ const FavoritesPage = () => {
     const [tracks, setTracks] = useState<Track[]>([]);
     const [albums, setAlbums] = useState<Album[]>([]);
     const [covers, setCovers] = useState<Record<number, string>>({});
+
+    const { favoriteTrackIds, favoriteAlbumIds, removeFavoriteTrack, removeFavoriteAlbum } = useFavorites();
 
     // Загрузка всех данных при монтировании
     useEffect(() => {
@@ -90,10 +93,10 @@ const FavoritesPage = () => {
         setCategory(cat);
     };
 
-    // Удаление трека из избранного
     const removeTrack = async (trackId: bigint) => {
         try {
-            await favoriteManager.deleteFavoriteTrack(trackId);
+            const numericId = Number(trackId);
+            await removeFavoriteTrack(numericId); // Используем стор
             setTracks(tracks.filter(t => t.id !== trackId));
         } catch (err) {
             console.error('Error removing track from favorites:', err);
@@ -101,11 +104,15 @@ const FavoritesPage = () => {
         }
     };
 
-    // Удаление альбома из избранного
     const removeAlbum = async (albumId: bigint) => {
+        if (!window.confirm('Удалить этот альбом из избранного?')) {
+            return;
+        }
+
         try {
-            await favoriteManager.deleteFavoriteAlbum(albumId);
-            setAlbums(albums.filter(a => a.id !== albumId));
+            const numericId = Number(albumId);
+            await removeFavoriteAlbum(numericId); // Используем стор вместо прямого вызова
+            setAlbums(prev => prev.filter(a => a.id !== albumId));
         } catch (err) {
             console.error('Error removing album from favorites:', err);
             alert('Не удалось удалить альбом из избранного');
@@ -261,13 +268,13 @@ const FavoritesPage = () => {
                                         viewBox="0 0 24 24"
                                         width="18"
                                         height="18"
-                                        fill="#ff2d55"
-                                        stroke="#aaa"
+                                        fill="none"
+                                        stroke="#ff2d55"
                                         strokeWidth="2"
                                         onClick={() => removeTrack(track.id)}
                                         style={{ cursor: 'pointer' }}
                                     >
-                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                        <path d="M3 6h18M19 6v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                     </svg>
                                 </div>
                                 <div className="favorites-track-add-to-playlist">
@@ -441,9 +448,11 @@ const FavoritesPage = () => {
                     <AlbumModal
                         isOpen={true}
                         onClose={closeAlbumModal}
-                        albumName={selectedAlbum.title}
-                        authorName="Разные исполнители"
+                        albumName={String(selectedAlbum.title)}
+                        authorName={selectedAlbum.authors?.[0]?.name || "Исполнитель"}
                         tracks={selectedAlbum.tracks || []}
+                        albumAuthors={selectedAlbum.authors || []}
+                        albumId={selectedAlbum.id}
                     />
                 )}
             </div>
