@@ -40,8 +40,7 @@ public class AlbumDto {
     ) {
         this.id = id;
         this.title = title;
-        this.type = new AlbumTypeDto();
-        this.type.setName(typeName);
+        this.type = new AlbumTypeDto(typeName);
         this.status = status;
         this.coverHash = coverHash;
         this.releasedAt = releasedAt;

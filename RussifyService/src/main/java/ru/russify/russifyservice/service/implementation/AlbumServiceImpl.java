@@ -1,8 +1,8 @@
 package ru.russify.russifyservice.service.implementation;
 
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.russify.models.AlbumDto;
 import ru.russify.models.AlbumStatus;
 import ru.russify.models.AlbumTypeDto;
@@ -11,18 +11,12 @@ import ru.russify.models.TrackDto;
 import ru.russify.models.projection.AlbumFlatDto;
 import ru.russify.models.request.AlbumCreateRequest;
 import ru.russify.models.request.AlbumUpdateRequest;
-import ru.russify.russifyservice.exception.AlbumAlreadyInFavouritesException;
 import ru.russify.russifyservice.exception.AlbumNotFoundException;
-import ru.russify.russifyservice.exception.AlreadyInFavouritesException;
-import ru.russify.russifyservice.exception.UserNotFoundException;
 import ru.russify.russifyservice.model.Album;
 import ru.russify.russifyservice.model.Author;
 import ru.russify.russifyservice.model.AuthorAlbum;
-import ru.russify.russifyservice.model.FavouriteAlbum;
 import ru.russify.russifyservice.model.TrackAlbum;
-import ru.russify.russifyservice.model.User;
 import ru.russify.russifyservice.model.compositekey.AuthorAlbumPK;
-import ru.russify.russifyservice.model.compositekey.FavouriteAlbumPK;
 import ru.russify.russifyservice.model.compositekey.TrackAlbumPK;
 import ru.russify.russifyservice.repository.AlbumRepository;
 import ru.russify.russifyservice.repository.AlbumTypeRepository;
@@ -77,7 +71,7 @@ public class AlbumServiceImpl implements AlbumService {
         album.setStatus(AlbumStatus.IN_PROGRESS);
 
         if (request.getCoverFile() != null) {
-            String coverHash = fileService.putObject("covers", request.getCoverFile());
+            String coverHash = fileService.uploadFile("covers", request.getCoverFile());
             album.setCoverHash(coverHash);
         }
 
@@ -142,7 +136,7 @@ public class AlbumServiceImpl implements AlbumService {
 
         if (request.getCoverFile() != null) {
 
-            String coverHash = fileService.putObject("covers", request.getCoverFile());
+            String coverHash = fileService.uploadFile("covers", request.getCoverFile());
 
             album.setCoverHash(coverHash);
         }

@@ -24,6 +24,9 @@ public interface TrackMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "genre", ignore = true)
+    @Mapping(target = "name", ignore = true)
+    @Mapping(target = "coverHash", ignore = true)
+    @Mapping(target = "audioHash", ignore = true)
     @Mapping(target = "trackAlbums", ignore = true)
     @Mapping(target = "authorTracks", ignore = true)
     @Mapping(target = "trackPlaylists", ignore = true)
@@ -32,6 +35,9 @@ public interface TrackMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "genre", ignore = true)
+    @Mapping(target = "name", ignore = true)
+    @Mapping(target = "coverHash", ignore = true)
+    @Mapping(target = "audioHash", ignore = true)
     @Mapping(target = "trackAlbums", ignore = true)
     @Mapping(target = "authorTracks", ignore = true)
     @Mapping(target = "trackPlaylists", ignore = true)

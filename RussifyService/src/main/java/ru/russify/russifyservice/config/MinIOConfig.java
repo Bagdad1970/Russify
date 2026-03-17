@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class S3Config {
+public class MinIOConfig {
 
     @Value("${s3.minio.url}")
     private String minioUrl;

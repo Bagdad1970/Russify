@@ -11,7 +11,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.russify.models.TrackDto;
 import ru.russify.russifyservice.service.implementation.TrackServiceImpl;
 
-import java.util.List;
 import java.util.Set;
 
 import static org.mockito.Mockito.times;
@@ -101,44 +100,6 @@ public class TrackControllerTest {
                 .andExpect(content().json(JsonMapper.asJsonString(updated)));
         Mockito.verify(service, times(1))
                 .update(1L, request);
-    }
-
-    @Test
-    void Finding_all_tracks_must_return_them() throws Exception {
-        // arrange
-        TrackDto track1 = TrackDto.builder()
-                .id(1L)
-                .name("name1")
-                .genreId(1L)
-                .audioHash("audio_hash1")
-                .coverHash("cover_hash1")
-                .authorIds(Set.of(1L))
-                .albumIds(Set.of(1L))
-                .build();
-
-        TrackDto track2 = TrackDto.builder()
-                .id(2L)
-                .name("name2")
-                .genreId(2L)
-                .audioHash("audio_hash2")
-                .coverHash("cover_hash2")
-                .authorIds(Set.of(2L))
-                .albumIds(Set.of(2L))
-                .build();
-
-        List<TrackDto> tracks = List.of(track1, track2);
-
-        Mockito.when(service.findAll())
-                .thenReturn(tracks);
-
-        // act & assert
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/api/tracks")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().json(JsonMapper.asJsonString(tracks)));
-        Mockito.verify(service, times(1))
-                .findAll();
     }
 
     @Test

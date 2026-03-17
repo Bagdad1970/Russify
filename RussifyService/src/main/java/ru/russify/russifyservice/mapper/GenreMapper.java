@@ -12,10 +12,12 @@ public interface GenreMapper {
     GenreDto toDto(Genre genre);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target= "name", ignore=true)
     @Mapping(target = "tracks", ignore = true)
     Genre toEntity(GenreDto dto);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target= "name", ignore=true)
     @Mapping(target = "tracks", ignore = true)
     void updateEntity(GenreDto dto, @MappingTarget Genre genre);
 }

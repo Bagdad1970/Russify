@@ -13,4 +13,5 @@ public class PlaylistCreateRequest {
     private Boolean isSystem;
 
     private MultipartFile coverFile;
+
 }

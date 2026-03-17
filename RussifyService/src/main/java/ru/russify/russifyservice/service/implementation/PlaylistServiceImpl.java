@@ -120,7 +120,7 @@ public class PlaylistServiceImpl implements PlaylistService {
             playlist.setIsSystem(false);
         }
 
-        String coverHash = fileService.putObject(
+        String coverHash = fileService.uploadFile(
                 "covers",
                 request.getCoverFile()
         );
@@ -163,7 +163,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 
         if (request.getCoverFile() != null && !request.getCoverFile().isEmpty()) {
 
-            String hash = fileService.putObject("covers", request.getCoverFile());
+            String hash = fileService.uploadFile("covers", request.getCoverFile());
             playlist.setCoverHash(hash);
         }
 

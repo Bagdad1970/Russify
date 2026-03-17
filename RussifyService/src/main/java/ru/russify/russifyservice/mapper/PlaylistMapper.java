@@ -20,11 +20,17 @@ public interface PlaylistMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "user", ignore = true)
+    @Mapping(target = "name", ignore = true)
+    @Mapping(target = "isSystem", ignore = true)
+    @Mapping(target = "coverHash", ignore = true)
     @Mapping(target = "trackPlaylists", ignore = true)
     Playlist toEntity(PlaylistDto dto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "user", ignore = true)
+    @Mapping(target = "name", ignore = true)
+    @Mapping(target = "isSystem", ignore = true)
+    @Mapping(target = "coverHash", ignore = true)
     @Mapping(target = "trackPlaylists", ignore = true)
     void updateEntity(PlaylistDto dto, @MappingTarget Playlist playlist);
 }

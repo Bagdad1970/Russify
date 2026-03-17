@@ -17,4 +17,8 @@ public class AlbumTypeDto {
     @NotBlank(message = "The album type name cannot be empty")
     private String name;
 
+    public AlbumTypeDto(String name) {
+        this.name = name;
+    }
+
 }
