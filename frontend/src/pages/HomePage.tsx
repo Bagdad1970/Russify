@@ -13,6 +13,7 @@ import { PlaylistManager } from "../api/PlaylistManager.ts";
 import { TrackManager } from "../api/TrackManager.ts";
 import { AlbumManager } from "../api/AlbumManager.ts";
 import { useEffect, useState } from "react";
+import {useFavorites} from "../hooks/useFavorites.ts";
 
 const playlistManager = new PlaylistManager();
 const trackManager = new TrackManager();
@@ -25,6 +26,7 @@ const HomePage = ({
                       onOpenCreatePlaylistModal,
                   }) => {
 
+    const { favoriteTrackIds, favoriteAlbumIds, removeFavoriteTrack, removeFavoriteAlbum, loadFavorites } = useFavorites();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -56,6 +58,7 @@ const HomePage = ({
 
     useEffect(() => {
         loadAllData();
+        loadFavorites();
     }, []);
 
     const loadAllData = async () => {
@@ -68,7 +71,11 @@ const HomePage = ({
             ]);
 
             setAllTracks(tracks);
-            setAllAlbums(albums);
+
+            // ✅ ФИЛЬТРАЦИЯ: Оставляем только альбомы со статусом APPROVED
+            const approvedAlbums = albums.filter(album => album.status === 'APPROVED');
+            setAllAlbums(approvedAlbums);
+
             setAllPlaylists(playlists);
 
             const moodPlaylistsFiltered = playlists.filter(p =>
@@ -105,6 +112,7 @@ const HomePage = ({
             return trackName.includes(searchQuery) || trackArtist.includes(searchQuery) || trackAlbum.includes(searchQuery);
         });
 
+        // ✅ Поиск тоже идет только по уже отфильтрованным (APPROVED) альбомам
         const filteredAlbums = allAlbums.filter(album => {
             if (!album) return false;
             const albumTitle = album.title?.toLowerCase() || '';
@@ -286,7 +294,11 @@ const HomePage = ({
                 <PlaylistModal
                     isOpen={true}
                     onClose={closePlaylistModal}
-                    playlistData={selectedPlaylistData}
+                    playlistName={String(selectedPlaylistData.name)}
+                    tracks={selectedPlaylistData.tracks || []}
+                    playlistId={selectedPlaylistData.id}
+                    playlist={selectedPlaylistData}
+                    coverHash={selectedPlaylistData.coverHash}
                 />
             )}
 
@@ -296,7 +308,7 @@ const HomePage = ({
                     onClose={closeAlbumModal}
                     albumName={String(selectedAlbum.title)}
                     authorName={selectedAlbum.authors?.[0]?.name || "Исполнитель"}
-                    tracks={selectedAlbum.tracks || []}
+                    tracks={selectedAlbum.tracks}
                     albumAuthors={selectedAlbum.authors || []}
                     albumId={selectedAlbum.id}
                 />
