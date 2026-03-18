@@ -56,7 +56,7 @@ public class Album {
     @Column(name = "released_at", nullable = false)
     private OffsetDateTime releasedAt;
 
-    @Column(name = "cover_hash", nullable = true, length = 64)
+    @Column(name = "cover_hash", nullable = true, length = 255)
     private String coverHash;
 
     @OneToMany(mappedBy = "album", cascade = CascadeType.ALL, orphanRemoval = true)

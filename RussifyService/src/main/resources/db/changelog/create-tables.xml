@@ -47,7 +47,7 @@
             <column name="role_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="avatar_hash" type="VARCHAR(64)">
+            <column name="avatar_hash" type="VARCHAR(255)">
                 <constraints nullable="true"/>
             </column>
             <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
@@ -71,7 +71,7 @@
             <column name="is_system" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
-            <column name="cover_hash" type="varchar(64)">
+            <column name="cover_hash" type="varchar(255)">
                 <constraints nullable="true"/>
             </column>
 
@@ -91,7 +91,7 @@
             <column name="album_type_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="cover_hash" type="VARCHAR(64)">
+            <column name="cover_hash" type="VARCHAR(255)">
                 <constraints nullable="true"/>
             </column>
             <column name="status" type="VARCHAR(255)">
@@ -113,7 +113,7 @@
             <column name="name" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="photo_hash" type="VARCHAR(64)">
+            <column name="photo_hash" type="VARCHAR(255)">
                 <constraints nullable="true"/>
             </column>
             <column name="description" type="VARCHAR(500)">
@@ -149,10 +149,10 @@
             <column name="genre_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="cover_hash" type="VARCHAR(64)">
+            <column name="cover_hash" type="VARCHAR(255)">
                 <constraints nullable="true"/>
             </column>
-            <column name="audio_hash" type="VARCHAR(64)">
+            <column name="audio_hash" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
         </createTable>

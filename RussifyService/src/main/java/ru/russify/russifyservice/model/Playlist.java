@@ -29,7 +29,7 @@ public class Playlist {
     @Column(name = "is_system", nullable = false)
     private Boolean isSystem;
 
-    @Column(name = "cover_hash")
+    @Column(name = "cover_hash", length = 255)
     private String coverHash;
 
     @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)

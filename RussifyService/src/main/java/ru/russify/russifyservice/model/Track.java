@@ -26,10 +26,10 @@ public class Track {
     @JoinColumn(name = "genre_id", nullable = false)
     private Genre genre;
 
-    @Column(name = "cover_hash", nullable = true, length = 64)
+    @Column(name = "cover_hash", nullable = true, length = 255)
     private String coverHash;
 
-    @Column(name = "audio_hash", nullable = false, length = 64)
+    @Column(name = "audio_hash", nullable = false, length = 255)
     private String audioHash;
 
     @OneToMany(mappedBy = "track", cascade = CascadeType.ALL, orphanRemoval = true)

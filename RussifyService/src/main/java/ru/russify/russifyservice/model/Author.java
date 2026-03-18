@@ -22,7 +22,7 @@ public class Author {
     @Column(name = "name", nullable = false, length = 255)
     private String name;
 
-    @Column(name = "photo_hash", nullable = true, length = 64)
+    @Column(name = "photo_hash", nullable = true, length = 255)
     private String photoHash;
 
     @Column(name = "description", nullable = true, length = 500)
