@@ -8,43 +8,50 @@ import AlbumModal from '../components/AlbumModal.tsx';
 import type {Playlist} from "../types/Playlist.ts";
 import type {Track} from "../types/Track.ts";
 import type {Album} from "../types/Album.ts";
+import type {PlaylistWithTracks} from "../types/PlaylistWithTracks.ts";
 import {PlaylistManager} from "../api/PlaylistManager.ts";
 import {FavoriteManager} from "../api/FavoriteManager.ts";
 import {FileManager} from "../api/FileManager.ts";
 import type {FileGetRequest} from "../types/request/FileGetRequest.ts";
 import noCoverPlaylist from '../assets/images/no-cover-playlist.svg';
 import {useFavorites} from "../hooks/useFavorites.ts";
+import { AlbumManager } from "../api/AlbumManager.ts";
 
 const FavoritesPage = () => {
     const [category, setCategory] = useState("Треки");
     const playlistManager = new PlaylistManager();
     const favoriteManager = new FavoriteManager();
     const fileManager = new FileManager();
+    const albumManager = new AlbumManager();
 
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
     const [tracks, setTracks] = useState<Track[]>([]);
     const [albums, setAlbums] = useState<Album[]>([]);
     const [covers, setCovers] = useState<Record<number, string>>({});
 
-    const { favoriteTrackIds, favoriteAlbumIds, removeFavoriteTrack, removeFavoriteAlbum } = useFavorites();
+    // ✅ Добавили removeFavoritePlaylist
+    const {
+        favoriteTrackIds,
+        favoriteAlbumIds,
+        favoritePlaylistIds,
+        removeFavoriteTrack,
+        removeFavoriteAlbum,
+        removeFavoritePlaylist
+    } = useFavorites();
 
     // Загрузка всех данных при монтировании
     useEffect(() => {
         const loadAllData = async () => {
             try {
-                // Загружаем плейлисты (как и было)
-                const userPlaylists = await playlistManager.findAll();
+                const userPlaylists = await favoriteManager.getFavoritePlaylists();
                 setPlaylists(userPlaylists);
 
-                // Загружаем избранные треки
                 const favoriteTracks = await favoriteManager.getFavoriteTracks();
                 setTracks(favoriteTracks);
 
-                // Загружаем избранные альбомы
                 const favoriteAlbums = await favoriteManager.getFavoriteAlbums();
                 setAlbums(favoriteAlbums);
 
-                // Загружаем обложки для плейлистов
                 const coversMap: Record<string, string> = {};
                 await Promise.all(userPlaylists.map(async (playlist) => {
                     const coverHash = playlist.coverHash;
@@ -84,6 +91,7 @@ const FavoritesPage = () => {
     const menuRef = useRef(null);
 
     const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist>();
+    const [selectedPlaylistData, setSelectedPlaylistData] = useState<PlaylistWithTracks | null>(null);
     const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -96,7 +104,7 @@ const FavoritesPage = () => {
     const removeTrack = async (trackId: bigint) => {
         try {
             const numericId = Number(trackId);
-            await removeFavoriteTrack(numericId); // Используем стор
+            await removeFavoriteTrack(numericId);
             setTracks(tracks.filter(t => t.id !== trackId));
         } catch (err) {
             console.error('Error removing track from favorites:', err);
@@ -111,11 +119,27 @@ const FavoritesPage = () => {
 
         try {
             const numericId = Number(albumId);
-            await removeFavoriteAlbum(numericId); // Используем стор вместо прямого вызова
+            await removeFavoriteAlbum(numericId);
             setAlbums(prev => prev.filter(a => a.id !== albumId));
         } catch (err) {
             console.error('Error removing album from favorites:', err);
             alert('Не удалось удалить альбом из избранного');
+        }
+    };
+
+    // ✅ Функция удаления плейлиста (как у альбомов)
+    const removePlaylist = async (playlistId: bigint) => {
+        if (!window.confirm('Удалить этот плейлист из избранного?')) {
+            return;
+        }
+
+        try {
+            const numericId = Number(playlistId);
+            await removeFavoritePlaylist(numericId);
+            setPlaylists(prev => prev.filter(p => p.id !== playlistId));
+        } catch (err) {
+            console.error('Error removing playlist from favorites:', err);
+            alert('Не удалось удалить плейлист из избранного');
         }
     };
 
@@ -157,14 +181,29 @@ const FavoritesPage = () => {
         hideMenu();
     };
 
-    const openPlaylistModal = (playlist: Playlist) => {
-        setSelectedPlaylist(playlist);
-        setIsModalOpen(true);
+    // ✅ Открытие модалки плейлиста с загрузкой треков
+    const openPlaylistModal = async (playlist: Playlist) => {
+        try {
+            const playlistInfo = await playlistManager.findById(playlist.id);
+            const tracksResult = await playlistManager.findTracksByPlaylistId(playlist.id);
+            const tracksArray = Array.isArray(tracksResult) ? tracksResult : (tracksResult?.tracks || []);
+
+            const playlistWithTracks: PlaylistWithTracks = {
+                ...playlistInfo,
+                tracks: tracksArray
+            };
+
+            setSelectedPlaylistData(playlistWithTracks);
+            setIsModalOpen(true);
+        } catch (err) {
+            console.error('Error loading playlist details:', err);
+            alert('Не удалось загрузить плейлист');
+        }
     };
 
     const closePlaylistModal = () => {
         setIsModalOpen(false);
-        setSelectedPlaylist(undefined);
+        setSelectedPlaylistData(null);
     };
 
     const openCreatePlaylistModal = () => {
@@ -175,9 +214,16 @@ const FavoritesPage = () => {
         setIsCreateModalOpen(false);
     };
 
-    const openAlbumModal = (album: Album) => {
-        setSelectedAlbum(album);
-        setIsAlbumModalOpen(true);
+    const handleAlbumClick = async (album: Album) => {
+        try {
+            const fullAlbum = await albumManager.findAllTrackById(album.id);
+            setSelectedAlbum(fullAlbum);
+            setIsAlbumModalOpen(true);
+        } catch (err) {
+            console.error('Error loading album details:', err);
+            setSelectedAlbum(album);
+            setIsAlbumModalOpen(true);
+        }
     };
 
     const closeAlbumModal = () => {
@@ -193,7 +239,6 @@ const FavoritesPage = () => {
         return `${day}.${month}.${year}`;
     };
 
-    // Функция для форматирования длительности трека (если есть)
     const formatDuration = (seconds?: number) => {
         if (!seconds) return '--:--';
         const mins = Math.floor(seconds / 60);
@@ -336,7 +381,15 @@ const FavoritesPage = () => {
                                             <span>Пользователь</span>
                                         </div>
                                     </div>
-                                    <div className="playlist-trash-icon">
+                                    {/* ✅ Вызов функции удаления плейлиста */}
+                                    <div
+                                        className="playlist-trash-icon"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            removePlaylist(playlist.id);
+                                        }}
+                                        style={{ cursor: 'pointer' }}
+                                    >
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#aaa" strokeWidth="2">
                                             <path d="M3 6h18M19 6v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                         </svg>
@@ -355,10 +408,10 @@ const FavoritesPage = () => {
                 {category === "Альбомы" && (
                     <div className="favorites-album-grid">
                         {albums.map((album) => (
-                            <div key={album.id.toString()} className="favorites-album-card">
+                            <div key={album.id} className="favorites-album-card">
                                 <div
                                     className="album-cover"
-                                    onClick={() => openAlbumModal(album)}
+                                    onClick={() => handleAlbumClick(album)}
                                 >
                                     {album.coverHash ? (
                                         <img
@@ -373,7 +426,7 @@ const FavoritesPage = () => {
                                         className="album-fav-cover-play-button"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            openAlbumModal(album);
+                                            handleAlbumClick(album);
                                         }}
                                     >
                                         <svg className="album-cover-play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -429,11 +482,16 @@ const FavoritesPage = () => {
                     </div>
                 )}
 
-                {isModalOpen && selectedPlaylist && (
+                {/* ✅ PlaylistModal с правильными пропами для отображения содержимого */}
+                {isModalOpen && selectedPlaylistData && (
                     <PlaylistModal
                         isOpen={true}
                         onClose={closePlaylistModal}
-                        selectedId={selectedPlaylist.id}
+                        playlistName={String(selectedPlaylistData.name)}
+                        tracks={selectedPlaylistData.tracks || []}
+                        playlistId={selectedPlaylistData.id ? Number(selectedPlaylistData.id) : undefined}
+                        playlist={selectedPlaylistData}
+                        coverHash={selectedPlaylistData.coverHash}
                     />
                 )}
 

@@ -1,11 +1,13 @@
 import { FavoriteManager } from '../api/FavoriteManager';
 import type { Track } from '../types/Track';
 import type { Album } from '../types/Album';
+import type { Playlist } from '../types/Playlist';
 
 class FavoriteStore {
     private static instance: FavoriteStore;
     private favoriteTrackIds: Set<number> = new Set();
     private favoriteAlbumIds: Set<number> = new Set();
+    private favoritePlaylistIds: Set<number> = new Set();
     private listeners: Set<() => void> = new Set();
     private favoriteManager = new FavoriteManager();
 
@@ -24,6 +26,10 @@ class FavoriteStore {
         return this.favoriteAlbumIds;
     }
 
+    getFavoritePlaylistIds(): Set<number> {
+        return this.favoritePlaylistIds;
+    }
+
     subscribe(listener: () => void) {
         this.listeners.add(listener);
         return () => this.listeners.delete(listener);
@@ -35,13 +41,15 @@ class FavoriteStore {
 
     async loadFavorites() {
         try {
-            const [tracks, albums] = await Promise.all([
+            const [tracks, albums, playlists] = await Promise.all([
                 this.favoriteManager.getFavoriteTracks(),
-                this.favoriteManager.getFavoriteAlbums()
+                this.favoriteManager.getFavoriteAlbums(),
+                this.favoriteManager.getFavoritePlaylists()
             ]);
 
             this.favoriteTrackIds = new Set(tracks.map(track => Number(track.id)));
             this.favoriteAlbumIds = new Set(albums.map(album => Number(album.id)));
+            this.favoritePlaylistIds = new Set(playlists.map(playlist => Number(playlist.id)));
 
             this.notify();
         } catch (error) {
@@ -89,12 +97,37 @@ class FavoriteStore {
         }
     }
 
+    async addFavoritePlaylist(playlistId: number) {
+        try {
+            await this.favoriteManager.addFavoritePlaylist(BigInt(playlistId));
+            this.favoritePlaylistIds.add(playlistId);
+            this.notify();
+        } catch (error) {
+            console.error('Error adding favorite playlist:', error);
+        }
+    }
+
+    async removeFavoritePlaylist(playlistId: number) {
+        try {
+            await this.favoriteManager.deleteFavoritePlaylist(BigInt(playlistId));
+            this.favoritePlaylistIds.delete(playlistId);
+            this.notify();
+        } catch (error) {
+            console.error('Error removing favorite playlist:', error);
+        }
+    }
+
+    // --- Checks ---
     isTrackFavorite(trackId: number): boolean {
         return this.favoriteTrackIds.has(trackId);
     }
 
     isAlbumFavorite(albumId: number): boolean {
         return this.favoriteAlbumIds.has(albumId);
+    }
+
+    isPlaylistFavorite(playlistId: number): boolean {
+        return this.favoritePlaylistIds.has(playlistId);
     }
 }
 

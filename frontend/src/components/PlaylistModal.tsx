@@ -1,78 +1,89 @@
 import { useState, useRef, useEffect } from 'react';
 import '../assets/styles/components/PlaylistModal.css';
 import noCoverPlaylist from '../assets/images/no-cover-playlist.svg';
-import type { PlaylistWithTracks } from "../types/PlaylistWithTracks.ts";
 import type { Track } from '../types/Track.ts';
-import { PlaylistManager } from '../api/PlaylistManager';
+import type { Playlist } from '../types/Playlist.ts';
 import { FileManager } from '../api/FileManager';
 import type { FileGetRequest } from '../types/request/FileGetRequest';
-import { useFavorites } from '../hooks/useFavorites'; // Добавляем хук
+import { useFavorites } from '../hooks/useFavorites';
 
-const PlaylistModal = ({ isOpen, onClose, playlistData }: {
+interface PlaylistModalProps {
     isOpen: boolean;
     onClose: () => void;
-    playlistData: PlaylistWithTracks | null
-}) => {
+    playlistName: string;
+    tracks: Track[];
+    playlistId?: number | bigint;
+    playlist?: Playlist;
+    coverHash?: string;
+}
+
+const PlaylistModal = ({
+                           isOpen,
+                           onClose,
+                           playlistName,
+                           tracks = [],
+                           playlistId,
+                           playlist,
+                           coverHash
+                       }: PlaylistModalProps) => {
     const modalRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [isPlaylistFavorite, setIsPlaylistFavorite] = useState(false);
-    const [menuTrack, setMenuTrack] = useState<Track | null>(null);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [isPositionCalculated, setIsPositionCalculated] = useState(false);
-    const [cover, setCover] = useState<string>("");
+    const [menuTrack, setMenuTrack] = useState<Track | null>(null);
+    const [coverSrc, setCoverSrc] = useState<string>("");
 
-    const playlistManager = new PlaylistManager();
     const fileManager = new FileManager();
 
-    // Используем хук избранного
-    const { favoriteTrackIds, addFavoriteTrack, removeFavoriteTrack } = useFavorites();
+    // ✅ Хук избранного (идентично AlbumModal)
+    const {
+        favoriteTrackIds,
+        favoritePlaylistIds,
+        addFavoriteTrack,
+        removeFavoriteTrack,
+        addFavoritePlaylist,
+        removeFavoritePlaylist
+    } = useFavorites();
 
-    const [formData, setFormData] = useState<PlaylistWithTracks>({
-        id: 0n,
-        userId: 0n,
-        name: "",
-        isSystem: false,
-        coverHash: "",
-        tracks: []
-    });
+    // ✅ Получаем ID (идентично actualAlbumId)
+    const actualPlaylistId = playlistId || playlist?.id;
 
+    // ✅ Проверка избранного (идентично isAlbumFavorite)
+    const isPlaylistFavorite = actualPlaylistId ? favoritePlaylistIds.has(Number(actualPlaylistId)) : false;
+
+    // Загрузка обложки (если передан hash)
     useEffect(() => {
-        const loadPlaylist = async () => {
-            if (!isOpen || !playlistData?.id) return;
+        if (!isOpen || !coverHash) {
+            setCoverSrc("");
+            return;
+        }
 
+        const loadCover = async () => {
             try {
-                const playlistWithTracks = await playlistManager.findById(playlistData.id);
-                setFormData(playlistWithTracks);
-
-                const coverHash = playlistWithTracks.coverHash;
-
-                if (coverHash) {
-                    const fileGetRequest: FileGetRequest = {
-                        bucket: "covers",
-                        hash: coverHash
-                    };
-                    const coverSrc = await fileManager.getFileUrl(fileGetRequest) ?? "";
-                    if (coverSrc) setCover(coverSrc);
-                }
-            }
-            catch (err) {
-                console.log('Error', err);
+                const fileGetRequest: FileGetRequest = {
+                    bucket: "covers",
+                    hash: coverHash
+                };
+                const src = await fileManager.getFileUrl(fileGetRequest) ?? "";
+                if (src) setCoverSrc(src);
+            } catch (err) {
+                console.error('Error loading cover:', err);
             }
         };
 
-        loadPlaylist();
+        loadCover();
 
         return () => {
-            if (cover) {
-                console.log('Cleaning up cover URL:', cover);
-                fileManager.revokeFileUrl(cover);
-                setCover("");
+            if (coverSrc) {
+                fileManager.revokeFileUrl(coverSrc);
+                setCoverSrc("");
             }
         };
-    }, [isOpen, playlistData?.id]);
+    }, [isOpen, coverHash]);
 
+    // Логика позиционирования (идентично AlbumModal)
     useEffect(() => {
         if (!isOpen) {
             setIsPositionCalculated(false);
@@ -100,18 +111,18 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
         return () => window.removeEventListener('resize', updateLayout);
     }, [isOpen]);
 
+    // Логика перетаскивания (идентично AlbumModal)
     const handleMouseDown = (e: React.MouseEvent) => {
         if (window.innerWidth < 1024) return;
-        if (e.target instanceof Element &&
-            e.target.closest('.pml-header') &&
-            !e.target.closest('.pml-close') &&
-            modalRef.current) {
+        if (e.target instanceof Element && e.target.closest('.pml-header') && !e.target.closest('.pml-close')) {
             setIsDragging(true);
-            const rect = modalRef.current.getBoundingClientRect();
-            setDragOffset({
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top,
-            });
+            const rect = modalRef.current?.getBoundingClientRect();
+            if (rect) {
+                setDragOffset({
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top,
+                });
+            }
         }
     };
 
@@ -141,11 +152,21 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
         }
     }, [isDragging]);
 
-    if (!isOpen || !playlistData) return null;
-
     const togglePlaylistFavorite = () => {
-        setIsPlaylistFavorite(!isPlaylistFavorite);
+        if (!actualPlaylistId) {
+            console.warn('Нет ID плейлиста');
+            return;
+        }
+
+        const id = Number(actualPlaylistId);
+        if (isPlaylistFavorite) {
+            removeFavoritePlaylist(id);
+        } else {
+            addFavoritePlaylist(id);
+        }
     };
+
+    if (!isOpen) return null;
 
     return (
         <div className="pml-overlay" onClick={() => setMenuTrack(null)} style={{ opacity: isPositionCalculated ? 1 : 0 }}>
@@ -156,75 +177,149 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
                 onMouseDown={handleMouseDown}
                 onClick={(e) => e.stopPropagation()}
             >
+                {/* Шапка */}
                 <div className="pml-header">
+                    {/* Обложка */}
                     <div className="pml-playlist-cover-wrapper">
-                        <img src={cover || noCoverPlaylist} alt="No cover of playlist" />
+                        <img
+                            src={coverSrc || noCoverPlaylist}
+                            alt="No cover of playlist"
+                            style={{ width: '156px', height: '156px', objectFit: 'cover' }}
+                        />
                     </div>
 
+                    {/* Информация */}
                     <div className="pml-playlist-info">
-                        <div className="pml-title">{playlistData.name}</div>
-                        <div className="pml-meta">{playlistData.tracks?.length || 0} треков</div>
+                        <div className="pml-title">{playlistName}</div>
+                        <div className="pml-meta">{tracks.length} треков</div>
                     </div>
 
                     <div className="pml-playlist-actions">
-                        <button className="pml-btn pml-btn-play" title="Воспроизвести" onClick={() => console.log("Play")}>
-                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2"><path d="M8 5v14l11-7z" /></svg>
+                        <button
+                            className="pml-btn pml-btn-play"
+                            title="Воспроизвести плейлист"
+                            onClick={() => console.log("Воспроизвести плейлист:", playlistName)}
+                        >
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
                         </button>
-                        <button className="pml-btn pml-btn-next" title="Следующий" onClick={() => console.log("Next")}>
-                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2"><path d="M8 5v14l11-7z" /><path d="M18 5v14" /></svg>
+                        <button
+                            className="pml-btn pml-btn-next"
+                            title="Играть следующим"
+                            onClick={() => console.log("Играть следующим:", playlistName)}
+                        >
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2">
+                                <path d="M8 5v14l11-7z" />
+                                <path d="M18 5v14" />
+                            </svg>
                         </button>
-                        <button className="pml-btn pml-btn-shuffle" title="Шuffle" onClick={() => console.log("Shuffle")}>
-                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" /></svg>
+                        <button
+                            className="pml-btn pml-btn-shuffle"
+                            title="Случайный порядок"
+                            onClick={() => console.log("Случайный порядок:", playlistName)}
+                        >
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2">
+                                <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
+                            </svg>
                         </button>
-                        <button className={`pml-btn pml-btn-heart ${isPlaylistFavorite ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); togglePlaylistFavorite(); }}>
-                            <svg viewBox="0 0 24 24" width="20" height="20" fill={isPlaylistFavorite ? "#ff2d55" : "none"} stroke="#aaa" strokeWidth="2"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+
+                        {/* ✅ Кнопка избранного (логика 1 в 1 как в AlbumModal) */}
+                        <button
+                            className={`pml-btn pml-btn-heart ${isPlaylistFavorite ? 'active' : ''}`}
+                            onClick={togglePlaylistFavorite}
+                            title={isPlaylistFavorite ? "Удалить из избранного" : "Добавить в избранное"}
+                        >
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill={isPlaylistFavorite ? "#ff2d55" : "none"} stroke="#aaa" strokeWidth="2">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
                         </button>
                     </div>
 
                     <button className="pml-close" onClick={onClose} aria-label="Закрыть">
-                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
                     </button>
                 </div>
 
                 <div className="pml-divider"></div>
 
+                {/* Список треков */}
                 <div className="pml-track-list">
-                    {playlistData.tracks.map((track, idx) => (
-                        <TrackItem
-                            key={track.id ? Number(track.id) : idx}
-                            index={idx + 1}
-                            track={track}
-                            isMobile={isMobile}
-                            isFavorite={favoriteTrackIds.has(Number(track.id))}
-                            onAddFavorite={() => addFavoriteTrack(Number(track.id))}
-                            onRemoveFavorite={() => removeFavoriteTrack(Number(track.id))}
-                            onMoreClick={() => setMenuTrack(track)}
-                        />
-                    ))}
+                    {tracks.length > 0 ? (
+                        tracks.map((track, idx) => (
+                            <TrackItem
+                                key={track.id ? Number(track.id) : idx}
+                                index={idx + 1}
+                                track={track}
+                                isMobile={isMobile}
+                                isFavorite={favoriteTrackIds.has(Number(track.id))}
+                                onAddFavorite={() => addFavoriteTrack(Number(track.id))}
+                                onRemoveFavorite={() => removeFavoriteTrack(Number(track.id))}
+                                onMoreClick={() => setMenuTrack(track)}
+                            />
+                        ))
+                    ) : (
+                        <div className="pml-empty-state">
+                            В этом плейлисте пока нет треков
+                        </div>
+                    )}
                 </div>
 
+                {/* Мобильное контекстное меню */}
                 {isMobile && menuTrack && (
-                    <div className="pml-context-menu-overlay" onClick={() => setMenuTrack(null)}>
-                        <div className={`pml-context-menu ${menuTrack ? 'active' : ''}`} onClick={(e) => e.stopPropagation()}>
-                            <div className="pml-context-item" onClick={() => { console.log("Next:", menuTrack.name); setMenuTrack(null); }}>Играть следующим</div>
+                    <div
+                        className="pml-context-menu-overlay"
+                        onClick={() => setMenuTrack(null)}
+                    >
+                        <div
+                            className={`pml-context-menu ${menuTrack ? 'active' : ''}`}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div
+                                className="pml-context-item"
+                                onClick={() => {
+                                    console.log("Играть следующим:", menuTrack.name);
+                                    setMenuTrack(null);
+                                }}
+                            >
+                                Играть следующим
+                            </div>
+
                             <div className="pml-context-divider" />
-                            <div className="pml-context-item" onClick={() => {
-                                if (menuTrack.id) {
-                                    const trackId = Number(menuTrack.id);
-                                    if (favoriteTrackIds.has(trackId)) {
-                                        removeFavoriteTrack(trackId);
-                                    } else {
-                                        addFavoriteTrack(trackId);
+
+                            <div
+                                className="pml-context-item"
+                                onClick={() => {
+                                    if (menuTrack.id) {
+                                        const trackId = Number(menuTrack.id);
+                                        if (favoriteTrackIds.has(trackId)) {
+                                            removeFavoriteTrack(trackId);
+                                        } else {
+                                            addFavoriteTrack(trackId);
+                                        }
                                     }
-                                }
-                                setMenuTrack(null);
-                            }}>
+                                    setMenuTrack(null);
+                                }}
+                            >
                                 {menuTrack.id && favoriteTrackIds.has(Number(menuTrack.id))
                                     ? "Удалить из избранного"
                                     : "Добавить в избранное"}
                             </div>
+
                             <div className="pml-context-divider" />
-                            <div className="pml-context-item" onClick={() => { console.log("Add:", menuTrack.name); setMenuTrack(null); }}>В плейлист</div>
+
+                            <div
+                                className="pml-context-item"
+                                onClick={() => {
+                                    console.log("Добавить в плейлист:", menuTrack.name);
+                                    setMenuTrack(null);
+                                }}
+                            >
+                                Добавить в плейлист
+                            </div>
                         </div>
                     </div>
                 )}
@@ -232,6 +327,8 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
         </div>
     );
 };
+
+// --- Компонент элемента трека (идентичен AlbumModal) ---
 
 interface TrackItemProps {
     index: number;
@@ -261,6 +358,13 @@ const TrackItem = ({
         }
     };
 
+    const formatDuration = (seconds?: number) => {
+        if (!seconds) return "0:00";
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
     return (
         <div className={`pml-track-item ${isMobile ? 'mobile' : ''}`}>
             <div className="pml-track-index">{index}.</div>
@@ -278,7 +382,7 @@ const TrackItem = ({
             </div>
             {!isMobile && (<div className="pml-track-album">{track.album || "Альбом"}</div>)}
             <div className="pml-track-duration">
-                {track.duration ? `${Math.floor(track.duration / 60)}:${(track.duration % 60).toString().padStart(2, '0')}` : "0:00"}
+                {formatDuration(track.duration)}
             </div>
             <div className="pml-track-actions">
                 {isMobile ? (

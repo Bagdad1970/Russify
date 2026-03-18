@@ -1,5 +1,6 @@
 import type {Track} from "../types/Track.ts";
 import type {Album} from "../types/Album.ts";
+import type {Playlist} from "../types/Playlist.ts";
 import apiClient from "./ApiClient.ts";
 
 export class FavoriteManager {
@@ -55,6 +56,34 @@ export class FavoriteManager {
             await apiClient.delete(`favorites/albums/${Number(albumId)}`);
         } catch (error) {
             console.error("Error deleting favorite album:", error);
+            throw error;
+        }
+    }
+
+    async getFavoritePlaylists(): Promise<Playlist[]> {
+        try {
+            const response = await apiClient.get<Playlist[]>("favorites/playlists");
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching favorite playlists:", error);
+            throw error;
+        }
+    }
+
+    async addFavoritePlaylist(playlistId: bigint): Promise<void> {
+        try {
+            await apiClient.post("favorites/playlists", { playlistId: Number(playlistId) });
+        } catch (error) {
+            console.error("Error adding favorite playlist:", error);
+            throw error;
+        }
+    }
+
+    async deleteFavoritePlaylist(playlistId: bigint): Promise<void> {
+        try {
+            await apiClient.delete(`favorites/playlists/${Number(playlistId)}`);
+        } catch (error) {
+            console.error("Error deleting favorite playlist:", error);
             throw error;
         }
     }
