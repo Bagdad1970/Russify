@@ -106,14 +106,13 @@ public class FavoriteController {
         favouriteService.addPlaylistToFavourites(authentication.getName(), request.getPlaylistId());
     }
 
-    @DeleteMapping("/playlists")
-    public ResponseEntity<Void> removePlaylistFromFavourites(
-            @RequestParam Long playlistId,
-            Authentication authentication
+    @DeleteMapping("/playlists/{playlistId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removePlaylistFromFavourites(
+            Authentication authentication,
+            @PathVariable Long playlistId
     ) {
-
-        favouriteService.removePlaylistFromFavourites(authentication.getName(), playlistId);
-
-        return ResponseEntity.ok().build();
+        String email = authentication.getName();
+        favouriteService.removePlaylistFromFavourites(email, playlistId);
     }
 }
