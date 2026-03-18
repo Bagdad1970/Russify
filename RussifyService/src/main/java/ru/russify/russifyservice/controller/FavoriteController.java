@@ -18,6 +18,7 @@ import ru.russify.models.AlbumDto;
 import ru.russify.models.FavouriteTrackDto;
 import ru.russify.models.PlaylistDto;
 import ru.russify.models.request.AddFavouriteAlbumRequest;
+import ru.russify.models.request.AddFavouritePlaylistRequest;
 import ru.russify.models.request.AddFavouriteTrackRequest;
 import ru.russify.russifyservice.service.implementation.AlbumServiceImpl;
 import ru.russify.russifyservice.service.implementation.FavouritesServiceImpl;
@@ -96,14 +97,13 @@ public class FavoriteController {
     }
 
     @PostMapping("/playlists")
-    public ResponseEntity<Void> addPlaylistToFavourites(
-            @RequestParam Long playlistId,
+    @ResponseStatus(HttpStatus.CREATED)
+    public void addFavouritePlaylist(
+            @RequestBody AddFavouritePlaylistRequest request,
             Authentication authentication
     ) {
 
-        favouriteService.addPlaylistToFavourites(authentication.getName(), playlistId);
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        favouriteService.addPlaylistToFavourites(authentication.getName(), request.getPlaylistId());
     }
 
     @DeleteMapping("/playlists")
