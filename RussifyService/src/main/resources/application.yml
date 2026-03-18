@@ -5,6 +5,8 @@ spring:
     password: password
     driver-class-name: org.postgresql.Driver
 
+  domain-name: russify.k-lab.su
+
   jpa:
     hibernate:
       ddl-auto: none    # У нас схемой управлять будет liquibase так что вот так вот

@@ -11,6 +11,12 @@ export default defineConfig({
                 changeOrigin: true,
                 secure: false,
             }
-        }
+        },
+        allowedHosts: [
+            'russify.k-lab.su',
+            'localhost'
+        ],
+        port: 5173,
+        strictPort: true
     }
 })
