@@ -3,6 +3,7 @@ package ru.russify.russifyservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity(name = "track")
@@ -33,15 +34,18 @@ public class Track {
     private String audioHash;
 
     @OneToMany(mappedBy = "track", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<TrackPlaylist> trackPlaylists;
+    @Builder.Default
+    private Set<TrackPlaylist> trackPlaylists = new HashSet<>();
 
     @OneToMany(mappedBy = "track", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<TrackAlbum> trackAlbums;
+    @Builder.Default
+    private Set<TrackAlbum> trackAlbums = new HashSet<>();
 
     @OneToMany(mappedBy = "track", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AuthorTrack> authorTracks;
+    @Builder.Default
+    private Set<AuthorTrack> authorTracks = new HashSet<>();
 
     @OneToMany(mappedBy = "track", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<FavouriteTrack> favoriteTracks;
-
+    @Builder.Default
+    private Set<FavouriteTrack> favoriteTracks = new HashSet<>();
 }
