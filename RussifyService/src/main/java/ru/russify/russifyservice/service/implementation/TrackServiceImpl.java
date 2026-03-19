@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.russify.models.TrackDto;
 import ru.russify.models.projection.TrackFlatDto;
-import ru.russify.models.request.TrackSearchRequest;
+import ru.russify.models.request.track.TrackCreateRequest;
+import ru.russify.models.request.track.TrackResponse;
+import ru.russify.models.request.track.TrackSearchRequest;
 import ru.russify.russifyservice.exception.TrackNotFoundException;
 import ru.russify.russifyservice.mapper.TrackMapper;
 import ru.russify.russifyservice.model.AuthorTrack;
@@ -33,19 +35,20 @@ public class TrackServiceImpl implements TrackService {
     private final GenreRepository genreRepository;
     private final AlbumRepository albumRepository;
     private final AuthorRepository authorRepository;
+    private final FileServiceImpl fileService;
     private final TrackMapper mapper;
 
     @Override
-    public TrackDto create(TrackDto dto) {
-        Track track = mapper.toEntity(dto);
+    public TrackResponse create(TrackCreateRequest request) {
+        Track track = new Track();
 
         track.setGenre(
-                genreRepository.getReferenceById(dto.getGenreId())
+                genreRepository.getReferenceById(request.getGenreId())
         );
 
-        if (dto.getAlbumIds() != null) {
+        if (request.getAlbumIds() != null) {
             track.setTrackAlbums(
-                    dto.getAlbumIds().stream()
+                    request.getAlbumIds().stream()
                             .map(albumId -> new TrackAlbum(
                                     new TrackAlbumPK(null, albumId),
                                     track,
@@ -55,9 +58,9 @@ public class TrackServiceImpl implements TrackService {
             );
         }
 
-        if (dto.getAuthorIds() != null) {
+        if (request.getAuthorIds() != null) {
             track.setAuthorTracks(
-                    dto.getAuthorIds().stream()
+                    request.getAuthorIds().stream()
                             .map(authorId -> new AuthorTrack(
                                     new AuthorTrackPK(authorId, null),
                                     authorRepository.getReferenceById(authorId),
@@ -67,7 +70,22 @@ public class TrackServiceImpl implements TrackService {
             );
         }
 
-        return mapper.toDto(repository.save(track));
+        String audioHash = fileService.uploadFile(
+                "music",
+                request.getAudioFile()
+        );
+
+        track.setAudioHash(audioHash);
+
+        Track saved = repository.save(track);
+
+        return TrackResponse.builder()
+                .id(saved.getId())
+                .name(saved.getName())
+                .albumIds(request.getAlbumIds())
+                .authorIds(request.getAuthorIds())
+                .coverHash(saved.getCoverHash())
+                .build();
     }
 
     @Override

@@ -9,7 +9,7 @@ import { AlbumManager } from '../api/AlbumManager.ts';
 import { FileManager } from '../api/FileManager.ts';
 import type { Album } from '../types/Album.ts';
 import type { FileGetRequest } from '../types/request/FileGetRequest.ts';
-import noCoverPlaylist from '../assets/images/no-cover-playlist.svg';
+import noCover from '../assets/images/no-cover.svg';
 
 const ProfilePage = () => {
     const [albums, setAlbums] = useState<Album[]>([]);
@@ -136,11 +136,11 @@ const ProfilePage = () => {
                                 onClick={() => openAlbumModal(album)}
                             >
                                 <img
-                                    src={covers[album.id.toString()] || noCoverPlaylist}
+                                    src={covers[album.id.toString()] || noCover}
                                     alt={album.title}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                     onError={(e) => {
-                                        e.currentTarget.src = noCoverPlaylist;
+                                        e.currentTarget.src = noCover;
                                     }}
                                 />
                                 <div

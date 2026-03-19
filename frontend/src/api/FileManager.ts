@@ -1,28 +1,11 @@
-import api from "./ApiClient.ts";
-import type {FileGetRequest} from "../types/request/FileGetRequest.ts";
-
 export class FileManager {
+    private readonly baseUrl: string;
 
-    async getFileUrl(request: FileGetRequest): Promise<string> {
-        try {
-            const response = await api.get("files", {
-                params: {
-                    bucket: request.bucket,
-                    hash: request.hash
-                },
-                responseType: "blob"
-            });
-
-            return URL.createObjectURL(response.data);
-        }
-        catch (error) {
-            console.error("Error fetching file:", error);
-            throw error;
-        }
+    constructor() {
+        this.baseUrl = 'http://localhost:9000';
     }
 
-    revokeFileUrl(url: string): void {
-        URL.revokeObjectURL(url);
+    async getFileUrl(bucket: 'music' | 'images', hash: string): Promise<string> {
+        return `${this.baseUrl}/${bucket}/${hash}`;
     }
-
 }

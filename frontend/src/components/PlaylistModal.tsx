@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import '../assets/styles/components/PlaylistModal.css';
-import noCoverPlaylist from '../assets/images/no-cover-playlist.svg';
+import noCover from '../assets/images/no-cover.svg';
 import type { Track } from '../types/Track.ts';
 import type { Playlist } from '../types/Playlist.ts';
 import { FileManager } from '../api/FileManager';
@@ -182,7 +182,7 @@ const PlaylistModal = ({
                     {/* Обложка */}
                     <div className="pml-playlist-cover-wrapper">
                         <img
-                            src={coverSrc || noCoverPlaylist}
+                            src={coverSrc || noCover}
                             alt="No cover of playlist"
                             style={{ width: '156px', height: '156px', objectFit: 'cover' }}
                         />

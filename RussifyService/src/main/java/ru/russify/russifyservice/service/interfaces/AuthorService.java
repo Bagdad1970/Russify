@@ -1,8 +1,8 @@
 package ru.russify.russifyservice.service.interfaces;
 
 import ru.russify.models.AuthorDto;
-import ru.russify.models.request.CreateAuthorDto;
-import ru.russify.models.request.UpdateAuthorDto;
+import ru.russify.models.request.author.CreateAuthorDto;
+import ru.russify.models.request.author.UpdateAuthorDto;
 
 import java.util.List;
 

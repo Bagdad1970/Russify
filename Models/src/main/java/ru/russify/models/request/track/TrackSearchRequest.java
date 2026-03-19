@@ -1,4 +1,4 @@
-package ru.russify.models.request;
+package ru.russify.models.request.track;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
