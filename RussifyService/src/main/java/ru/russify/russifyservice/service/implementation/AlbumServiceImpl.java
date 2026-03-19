@@ -116,7 +116,7 @@ public class AlbumServiceImpl implements AlbumService {
                 MultipartFile audioFile = trackAudioFiles.get(i);
                 Long authorId = trackAuthorIds.get(i);
 
-                String audioHash = fileService.uploadFile("audio", audioFile);
+                String audioHash = fileService.uploadFile("music", audioFile);
 
                 Track track = Track.builder()
                         .name(name)

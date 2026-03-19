@@ -28,21 +28,6 @@ public class FileServiceImpl implements FileService {
 
     private final MinioClient client;
 
-    private void ensureBucketExists(String bucket) {
-        try {
-            boolean exists = client.bucketExists(BucketExistsArgs.builder()
-                    .bucket(bucket)
-                    .build());
-            if (!exists) {
-                client.makeBucket(MakeBucketArgs.builder()
-                        .bucket(bucket)
-                        .build());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to ensure bucket exists: " + e.getMessage(), e);
-        }
-    }
-
     private boolean doesObjectExist(String bucket, String filename) {
         try {
             client.statObject(StatObjectArgs.builder()
@@ -64,8 +49,6 @@ public class FileServiceImpl implements FileService {
         if (file.isEmpty()) {
             throw new RuntimeException("File is empty");
         }
-
-        ensureBucketExists(bucket);
 
         try {
             InputStream inputStream = file.getInputStream();
