@@ -5,8 +5,7 @@ import type { PlaylistWithTracks } from "../types/PlaylistWithTracks.ts";
 import type { Track } from '../types/Track.ts';
 import { PlaylistManager } from '../api/PlaylistManager';
 import { FileManager } from '../api/FileManager';
-import type { FileGetRequest } from '../types/request/FileGetRequest';
-import { useFavorites } from '../hooks/useFavorites'; // Добавляем хук
+import { useFavorites } from '../hooks/useFavorites';
 
 const PlaylistModal = ({ isOpen, onClose, playlistData }: {
     isOpen: boolean;
@@ -21,12 +20,11 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
     const [menuTrack, setMenuTrack] = useState<Track | null>(null);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [isPositionCalculated, setIsPositionCalculated] = useState(false);
-    const [cover, setCover] = useState<string>("");
+    const [coverUrl, setCoverUrl] = useState<string>("");
 
     const playlistManager = new PlaylistManager();
     const fileManager = new FileManager();
 
-    // Используем хук избранного
     const { favoriteTrackIds, addFavoriteTrack, removeFavoriteTrack } = useFavorites();
 
     const [formData, setFormData] = useState<PlaylistWithTracks>({
@@ -49,12 +47,9 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
                 const coverHash = playlistWithTracks.coverHash;
 
                 if (coverHash) {
-                    const fileGetRequest: FileGetRequest = {
-                        bucket: "covers",
-                        hash: coverHash
-                    };
-                    const coverSrc = await fileManager.getFileUrl(fileGetRequest) ?? "";
-                    if (coverSrc) setCover(coverSrc);
+                    const coverUrl = await fileManager.getFileUrl("images", coverHash) ?? "";
+                    if (coverUrl)
+                        setCoverUrl(coverUrl);
                 }
             }
             catch (err) {
@@ -63,14 +58,7 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
         };
 
         loadPlaylist();
-
-        return () => {
-            if (cover) {
-                console.log('Cleaning up cover URL:', cover);
-                fileManager.revokeFileUrl(cover);
-                setCover("");
-            }
-        };
+        console.log(coverUrl);
     }, [isOpen, playlistData?.id]);
 
     useEffect(() => {
@@ -158,7 +146,10 @@ const PlaylistModal = ({ isOpen, onClose, playlistData }: {
             >
                 <div className="pml-header">
                     <div className="pml-playlist-cover-wrapper">
-                        <img src={cover || noCoverPlaylist} alt="No cover of playlist" />
+                        <img src={coverUrl || noCoverPlaylist} alt="No cover of playlist"
+                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+
+                        />
                     </div>
 
                     <div className="pml-playlist-info">

@@ -2,13 +2,15 @@ package ru.russify.russifyservice.service.interfaces;
 
 import ru.russify.models.TrackDto;
 import ru.russify.models.projection.TrackFlatDto;
-import ru.russify.models.request.TrackSearchRequest;
+import ru.russify.models.request.track.TrackCreateRequest;
+import ru.russify.models.request.track.TrackResponse;
+import ru.russify.models.request.track.TrackSearchRequest;
 
 import java.util.List;
 
 public interface TrackService {
 
-    TrackDto create(TrackDto album);
+    TrackResponse create(TrackCreateRequest request);
 
     TrackDto update(Long id, TrackDto album);
 

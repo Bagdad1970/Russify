@@ -11,7 +11,6 @@ import type {Album} from "../types/Album.ts";
 import {PlaylistManager} from "../api/PlaylistManager.ts";
 import {FavoriteManager} from "../api/FavoriteManager.ts";
 import {FileManager} from "../api/FileManager.ts";
-import type {FileGetRequest} from "../types/request/FileGetRequest.ts";
 import noCoverPlaylist from '../assets/images/no-cover-playlist.svg';
 import {useFavorites} from "../hooks/useFavorites.ts";
 
@@ -24,7 +23,7 @@ const FavoritesPage = () => {
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
     const [tracks, setTracks] = useState<Track[]>([]);
     const [albums, setAlbums] = useState<Album[]>([]);
-    const [covers, setCovers] = useState<Record<number, string>>({});
+    const [covers, setCovers] = useState<Record<string, string>>({});
 
     const { favoriteTrackIds, favoriteAlbumIds, removeFavoriteTrack, removeFavoriteAlbum } = useFavorites();
 
@@ -46,15 +45,13 @@ const FavoritesPage = () => {
 
                 // Загружаем обложки для плейлистов
                 const coversMap: Record<string, string> = {};
-                await Promise.all(userPlaylists.map(async (playlist) => {
+                userPlaylists.map(async (playlist) => {
+                    console.log(playlist);
                     const coverHash = playlist.coverHash;
                     if (coverHash) {
                         try {
-                            const fileGetRequest: FileGetRequest = {
-                                bucket: "covers",
-                                hash: coverHash
-                            };
-                            const coverSrc = await fileManager.getFileUrl(fileGetRequest);
+                            const coverSrc = await fileManager.getFileUrl("images", coverHash) ?? "";
+
                             if (coverSrc) {
                                 coversMap[playlist.id.toString()] = coverSrc;
                             }
@@ -62,21 +59,14 @@ const FavoritesPage = () => {
                             console.log(`Error loading cover for playlist ${playlist.id}:`, err);
                         }
                     }
-                }));
+                });
                 setCovers(coversMap);
-
             } catch (err) {
                 console.log('Error loading data:', err);
             }
         };
 
         loadAllData();
-
-        return () => {
-            Object.values(covers).forEach(url => {
-                if (url) fileManager.revokeFileUrl(url);
-            });
-        };
     }, []);
 
     const [menuVisible, setMenuVisible] = useState<number | null>(null);
@@ -310,7 +300,7 @@ const FavoritesPage = () => {
                                     onClick={() => openPlaylistModal(playlist)}
                                 >
                                     <img
-                                        src={covers[Number(playlist.id)] || noCoverPlaylist}
+                                        src={covers[playlist.id.toString()] || noCoverPlaylist}
                                         alt={playlist.name}
                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                         onError={(e) => {

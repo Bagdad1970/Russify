@@ -80,17 +80,15 @@ public class FileServiceImpl implements FileService {
                     .method(Method.GET)
                     .bucket(bucket)
                     .object(filename)
-                    .expiry(10, TimeUnit.HOURS)
+                    .expiry(24, TimeUnit.HOURS)
                     .build();
 
             String url = client.getPresignedObjectUrl(args);
 
-            FileResponseDto minioFileResponseDto = FileResponseDto.builder()
+            return FileResponseDto.builder()
                     .filename(filename)
                     .fileUrl(url)
                     .build();
-
-            return minioFileResponseDto;
         }
         catch (Exception e) {
             throw new RuntimeException("Exception when generating presigned Url" + e.getMessage());
