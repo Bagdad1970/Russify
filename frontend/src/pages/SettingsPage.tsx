@@ -42,10 +42,6 @@ const SettingsPage = () => {
         setLanguage(language === "ru" ? "en" : "ru");
     };
 
-    const handleAccountChange = () => {
-        console.log("Сменить аккаунт");
-    };
-
     const openRegistrationModal = () => {
         const event = new CustomEvent('openAuthModal', {
             detail: { type: 'registration' }
@@ -80,16 +76,6 @@ const SettingsPage = () => {
                             {theme === "dark" ? "Темная" : "Светлая"}
                         </button>
                     </div>
-
-                    <div className="settings-option">
-                        <div className="settings-option-label">Язык</div>
-                        <button
-                            className="settings-select-btn"
-                            onClick={toggleLanguage}
-                        >
-                            {language === "ru" ? "Русский" : "English"}
-                        </button>
-                    </div>
                 </div>
 
 
@@ -119,16 +105,6 @@ const SettingsPage = () => {
                             <div className="settings-avatar-change">
                                 <button className="settings-avatar-btn">Сменить</button>
                             </div>
-                        </div>
-
-                        <div className="settings-option">
-                            <div className="settings-option-label">Сменить аккаунт</div>
-                            <button
-                                className="settings-account-btn"
-                                onClick={handleAccountChange}
-                            >
-                                Сменить
-                            </button>
                         </div>
 
                         <div className="settings-option">
