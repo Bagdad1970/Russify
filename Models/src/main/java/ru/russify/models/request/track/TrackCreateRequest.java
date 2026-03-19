@@ -17,8 +17,6 @@ import java.util.Set;
 @Builder
 public class TrackCreateRequest {
 
-    private Long id;
-
     @NotNull
     private Set<Long> albumIds;
 

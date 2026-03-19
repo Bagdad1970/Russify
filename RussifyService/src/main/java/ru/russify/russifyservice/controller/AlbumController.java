@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.russify.models.AlbumDto;
-import ru.russify.models.request.AlbumCreateRequest;
-import ru.russify.models.request.AlbumUpdateRequest;
+import ru.russify.models.request.album.AlbumCreateRequest;
+import ru.russify.models.request.album.AlbumUpdateRequest;
 import ru.russify.russifyservice.service.implementation.AlbumServiceImpl;
 
 import java.util.List;

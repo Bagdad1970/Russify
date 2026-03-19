@@ -1,4 +1,4 @@
-package ru.russify.models.request;
+package ru.russify.models.request.author;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

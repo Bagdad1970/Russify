@@ -3,12 +3,14 @@ package ru.russify.russifyservice.service.implementation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.russify.models.AuthorDto;
-import ru.russify.models.request.CreateAuthorDto;
-import ru.russify.models.request.UpdateAuthorDto;
+import ru.russify.models.request.author.CreateAuthorDto;
+import ru.russify.models.request.author.UpdateAuthorDto;
 import ru.russify.russifyservice.exception.AuthorNotFoundException;
 import ru.russify.russifyservice.mapper.AuthorMapper;
 import ru.russify.russifyservice.model.Author;
+import ru.russify.russifyservice.model.User;
 import ru.russify.russifyservice.repository.AuthorRepository;
+import ru.russify.russifyservice.repository.UserRepository;
 import ru.russify.russifyservice.service.interfaces.AuthorService;
 
 import java.util.List;
@@ -19,10 +21,26 @@ public class AuthorServiceImpl implements AuthorService {
 
     private final AuthorRepository repository;
     private final AuthorMapper mapper;
+    private final UserRepository userRepository;
+    private final FileServiceImpl fileService;
 
     @Override
     public AuthorDto create(CreateAuthorDto dto) {
         Author author = mapper.toEntity(dto);
+
+        if (dto.getUserId() != null) {
+            User user = userRepository.findById(dto.getUserId())
+                    .orElseThrow(() -> new RuntimeException("User not found with id: " + dto.getUserId()));
+            author.setUser(user);
+        }
+
+        String photoHash = fileService.uploadFile(
+                "images",
+                dto.getPhotoFile()
+        );
+
+        author.setPhotoHash(photoHash);
+
         return mapper.toDto(repository.save(author));
     }
 

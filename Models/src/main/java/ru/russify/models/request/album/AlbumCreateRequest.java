@@ -1,4 +1,4 @@
-package ru.russify.models.request;
+package ru.russify.models.request.album;
 
 
 import lombok.Data;

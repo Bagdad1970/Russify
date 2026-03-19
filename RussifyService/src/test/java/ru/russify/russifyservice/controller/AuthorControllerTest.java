@@ -9,8 +9,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.russify.models.AuthorDto;
-import ru.russify.models.request.CreateAuthorDto;
-import ru.russify.models.request.UpdateAuthorDto;
+import ru.russify.models.request.author.CreateAuthorDto;
+import ru.russify.models.request.author.UpdateAuthorDto;
 import ru.russify.russifyservice.service.implementation.AuthorServiceImpl;
 
 import java.util.List;
