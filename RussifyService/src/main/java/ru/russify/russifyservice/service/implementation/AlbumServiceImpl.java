@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import ru.russify.models.AlbumDto;
 import ru.russify.models.AlbumStatus;
 import ru.russify.models.AlbumTypeDto;
@@ -12,18 +13,23 @@ import ru.russify.models.TrackDto;
 import ru.russify.models.projection.AlbumFlatDto;
 import ru.russify.models.request.album.AlbumCreateRequest;
 import ru.russify.models.request.album.AlbumUpdateRequest;
+import ru.russify.models.request.track.TrackCreateRequest;
 import ru.russify.russifyservice.exception.AlbumNotFoundException;
 import ru.russify.russifyservice.exception.UserNotFoundException;
 import ru.russify.russifyservice.model.Album;
 import ru.russify.russifyservice.model.Author;
 import ru.russify.russifyservice.model.AuthorAlbum;
+import ru.russify.russifyservice.model.AuthorTrack;
+import ru.russify.russifyservice.model.Track;
 import ru.russify.russifyservice.model.TrackAlbum;
 import ru.russify.russifyservice.model.User;
 import ru.russify.russifyservice.model.compositekey.AuthorAlbumPK;
+import ru.russify.russifyservice.model.compositekey.AuthorTrackPK;
 import ru.russify.russifyservice.model.compositekey.TrackAlbumPK;
 import ru.russify.russifyservice.repository.AlbumRepository;
 import ru.russify.russifyservice.repository.AlbumTypeRepository;
 import ru.russify.russifyservice.repository.AuthorRepository;
+import ru.russify.russifyservice.repository.GenreRepository;
 import ru.russify.russifyservice.repository.TrackRepository;
 import ru.russify.russifyservice.repository.UserRepository;
 import ru.russify.russifyservice.service.interfaces.AlbumService;
@@ -35,11 +41,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * Сервис для управления альбомами.
- * Позволяет сохранять, редактировать, искать и удалять альбомы.
- */
-
 @Service
 @RequiredArgsConstructor
 public class AlbumServiceImpl implements AlbumService {
@@ -50,6 +51,7 @@ public class AlbumServiceImpl implements AlbumService {
     private final AuthorRepository authorRepository;
     private final FileService fileService;
     private final UserRepository userRepository;
+    private final GenreRepository genreRepository;
 
     public List<AlbumDto> findAllWithRelations() {
         return albumRepository.findAllAlbumsDto();
@@ -90,29 +92,59 @@ public class AlbumServiceImpl implements AlbumService {
 
         Album savedAlbum = albumRepository.save(album);
 
-        if (request.getTrackIds() != null) {
-
-            for (Long trackId : request.getTrackIds()) {
-
-                TrackAlbum trackAlbum = new TrackAlbum(
-                        new TrackAlbumPK(trackId, savedAlbum.getId()),
-                        trackRepository.getReferenceById(trackId),
-                        savedAlbum
-                );
-
-                savedAlbum.getTrackAlbums().add(trackAlbum);
-            }
-        }
-
-        Author author = authorRepository.getReferenceById(request.getAuthorId());
+        Author albumAuthor = authorRepository.getReferenceById(request.getAuthorId());
 
         AuthorAlbum authorAlbum = new AuthorAlbum(
-                new AuthorAlbumPK(author.getId(), savedAlbum.getId()),
-                author,
+                new AuthorAlbumPK(albumAuthor.getId(), savedAlbum.getId()),
+                albumAuthor,
                 savedAlbum
         );
 
         savedAlbum.getAuthorAlbums().add(authorAlbum);
+
+        List<String> trackNames = request.getTrackNames();
+        List<Long> trackGenreIds = request.getTrackGenreIds();
+        List<MultipartFile> trackAudioFiles = request.getTrackAudioFiles();
+        List<Long> trackAuthorIds = request.getTrackAuthorIds();
+
+        if (trackNames != null) {
+
+            for (int i = 0; i < trackNames.size(); i++) {
+
+                String name = trackNames.get(i);
+                Long genreId = trackGenreIds.get(i);
+                MultipartFile audioFile = trackAudioFiles.get(i);
+                Long authorId = trackAuthorIds.get(i);
+
+                String audioHash = fileService.uploadFile("audio", audioFile);
+
+                Track track = Track.builder()
+                        .name(name)
+                        .genre(genreRepository.getReferenceById(genreId))
+                        .audioHash(audioHash)
+                        .build();
+
+                Track savedTrack = trackRepository.save(track);
+
+                TrackAlbum trackAlbum = new TrackAlbum(
+                        new TrackAlbumPK(savedTrack.getId(), savedAlbum.getId()),
+                        savedTrack,
+                        savedAlbum
+                );
+
+                savedAlbum.getTrackAlbums().add(trackAlbum);
+
+                Author author = authorRepository.getReferenceById(authorId);
+
+                AuthorTrack authorTrack = new AuthorTrack(
+                        new AuthorTrackPK(author.getId(), savedTrack.getId()),
+                        author,
+                        savedTrack
+                );
+
+                savedTrack.getAuthorTracks().add(authorTrack);
+            }
+        }
 
         Album result = albumRepository.save(savedAlbum);
 
@@ -171,12 +203,6 @@ public class AlbumServiceImpl implements AlbumService {
         return getAlbumById(album.getId());
     }
 
-    /**
-     * Метод сохранения альбома в бд.
-     *
-     * @param album - экземпляр класса {@code Album }
-     * @return
-     */
     @Override
     public Album save(Album album) {
         return albumRepository.save(album);
@@ -375,6 +401,12 @@ public class AlbumServiceImpl implements AlbumService {
             throw new AccessDeniedException("Access denied");
         }
 
+        List<String> trackNames = request.getTrackNames();
+
+        if (trackNames == null || trackNames.isEmpty()) {
+            throw new RuntimeException("Album must contain tracks");
+        }
+
         Album album = new Album();
 
         album.setTitle(request.getTitle());
@@ -397,19 +429,6 @@ public class AlbumServiceImpl implements AlbumService {
 
         Album savedAlbum = albumRepository.save(album);
 
-        if (request.getTrackIds() != null) {
-            for (Long trackId : request.getTrackIds()) {
-
-                TrackAlbum ta = new TrackAlbum(
-                        new TrackAlbumPK(trackId, savedAlbum.getId()),
-                        trackRepository.getReferenceById(trackId),
-                        savedAlbum
-                );
-
-                savedAlbum.getTrackAlbums().add(ta);
-            }
-        }
-
         AuthorAlbum authorAlbum = new AuthorAlbum(
                 new AuthorAlbumPK(author.getId(), savedAlbum.getId()),
                 author,
@@ -417,6 +436,54 @@ public class AlbumServiceImpl implements AlbumService {
         );
 
         savedAlbum.getAuthorAlbums().add(authorAlbum);
+
+        List<Long> trackGenreIds = request.getTrackGenreIds();
+        List<MultipartFile> trackAudioFiles = request.getTrackAudioFiles();
+        List<Long> trackAuthorIds = request.getTrackAuthorIds();
+
+        if (
+                trackNames.size() != trackGenreIds.size() ||
+                        trackNames.size() != trackAudioFiles.size() ||
+                        trackNames.size() != trackAuthorIds.size()
+        ) {
+            throw new RuntimeException("Track arrays size mismatch");
+        }
+
+        for (int i = 0; i < trackNames.size(); i++) {
+
+            String name = trackNames.get(i);
+            Long genreId = trackGenreIds.get(i);
+            MultipartFile audioFile = trackAudioFiles.get(i);
+            Long authorId = trackAuthorIds.get(i);
+
+            String audioHash = fileService.uploadFile("audio", audioFile);
+
+            Track track = Track.builder()
+                    .name(name)
+                    .genre(genreRepository.getReferenceById(genreId))
+                    .audioHash(audioHash)
+                    .build();
+
+            Track savedTrack = trackRepository.save(track);
+
+            TrackAlbum trackAlbum = new TrackAlbum(
+                    new TrackAlbumPK(savedTrack.getId(), savedAlbum.getId()),
+                    savedTrack,
+                    savedAlbum
+            );
+
+            savedAlbum.getTrackAlbums().add(trackAlbum);
+
+            Author trackAuthor = authorRepository.getReferenceById(authorId);
+
+            AuthorTrack authorTrack = new AuthorTrack(
+                    new AuthorTrackPK(trackAuthor.getId(), savedTrack.getId()),
+                    trackAuthor,
+                    savedTrack
+            );
+
+            savedTrack.getAuthorTracks().add(authorTrack);
+        }
 
         Album result = albumRepository.save(savedAlbum);
 

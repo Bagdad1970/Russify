@@ -35,11 +35,9 @@ public class AlbumController {
         return service.findAllWithRelations();
     }
 
-    @PostMapping(consumes = "multipart/form-data")
-    public ResponseEntity<AlbumDto> createAlbum(
-            @ModelAttribute AlbumCreateRequest request
-    ) {
-        return ResponseEntity.ok(service.createAlbum(request));
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public AlbumDto createAlbum(@ModelAttribute AlbumCreateRequest request) {
+        return service.createAlbum(request);
     }
 
     @GetMapping("/{albumId}")

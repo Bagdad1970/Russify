@@ -40,23 +40,14 @@ public class TrackServiceImpl implements TrackService {
 
     @Override
     public TrackResponse create(TrackCreateRequest request) {
+
         Track track = new Track();
+
+        track.setName(request.getName());
 
         track.setGenre(
                 genreRepository.getReferenceById(request.getGenreId())
         );
-
-        if (request.getAlbumIds() != null) {
-            track.setTrackAlbums(
-                    request.getAlbumIds().stream()
-                            .map(albumId -> new TrackAlbum(
-                                    new TrackAlbumPK(null, albumId),
-                                    track,
-                                    albumRepository.getReferenceById(albumId)
-                            ))
-                            .collect(Collectors.toSet())
-            );
-        }
 
         if (request.getAuthorIds() != null) {
             track.setAuthorTracks(
@@ -82,7 +73,6 @@ public class TrackServiceImpl implements TrackService {
         return TrackResponse.builder()
                 .id(saved.getId())
                 .name(saved.getName())
-                .albumIds(request.getAlbumIds())
                 .authorIds(request.getAuthorIds())
                 .coverHash(saved.getCoverHash())
                 .build();
