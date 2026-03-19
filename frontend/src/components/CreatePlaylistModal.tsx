@@ -131,7 +131,8 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
     const totalDuration = playlistTracks.reduce((sum, t) => sum + t.duration, 0);
     const durationFormatted = formatTime(totalDuration);
 
-    const handleCoverClick = () => {
+    const handleCoverClick = (e) => {
+        e.stopPropagation();
         document.getElementById('cover-upload').click();
     };
 
@@ -171,7 +172,8 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
         onClose();
     };
 
-    const handleNameClick = () => {
+    const handleNameClick = (e) => {
+        e.stopPropagation();
         setIsEditingName(true);
     };
 
@@ -190,7 +192,7 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
     };
 
     return (
-        <div className="cpl-overlay" onClick={onClose} style={{ opacity: isPositionCalculated ? 1 : 0 }}>
+        <div className="cpl-overlay" style={{ opacity: isPositionCalculated ? 1 : 0 }}>
             <div
                 ref={modalRef}
                 className={`cpl-container ${isMobile ? 'mobile' : ''}`}
@@ -220,6 +222,7 @@ const CreatePlaylistModal = ({ isOpen, onClose }) => {
                                 onBlur={handleNameBlur}
                                 onKeyDown={handleNameKeyDown}
                                 autoFocus
+                                onClick={(e) => e.stopPropagation()}
                             />
                         ) : (
                             <div className="cpl-title" onClick={handleNameClick}>
