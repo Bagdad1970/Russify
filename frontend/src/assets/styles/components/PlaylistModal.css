@@ -87,6 +87,7 @@
     flex-direction: column;
     justify-content: center;
     flex: 1;
+    min-width: 0;
 }
 
 .pml-playlist-actions-inline {
@@ -108,6 +109,9 @@
     color: var(--pml-text);
     margin: 0;
     transition: color 0.3s ease;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.3;
 }
 
 .pml-author {
