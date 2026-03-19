@@ -33,7 +33,6 @@ public class AuthorControllerTest {
         // arrange
         CreateAuthorDto request = new CreateAuthorDto();
         request.setName("name");
-        request.setPhotoHash("photo_hash");
         request.setDescription("description");
 
         AuthorDto saved = AuthorDto.builder()

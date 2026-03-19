@@ -9,6 +9,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.russify.models.TrackDto;
+import ru.russify.models.request.track.TrackCreateRequest;
+import ru.russify.models.request.track.TrackResponse;
 import ru.russify.russifyservice.service.implementation.TrackServiceImpl;
 
 import java.util.Set;
@@ -29,16 +31,14 @@ public class TrackControllerTest {
     @Test
     void Creating_track_must_create_and_return_it() throws  Exception {
         // arrange
-        TrackDto request = TrackDto.builder()
+        TrackCreateRequest request = TrackCreateRequest.builder()
                 .name("name")
                 .genreId(1L)
-                .audioHash("audio_hash")
-                .coverHash("cover_hash")
                 .authorIds(Set.of(1L))
                 .albumIds(Set.of(1L))
                 .build();
 
-        TrackDto saved = TrackDto.builder()
+        TrackResponse saved = TrackResponse.builder()
                 .id(1L)
                 .name("name")
                 .genreId(1L)
