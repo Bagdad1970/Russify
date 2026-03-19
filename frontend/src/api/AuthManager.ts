@@ -9,6 +9,12 @@ export class AuthManager {
     async register(userData: CreateUserDto): Promise<AuthResponse> {
         try {
             const response = await api.post<AuthResponse>("auth/register", userData);
+
+            if (response.data.token) {
+                localStorage.setItem("auth_token", response.data.token);
+                window.dispatchEvent(new Event('authChange'));
+            }
+
             return response.data;
         }
         catch (error) {

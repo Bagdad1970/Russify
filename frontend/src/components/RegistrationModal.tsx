@@ -253,8 +253,14 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         if (isValid) {
             try {
                 console.log('Регистрация:', formData);
-                await authManager.register(formData);
-                onClose();
+                const response = await authManager.register(formData);
+
+                if (response && response.token) {
+                    console.log('Регистрация успешна, пользователь авторизован');
+                    onClose();
+                } else {
+                    onClose();
+                }
             } catch (error: any) {
                 console.error('Ошибка регистрации:', error);
                 console.log('Response data:', error.response?.data);
