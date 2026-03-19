@@ -35,7 +35,7 @@ public class TrackControllerTest {
                 .name("name")
                 .genreId(1L)
                 .authorIds(Set.of(1L))
-                .albumIds(Set.of(1L))
+//                .albumIds(Set.of(1L))
                 .build();
 
         TrackResponse saved = TrackResponse.builder()
