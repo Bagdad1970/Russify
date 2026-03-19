@@ -214,3 +214,32 @@
 .logm-switch-btn:hover {
     color: var(--logm-link-hover);
 }
+
+.logm-password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.logm-password-input {
+    width: 100%;
+    padding-right: 40px !important;
+}
+
+.logm-password-toggle {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: var(--logm-input-placeholder);
+    transition: color 0.2s;
+}
+
+.logm-password-toggle:hover {
+    color: var(--logm-text);
+}

@@ -12,8 +12,10 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
     const authManager = new AuthManager();
 
     const [errors, setErrors] = useState({});
+    const [serverError, setServerError] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [inputKey, setInputKey] = useState(Date.now());
+    const [showPassword, setShowPassword] = useState(false);
 
     const modalRef = useRef(null);
     const passwordInputRef = useRef(null);
@@ -30,8 +32,10 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
                 password: ''
             });
             setErrors({});
+            setServerError('');
             setIsSubmitted(false);
             setInputKey(Date.now());
+            setShowPassword(false);
 
             const appBarHeight = 56;
             const modalWidth = 400;
@@ -112,6 +116,8 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
             ...prev,
             [name]: value
         }));
+
+        setServerError('');
     };
 
     const handleKeyDown = (e) => {
@@ -123,9 +129,67 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
         }
     };
 
+    const translateErrorMessage = (message: string): string => {
+        const exactTranslations: { [key: string]: string } = {
+            'Invalid email format': 'Некорректный формат email',
+            'Email cannot be empty': 'Email обязателен',
+            'Password cannot be empty': 'Пароль обязателен',
+
+            'Bad credentials': 'Неверный email или пароль',
+            'User not found': 'Пользователь не найден',
+            'Invalid password': 'Неверный пароль',
+            'Invalid email or password': 'Неверный email или пароль',
+
+            'Bad Request': 'Неверный запрос',
+            'Unauthorized': 'Неавторизованный доступ'
+        };
+
+        if (exactTranslations[message]) {
+            return exactTranslations[message];
+        }
+
+        const lowerMessage = message.toLowerCase();
+
+        const emailNotFoundMatch = message.match(/User with email (.+) not found/i);
+        if (emailNotFoundMatch) {
+            const email = emailNotFoundMatch[1];
+            return `Пользователь с email ${email} не найден`;
+        }
+
+        const altEmailNotFoundMatch = message.match(/User not found with email (.+)/i);
+        if (altEmailNotFoundMatch) {
+            const email = altEmailNotFoundMatch[1];
+            return `Пользователь с email ${email} не найден`;
+        }
+
+        const invalidPasswordMatch = message.match(/Invalid password for user (.+)/i);
+        if (invalidPasswordMatch) {
+            return 'Неверный пароль';
+        }
+
+        const emailExistsMatch = message.match(/User with email (.+) already exists/i);
+        if (emailExistsMatch) {
+            return 'Пользователь с таким email уже существует';
+        }
+
+        if (lowerMessage.includes('email not found') ||
+            lowerMessage.includes('user not found')) {
+            return 'Пользователь не найден';
+        }
+
+        if (lowerMessage.includes('invalid password') ||
+            lowerMessage.includes('bad credentials') ||
+            lowerMessage.includes('invalid email or password')) {
+            return 'Неверный email или пароль';
+        }
+
+        return message;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitted(true);
+        setServerError('');
 
         const isValid = !!(formData.email.trim() && formData.password);
 
@@ -134,10 +198,54 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
                 console.log('Вход:', formData);
                 await authManager.login(formData);
                 onClose();
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Ошибка входа:', error);
+                console.log('Response data:', error.response?.data);
+
+                if (error.response?.data) {
+                    const serverErrorData = error.response.data;
+
+                    if (serverErrorData.message) {
+                        const errorMessage = serverErrorData.message;
+
+                        if (typeof errorMessage === 'string') {
+                            const lowerMessage = errorMessage.toLowerCase();
+
+                            if (lowerMessage.includes('email')) {
+                                setErrors(prev => ({ ...prev, email: translateErrorMessage(errorMessage) }));
+                            } else if (lowerMessage.includes('password')) {
+                                setErrors(prev => ({ ...prev, password: translateErrorMessage(errorMessage) }));
+                            } else {
+                                setServerError(translateErrorMessage(errorMessage));
+                            }
+                        } else if (Array.isArray(errorMessage)) {
+                            const newErrors = {};
+                            errorMessage.forEach((msg: string) => {
+                                const translatedMsg = translateErrorMessage(msg);
+                                const lowerMsg = msg.toLowerCase();
+
+                                if (lowerMsg.includes('email')) {
+                                    newErrors.email = translatedMsg;
+                                } else if (lowerMsg.includes('password')) {
+                                    newErrors.password = translatedMsg;
+                                }
+                            });
+                            setErrors(prev => ({ ...prev, ...newErrors }));
+                        }
+                    } else if (serverErrorData.error) {
+                        setServerError(translateErrorMessage(serverErrorData.error));
+                    } else {
+                        setServerError('Ошибка при входе. Попробуйте позже.');
+                    }
+                } else {
+                    setServerError('Ошибка соединения с сервером');
+                }
             }
         }
+    };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
     };
 
     if (!isOpen) return null;
@@ -175,6 +283,12 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
 
                 {/* Форма */}
                 <form className="logm-form" onSubmit={handleSubmit}>
+                    {serverError && (
+                        <div className="logm-server-error">
+                            {serverError}
+                        </div>
+                    )}
+
                     <div className="logm-input-group">
                         <input
                             type="email"
@@ -189,18 +303,38 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
                     </div>
 
                     <div className="logm-input-group">
-                        <input
-                            ref={passwordInputRef}
-                            key={`password-${inputKey}`}
-                            type="password"
-                            name="password"
-                            className={`logm-input ${errors.password ? 'error' : ''}`}
-                            placeholder="Введите пароль"
-                            value={formData.password}
-                            onChange={handleChange}
-                            onKeyDown={handleKeyDown}
-                            autoComplete="new-password"
-                        />
+                        <div className="logm-password-wrapper">
+                            <input
+                                ref={passwordInputRef}
+                                key={`password-${inputKey}`}
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                className={`logm-input logm-password-input ${errors.password ? 'error' : ''}`}
+                                placeholder="Введите пароль"
+                                value={formData.password}
+                                onChange={handleChange}
+                                onKeyDown={handleKeyDown}
+                                autoComplete="new-password"
+                            />
+                            <button
+                                type="button"
+                                className="logm-password-toggle"
+                                onClick={togglePasswordVisibility}
+                                tabIndex="-1"
+                            >
+                                {showPassword ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                                    </svg>
+                                )}
+                            </button>
+                        </div>
                         {errors.password && <div className="logm-error">{errors.password}</div>}
                     </div>
 

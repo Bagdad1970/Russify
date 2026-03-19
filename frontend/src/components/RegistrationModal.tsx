@@ -14,9 +14,12 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
     const authManager = new AuthManager();
 
     const [errors, setErrors] = useState({});
+    const [serverError, setServerError] = useState('');
     const [showRequirements, setShowRequirements] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [inputKey, setInputKey] = useState(Date.now());
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const modalRef = useRef(null);
     const passwordInputRef = useRef(null);
@@ -35,9 +38,12 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                 passwordConfirm: ''
             });
             setErrors({});
+            setServerError('');
             setShowRequirements(false);
             setIsSubmitted(false);
             setInputKey(Date.now());
+            setShowPassword(false);
+            setShowConfirmPassword(false);
 
             const appBarHeight = 56;
             const modalWidth = 400;
@@ -108,12 +114,18 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         if (isSubmitted) {
             if (!formData.username.trim()) {
                 newErrors.username = 'Имя пользователя обязательно';
+            } else if (formData.username.trim().length < 3) {
+                newErrors.username = 'Имя пользователя должно быть от 3 до 50 символов';
+            } else if (formData.username.trim().length > 50) {
+                newErrors.username = 'Имя пользователя должно быть от 3 до 50 символов';
             }
 
             if (!formData.email.trim()) {
                 newErrors.email = 'Email обязателен';
             } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-                newErrors.email = 'Некорректный email';
+                newErrors.email = 'Некорректный формат email';
+            } else if (formData.email.length > 100) {
+                newErrors.email = 'Email не должен превышать 100 символов';
             }
 
             const passwordValidation = validatePassword(formData.password);
@@ -149,6 +161,8 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         if (name === 'password') {
             setShowRequirements(value.length > 0);
         }
+
+        setServerError('');
     };
 
     const handleKeyDown = (e) => {
@@ -160,9 +174,71 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         }
     };
 
+    const translateErrorMessage = (message: string): string => {
+        const exactTranslations: { [key: string]: string } = {
+            'Invalid email format': 'Некорректный формат email',
+
+            'Username cannot be empty': 'Имя пользователя обязательно',
+            'Имя пользователя должно быть от 3 до 50 символов': 'Имя пользователя должно быть от 3 до 50 символов',
+            'Email cannot be empty': 'Email обязателен',
+            'Incorrect email format': 'Некорректный формат email',
+            'Email must not exceed 100 characters': 'Email не должен превышать 100 символов',
+            'Password cannot be empty': 'Пароль обязателен',
+            'Password must contain from 6 to 255 characters': 'Пароль должен содержать от 6 до 255 символов',
+
+            'Password too short': 'Пароль слишком короткий',
+
+            'Bad Request': 'Неверный запрос'
+        };
+
+        if (exactTranslations[message]) {
+            return exactTranslations[message];
+        }
+
+        const lowerMessage = message.toLowerCase();
+
+        const emailExistsMatch = message.match(/User with email (.+) already exists/i);
+        if (emailExistsMatch) {
+            const email = emailExistsMatch[1];
+            return `Пользователь с email ${email} уже существует`;
+        }
+
+        const usernameExistsMatch = message.match(/User with username (.+) already exists/i);
+        if (usernameExistsMatch) {
+            const username = usernameExistsMatch[1];
+            return `Пользователь с именем ${username} уже существует`;
+        }
+
+        if (lowerMessage.includes('email already exists') ||
+            lowerMessage.includes('duplicate key') && lowerMessage.includes('email') ||
+            lowerMessage.includes('users_email_key')) {
+
+            const emailMatch = message.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+            if (emailMatch) {
+                return `Пользователь с email ${emailMatch[0]} уже существует`;
+            }
+            return 'Пользователь с таким email уже существует';
+        }
+
+        if (lowerMessage.includes('username already exists') ||
+            lowerMessage.includes('duplicate key') && lowerMessage.includes('username') ||
+            lowerMessage.includes('users_username_key')) {
+
+            const usernameMatch = message.match(/username[:\s]+([a-zA-Z0-9_]+)/i) ||
+                message.match(/'([a-zA-Z0-9_]+)'/);
+            if (usernameMatch) {
+                return `Пользователь с именем ${usernameMatch[1]} уже существует`;
+            }
+            return 'Имя пользователя уже занято';
+        }
+
+        return message;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitted(true);
+        setServerError('');
 
         const passwordValidation = validatePassword(formData.password);
         const isPasswordValid = Object.values(passwordValidation).every(Boolean);
@@ -179,10 +255,62 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                 console.log('Регистрация:', formData);
                 await authManager.register(formData);
                 onClose();
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Ошибка регистрации:', error);
+                console.log('Response data:', error.response?.data);
+
+                if (error.response?.data) {
+                    const serverErrorData = error.response.data;
+
+                    if (serverErrorData.message) {
+                        const errorMessage = serverErrorData.message;
+
+                        if (typeof errorMessage === 'string') {
+                            const lowerMessage = errorMessage.toLowerCase();
+
+                            if (lowerMessage.includes('email')) {
+                                setErrors(prev => ({ ...prev, email: translateErrorMessage(errorMessage) }));
+                            } else if (lowerMessage.includes('username')) {
+                                setErrors(prev => ({ ...prev, username: translateErrorMessage(errorMessage) }));
+                            } else if (lowerMessage.includes('password')) {
+                                setErrors(prev => ({ ...prev, password: translateErrorMessage(errorMessage) }));
+                            } else {
+                                setServerError(translateErrorMessage(errorMessage));
+                            }
+                        } else if (Array.isArray(errorMessage)) {
+                            const newErrors = {};
+                            errorMessage.forEach((msg: string) => {
+                                const translatedMsg = translateErrorMessage(msg);
+                                const lowerMsg = msg.toLowerCase();
+
+                                if (lowerMsg.includes('email')) {
+                                    newErrors.email = translatedMsg;
+                                } else if (lowerMsg.includes('username')) {
+                                    newErrors.username = translatedMsg;
+                                } else if (lowerMsg.includes('password')) {
+                                    newErrors.password = translatedMsg;
+                                }
+                            });
+                            setErrors(prev => ({ ...prev, ...newErrors }));
+                        }
+                    } else if (serverErrorData.error) {
+                        setServerError(translateErrorMessage(serverErrorData.error));
+                    } else {
+                        setServerError('Ошибка при регистрации. Попробуйте позже.');
+                    }
+                } else {
+                    setServerError('Ошибка соединения с сервером');
+                }
             }
         }
+    };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
+    const toggleConfirmPasswordVisibility = () => {
+        setShowConfirmPassword(!showConfirmPassword);
     };
 
     if (!isOpen) return null;
@@ -217,6 +345,12 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
 
                 {/* Форма */}
                 <form className="regm-form" onSubmit={handleSubmit}>
+                    {serverError && (
+                        <div className="regm-server-error">
+                            {serverError}
+                        </div>
+                    )}
+
                     <div className="regm-input-group">
                         <input
                             type="text"
@@ -244,18 +378,38 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                     </div>
 
                     <div className="regm-input-group">
-                        <input
-                            ref={passwordInputRef}
-                            key={`password-${inputKey}`}
-                            type="password"
-                            name="password"
-                            className={`regm-input ${errors.password ? 'error' : ''}`}
-                            placeholder="Введите пароль"
-                            value={formData.password}
-                            onChange={handleChange}
-                            onKeyDown={handleKeyDown}
-                            autoComplete="new-password"
-                        />
+                        <div className="regm-password-wrapper">
+                            <input
+                                ref={passwordInputRef}
+                                key={`password-${inputKey}`}
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                className={`regm-input regm-password-input ${errors.password ? 'error' : ''}`}
+                                placeholder="Введите пароль"
+                                value={formData.password}
+                                onChange={handleChange}
+                                onKeyDown={handleKeyDown}
+                                autoComplete="new-password"
+                            />
+                            <button
+                                type="button"
+                                className="regm-password-toggle"
+                                onClick={togglePasswordVisibility}
+                                tabIndex="-1"
+                            >
+                                {showPassword ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                                    </svg>
+                                )}
+                            </button>
+                        </div>
                         {errors.password && <div className="regm-error">{errors.password}</div>}
 
                         {showRequirements && (
@@ -290,17 +444,37 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                     </div>
 
                     <div className="regm-input-group">
-                        <input
-                            key={`confirm-password-${inputKey}`}
-                            type="password"
-                            name="passwordConfirm"
-                            className={`regm-input ${errors.passwordConfirm ? 'error' : ''}`}
-                            placeholder="Повторите пароль"
-                            value={formData.passwordConfirm}
-                            onChange={handleChange}
-                            onKeyDown={handleKeyDown}
-                            autoComplete="new-password"
-                        />
+                        <div className="regm-password-wrapper">
+                            <input
+                                key={`confirm-password-${inputKey}`}
+                                type={showConfirmPassword ? "text" : "password"}
+                                name="passwordConfirm"
+                                className={`regm-input regm-password-input ${errors.passwordConfirm ? 'error' : ''}`}
+                                placeholder="Повторите пароль"
+                                value={formData.passwordConfirm}
+                                onChange={handleChange}
+                                onKeyDown={handleKeyDown}
+                                autoComplete="new-password"
+                            />
+                            <button
+                                type="button"
+                                className="regm-password-toggle"
+                                onClick={toggleConfirmPasswordVisibility}
+                                tabIndex="-1"
+                            >
+                                {showConfirmPassword ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                                    </svg>
+                                )}
+                            </button>
+                        </div>
                         {errors.passwordConfirm && <div className="regm-error">{errors.passwordConfirm}</div>}
                     </div>
 

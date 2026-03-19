@@ -7,7 +7,6 @@ import SettingsHeader from '../components/SettingsHeader.tsx';
 
 const SettingsPage = () => {
     const { theme, toggleTheme } = useTheme();
-    const [language, setLanguage] = useState("ru");
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const authManager = new AuthManager();
 
@@ -37,10 +36,6 @@ const SettingsPage = () => {
             window.removeEventListener('authChange', handleAuthChange);
         };
     }, []);
-
-    const toggleLanguage = () => {
-        setLanguage(language === "ru" ? "en" : "ru");
-    };
 
     const openRegistrationModal = () => {
         const event = new CustomEvent('openAuthModal', {
