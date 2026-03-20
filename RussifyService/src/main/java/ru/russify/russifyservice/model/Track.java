@@ -33,6 +33,9 @@ public class Track {
     @Column(name = "audio_hash", nullable = false, length = 255)
     private String audioHash;
 
+    @Column(name = "duration", nullable = false)
+    private Integer duration;
+
     @OneToMany(mappedBy = "track", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<TrackPlaylist> trackPlaylists = new HashSet<>();

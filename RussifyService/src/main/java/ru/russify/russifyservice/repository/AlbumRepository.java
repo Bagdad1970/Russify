@@ -42,6 +42,7 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
                 g.name,
                 t.coverHash,
                 t.audioHash,
+                t.duration,
             
                 au.id,
                 au.name,

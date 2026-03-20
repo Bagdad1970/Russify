@@ -29,6 +29,8 @@ public class TrackDto {
     @NotNull
     private String audioHash;
 
+    private Integer duration;
+
     @NotBlank(message = "Track name cannot be empty")
     private String name;
 

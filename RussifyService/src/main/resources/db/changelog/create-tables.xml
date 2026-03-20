@@ -155,6 +155,9 @@
             <column name="audio_hash" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="duration" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 

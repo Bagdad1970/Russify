@@ -145,22 +145,25 @@
 
     <changeSet id="27" author="LittleBlBb">
         <insert tableName="tracks" schemaName="app">
-            <column name="track_name" value="2 Goyard"></column>
+            <column name="track_name" value="1 Goyard"></column>
             <column name="genre_id" value="1"></column>
             <column name="audio_hash" value="audio1"></column>
             <column name="cover_hash" value="cover1"></column>
+            <column name="duration" value="184"></column>
         </insert>
         <insert tableName="tracks" schemaName="app">
             <column name="track_name" value="2 Goyard"></column>
             <column name="genre_id" value="2"></column>
             <column name="audio_hash" value="audio2"></column>
             <column name="cover_hash" value="cover2"></column>
+            <column name="duration" value="184"></column>
         </insert>
         <insert tableName="tracks" schemaName="app">
-            <column name="track_name" value="2 Goyard"></column>
+            <column name="track_name" value="3 Goyard"></column>
             <column name="genre_id" value="3"></column>
             <column name="audio_hash" value="audio3"></column>
             <column name="cover_hash" value="cover3"></column>
+            <column name="duration" value="184"></column>
         </insert>
     </changeSet>
 

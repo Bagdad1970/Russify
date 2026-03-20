@@ -13,7 +13,6 @@ import ru.russify.models.TrackDto;
 import ru.russify.models.projection.AlbumFlatDto;
 import ru.russify.models.request.album.AlbumCreateRequest;
 import ru.russify.models.request.album.AlbumUpdateRequest;
-import ru.russify.models.request.track.TrackCreateRequest;
 import ru.russify.russifyservice.exception.AlbumNotFoundException;
 import ru.russify.russifyservice.exception.UserNotFoundException;
 import ru.russify.russifyservice.model.Album;
@@ -52,6 +51,7 @@ public class AlbumServiceImpl implements AlbumService {
     private final FileService fileService;
     private final UserRepository userRepository;
     private final GenreRepository genreRepository;
+    private final AudioMetadataServiceImpl audioMetadataService;
 
     public List<AlbumDto> findAllWithRelations() {
         return albumRepository.findAllAlbumsDto();
@@ -118,10 +118,13 @@ public class AlbumServiceImpl implements AlbumService {
 
                 String audioHash = fileService.uploadFile("music", audioFile);
 
+                int duration = audioMetadataService.extractDurationSeconds(audioFile);
+
                 Track track = Track.builder()
                         .name(name)
                         .genre(genreRepository.getReferenceById(genreId))
                         .audioHash(audioHash)
+                        .duration(duration)
                         .build();
 
                 Track savedTrack = trackRepository.save(track);
@@ -257,6 +260,7 @@ public class AlbumServiceImpl implements AlbumService {
                         .genreId(r.getGenreId())
                         .coverHash(r.getTrackCoverHash())
                         .audioHash(r.getAudioHash())
+                        .duration(r.getDuration())
                         .build())
                 .collect(Collectors.toSet());
 
@@ -458,10 +462,13 @@ public class AlbumServiceImpl implements AlbumService {
 
             String audioHash = fileService.uploadFile("audio", audioFile);
 
+            int duration = audioMetadataService.extractDurationSeconds(audioFile);
+
             Track track = Track.builder()
                     .name(name)
                     .genre(genreRepository.getReferenceById(genreId))
                     .audioHash(audioHash)
+                    .duration(duration)
                     .build();
 
             Track savedTrack = trackRepository.save(track);

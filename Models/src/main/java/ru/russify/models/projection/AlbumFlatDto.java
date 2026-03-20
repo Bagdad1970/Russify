@@ -27,6 +27,7 @@ public class AlbumFlatDto {
     private String genreName;
     private String trackCoverHash;
     private String audioHash;
+    private Integer duration;
 
     // AUTHOR
     private Long authorId;
