@@ -38,7 +38,7 @@ const PlaylistModal = ({
 
     // Состояния для управления треками
     const [currentTracks, setCurrentTracks] = useState<Track[]>([]);
-    const [isAddMode, setIsAddMode] = useState(false); // Режим выбора трека для добавления
+    const [isAddMode, setIsAddMode] = useState(false);
     const [availableTracks, setAvailableTracks] = useState<Track[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -58,7 +58,6 @@ const PlaylistModal = ({
     const actualPlaylistId = playlistId || playlist?.id;
     const isPlaylistFavorite = actualPlaylistId ? favoritePlaylistIds.has(Number(actualPlaylistId)) : false;
 
-    // Инициализация
     useEffect(() => {
         if (isOpen) {
             setCurrentTracks(initialTracks);
@@ -67,16 +66,20 @@ const PlaylistModal = ({
         }
     }, [isOpen, initialTracks]);
 
-    // Загрузка обложки
     const loadCover = async () => {
-        if (!coverHash) { setCoverSrc(""); return; }
+        if (!coverHash) {
+            setCoverSrc("");
+            return;
+        }
         try {
-            const src = await fileManager.getFileUrl({ bucket: "covers", hash: coverHash });
+            const src = await fileManager.getFileUrl("images", coverHash);
             if (src) setCoverSrc(src);
-        } catch (err) { console.error('Error loading cover:', err); }
+        } catch (err) {
+            console.error('Error loading cover:', err);
+            setCoverSrc("");
+        }
     };
 
-    // Загрузка доступных треков при входе в режим добавления
     useEffect(() => {
         if (isOpen && isAddMode) {
             loadAvailableTracks();
@@ -145,15 +148,12 @@ const PlaylistModal = ({
 
     // --- Действия с треками ---
 
-    // Добавить трек (сразу на сервер)
     const handleAddTrack = async (track: Track) => {
         if (!actualPlaylistId) return;
         setIsLoading(true);
         try {
             await playlistManager.addTrackToPlaylist(actualPlaylistId, Number(track.id));
-            // Обновляем локальный список
             setCurrentTracks(prev => [...prev, track]);
-            // Убираем из доступных
             setAvailableTracks(prev => prev.filter(t => t.id !== track.id));
         } catch (err) {
             console.error('Error adding track:', err);
@@ -163,7 +163,6 @@ const PlaylistModal = ({
         }
     };
 
-    // Удалить трек (сразу с сервера)
     const handleRemoveTrack = async (track: Track) => {
         if (!actualPlaylistId) return;
         if (!window.confirm(`Удалить трек "${track.name}" из плейлиста?`)) return;
@@ -207,7 +206,14 @@ const PlaylistModal = ({
                 {/* Шапка */}
                 <div className="pml-header">
                     <div className="pml-playlist-cover-wrapper">
-                        <img src={coverSrc || noCover} alt="Cover" style={{ width: '156px', height: '156px', objectFit: 'cover' }} />
+                        <img
+                            src={coverSrc || noCover}
+                            alt="Cover"
+                            style={{ width: '156px', height: '156px', objectFit: 'cover' }}
+                            onError={(e) => {
+                                e.currentTarget.src = noCover;
+                            }}
+                        />
                     </div>
                     <div className="pml-playlist-info">
                         <div className="pml-title">{playlistName}</div>
@@ -216,7 +222,6 @@ const PlaylistModal = ({
 
                     {!isAddMode ? (
                         <div className="pml-playlist-actions">
-                            {/* Кнопка добавления трека */}
                             <button className="pml-btn pml-btn-add" onClick={() => setIsAddMode(true)} title="Добавить трек" disabled={isLoading}>
                                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                             </button>
@@ -250,16 +255,24 @@ const PlaylistModal = ({
                                     <div className="pml-track-index">{idx + 1}.</div>
                                     <div className="pml-track-cover-wrapper">
                                         <div className="pml-track-cover">
-                                            {track.coverHash ? <img src={`http://localhost:9000/covers/${track.coverHash}`} alt="" style={{width:32, height:32, objectFit:'cover'}}/> :
-                                                <svg viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="#f1f1f1" strokeWidth="1.2"><rect x="4" y="4" width="24" height="24" rx="2"/><path d="M12 12v8"/><path d="M16 12v8"/><path d="M20 12v8"/></svg>}
+                                            <svg viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="#f1f1f1" strokeWidth="1.2">
+                                                <rect x="4" y="4" width="24" height="24" rx="2"/>
+                                                <path d="M12 12v8"/><path d="M16 12v8"/><path d="M20 12v8"/>
+                                            </svg>
                                         </div>
                                     </div>
-                                    <div className="pml-track-text"><div className="pml-track-title">{track.name}</div><div className="pml-track-artist">{track.artist}</div></div>
+                                    <div className="pml-track-text">
+                                        <div className="pml-track-title">{track.name}</div>
+                                        <div className="pml-track-artist">{track.artist}</div>
+                                    </div>
                                     {!isMobile && <div className="pml-track-album">{track.album}</div>}
                                     <div className="pml-track-duration">{formatDuration(track.duration)}</div>
                                     <div className="pml-track-actions">
                                         <button className="pml-btn pml-btn-remove" onClick={() => handleRemoveTrack(track)} title="Удалить из плейлиста" disabled={isLoading}>
-                                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#ff4444" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#ff4444" strokeWidth="2">
+                                                <polyline points="3 6 5 6 21 6"/>
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                            </svg>
                                         </button>
                                     </div>
                                 </div>
@@ -276,14 +289,22 @@ const PlaylistModal = ({
                                 <div key={String(track.id)} className="pml-track-item">
                                     <div className="pml-track-cover-wrapper">
                                         <div className="pml-track-cover">
-                                            {track.coverHash ? <img src={`http://localhost:9000/covers/${track.coverHash}`} alt="" style={{width:32, height:32, objectFit:'cover'}}/> :
-                                                <svg viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="#f1f1f1" strokeWidth="1.2"><rect x="4" y="4" width="24" height="24" rx="2"/><path d="M12 12v8"/><path d="M16 12v8"/><path d="M20 12v8"/></svg>}
+                                            <svg viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="#f1f1f1" strokeWidth="1.2">
+                                                <rect x="4" y="4" width="24" height="24" rx="2"/>
+                                                <path d="M12 12v8"/><path d="M16 12v8"/><path d="M20 12v8"/>
+                                            </svg>
                                         </div>
                                     </div>
-                                    <div className="pml-track-text"><div className="pml-track-title">{track.name}</div><div className="pml-track-artist">{track.artist}</div></div>
+                                    <div className="pml-track-text">
+                                        <div className="pml-track-title">{track.name}</div>
+                                        <div className="pml-track-artist">{track.artist}</div>
+                                    </div>
                                     <div className="pml-track-actions">
                                         <button className="pml-btn pml-btn-add-track" onClick={() => handleAddTrack(track)} disabled={isLoading}>
-                                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2">
+                                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                            </svg>
                                         </button>
                                     </div>
                                 </div>
