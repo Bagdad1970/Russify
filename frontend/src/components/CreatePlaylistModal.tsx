@@ -1,80 +1,94 @@
 import { useState, useRef, useEffect } from 'react';
-import '../assets/styles/components/CreatePlaylistModal.css';
-import { PlaylistManager } from '../api/PlaylistManager';
-import { useFavorites } from '../hooks/useFavorites'; // ✅ Добавлен импорт хука
-import noCover from '../assets/images/no-cover.svg';
+import { useNavigate } from 'react-router-dom';
+import '../assets/styles/components/CreateAlbumOrTrackModal.css';
+import { TrackManager } from '../api/TrackManager'; // Если понадобится для загрузки списка треков
 
-interface CreatePlaylistModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onSuccess?: () => void;
-}
-
-const CreatePlaylistModal = ({ isOpen, onClose, onSuccess }: CreatePlaylistModalProps) => {
+const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "track" }) => {
+    const navigate = useNavigate();
     const modalRef = useRef(null);
+    const fileInputRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-    // Состояния данных
-    const [playlistCoverFile, setPlaylistCoverFile] = useState<File | null>(null);
-    const [playlistCoverPreview, setPlaylistCoverPreview] = useState<string | null>(null);
-    const [playlistName, setPlaylistName] = useState("Новый плейлист");
+    const [type, setType] = useState(mode);
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [isPositionCalculated, setIsPositionCalculated] = useState(false);
-    const [isEditingName, setIsEditingName] = useState(false);
+    // Данные формы
+    const [coverFile, setCoverFile] = useState<File | null>(null);
+    const [coverImagePreview, setCoverImagePreview] = useState<string | null>(null);
 
-    const playlistManager = new PlaylistManager();
+    // Поля для Трека
+    const [trackName, setTrackName] = useState("");
+    const [authorName, setAuthorName] = useState("");
 
-    // ✅ Инициализируем хук для работы с избранным
-    const { addFavoritePlaylist } = useFavorites();
+    // Поля для Альбома
+    const [albumName, setAlbumName] = useState("");
+    const [albumTracks, setAlbumTracks] = useState([]); // Список выбранных треков (объекты)
+    const [draggedIndex, setDraggedIndex] = useState(null);
 
-    // Сброс состояния при открытии
+    // Список всех доступных треков (для добавления в альбом) - можно загружать реально
+    const [availableTracks, setAvailableTracks] = useState([]);
+    const [isLoadingTracks, setIsLoadingTracks] = useState(false);
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Загрузка доступных треков при открытии (если режим альбома)
     useEffect(() => {
-        if (isOpen) {
-            setPlaylistName("Новый плейлист");
-            setPlaylistCoverFile(null);
-            setPlaylistCoverPreview(null);
-            setIsLoading(false);
+        if (isOpen && type === 'album') {
+            loadAvailableTracks();
         }
-    }, [isOpen]);
+    }, [isOpen, type]);
+
+    const loadAvailableTracks = async () => {
+        try {
+            setIsLoadingTracks(true);
+            // Здесь можно вызвать реальный API, например:
+            // const tracks = await trackManager.findAll();
+            // setAvailableTracks(tracks);
+
+            // ЗАГЛУШКА для примера (удалите в продакшене)
+            const mockTracks = [
+                { id: 1, title: "Трек 1", artist: "Исполнитель A", duration: 180 },
+                { id: 2, title: "Трек 2", artist: "Исполнитель B", duration: 210 },
+                { id: 3, title: "Трек 3", artist: "Исполнитель C", duration: 150 },
+            ];
+            setAvailableTracks(mockTracks);
+        } catch (error) {
+            console.error('Error loading tracks:', error);
+        } finally {
+            setIsLoadingTracks(false);
+        }
+    };
 
     useEffect(() => {
-        if (!isOpen) {
-            setIsPositionCalculated(false);
-            return;
-        }
+        if (!isOpen) return;
         const updateLayout = () => {
             const w = window.innerWidth;
             setIsMobile(w < 768);
-            let modalWidth = 500;
+            let modalWidth = 600;
             if (w < 768) modalWidth = w - 24;
-            const modalHeight = 300;
+            const modalHeight = Math.min(600, window.innerHeight - 112);
             const left = (window.innerWidth - modalWidth) / 2;
-            const top = Math.max(40, (window.innerHeight - modalHeight) / 2);
+            const top = Math.max(40, (window.innerHeight - modalHeight) / 2 - 50);
             setPosition({ x: left, y: top });
-            setIsPositionCalculated(true);
         };
         updateLayout();
         window.addEventListener('resize', updateLayout);
         return () => window.removeEventListener('resize', updateLayout);
     }, [isOpen]);
 
-    const handleMouseDown = (e: React.MouseEvent) => {
+    // --- Логика перетаскивания модалки ---
+    const handleMouseDown = (e) => {
         if (window.innerWidth < 1024) return;
-        if (e.target instanceof Element && e.target.closest('.cpl-header') && !e.target.closest('.cpl-close')) {
+        if (e.target.closest('.caotm-header') && !e.target.closest('.caotm-close-btn')) {
             setIsDragging(true);
-            const rect = modalRef.current?.getBoundingClientRect();
-            if (rect) {
-                setDragOffset({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-            }
+            const rect = modalRef.current.getBoundingClientRect();
+            setDragOffset({ x: e.clientX - rect.left, y: e.clientY - rect.top });
         }
     };
-
-    const handleMouseMove = (e: MouseEvent) => {
-        if (!isDragging || window.innerWidth < 1024 || !modalRef.current) return;
+    const handleMouseMove = (e) => {
+        if (!isDragging || window.innerWidth < 1024) return;
         let newX = e.clientX - dragOffset.x;
         let newY = e.clientY - dragOffset.y;
         const r = modalRef.current.getBoundingClientRect();
@@ -82,9 +96,7 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSuccess }: CreatePlaylistModal
         newY = Math.max(40, Math.min(newY, window.innerHeight - r.height));
         setPosition({ x: newX, y: newY });
     };
-
     const handleMouseUp = () => setIsDragging(false);
-
     useEffect(() => {
         if (isDragging && window.innerWidth >= 1024) {
             document.addEventListener('mousemove', handleMouseMove);
@@ -98,176 +110,225 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSuccess }: CreatePlaylistModal
 
     if (!isOpen) return null;
 
-    const handleCoverClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        document.getElementById('cover-upload')?.click();
+    // --- Drag & Drop треков внутри альбома ---
+    const handleDragStart = (e, index) => {
+        setDraggedIndex(index);
+        e.dataTransfer.effectAllowed = 'move';
+    };
+    const handleDragOver = (e) => e.preventDefault();
+    const handleDrop = (e, dropIndex) => {
+        e.preventDefault();
+        if (draggedIndex === null) return;
+        const newTracks = [...albumTracks];
+        const [moved] = newTracks.splice(draggedIndex, 1);
+        newTracks.splice(dropIndex, 0, moved);
+        setAlbumTracks(newTracks);
+        setDraggedIndex(null);
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // --- Работа с файлами ---
+    const handleCoverClick = () => fileInputRef.current?.click();
+    const handleFileChange = (e) => {
         const file = e.target.files?.[0];
         if (file) {
-            setPlaylistCoverFile(file);
+            setCoverFile(file);
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                setPlaylistCoverPreview(ev.target?.result as string);
-            };
+            reader.onload = (ev) => setCoverImagePreview(ev.target?.result);
             reader.readAsDataURL(file);
         }
     };
 
-    const handleSave = async () => {
-        if (isLoading) return;
-        setIsLoading(true);
+    // Добавление трека из списка доступных в альбом
+    const addTrackToAlbum = (track) => {
+        if (!albumTracks.find(t => t.id === track.id)) {
+            setAlbumTracks([...albumTracks, track]);
+        }
+    };
+
+    const removeTrackFromAlbum = (id) => {
+        setAlbumTracks(albumTracks.filter(t => t.id !== id));
+    };
+
+    // ✅ ГЛАВНАЯ ФУНКЦИЯ ОТПРАВКИ (Прямой fetch как в PlaylistModal)
+    const handleSubmit = async () => {
+        if (isSubmitting) return;
+
+        // Валидация
+        if (type === 'track' && (!trackName.trim() || !authorName.trim())) {
+            alert('Заполните название трека и автора');
+            return;
+        }
+        if (type === 'album' && !albumName.trim()) {
+            alert('Введите название альбома');
+            return;
+        }
+
+        setIsSubmitting(true);
 
         try {
             const formData = new FormData();
-            formData.append("userId", JSON.parse(atob(localStorage.getItem('auth_token')!.split('.')[1])).userId);
-            formData.append("name", playlistName.trim() || "Новый плейлист");
-            formData.append("isSystem", "false");
-
-            if (playlistCoverFile) {
-                formData.append("coverFile", playlistCoverFile);
-            }
-
-            const API_URL = import.meta.env.VITE_BASE_URL_PROD || import.meta.env.VITE_BASE_URL_DEV || 'http://localhost:8080';
             const token = localStorage.getItem('auth_token');
+            const API_URL = import.meta.env.VITE_BASE_URL_PROD || import.meta.env.VITE_BASE_URL_DEV || 'http://localhost:8080';
 
-            const response = await fetch(`${API_URL}/api/playlists`, {
-                method: 'POST',
-                headers: token ? {
-                    'Authorization': `Bearer ${token}`,
-                } : {},
-                body: formData,
-            });
+            if (type === 'track') {
+                // --- ЛОГИКА ДЛЯ ТРЕКА ---
+                // Предположим, эндпоинт POST /api/tracks
+                formData.append('title', trackName);
+                formData.append('artist', authorName); // Или authorId, если выбирается из списка
+                if (coverFile) formData.append('coverFile', coverFile);
+                // Если трек требует файл аудио:
+                // formData.append('audioFile', audioFile);
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Server error ${response.status}: ${errorText}`);
+                const response = await fetch(`${API_URL}/api/tracks`, {
+                    method: 'POST',
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`Ошибка трека: ${response.status} ${errText}`);
+                }
+
+            } else {
+                // --- ЛОГИКА ДЛЯ АЛЬБОМА ---
+                // Эндпоинт POST /api/albums (требует multipart)
+                formData.append('title', albumName);
+
+                // AuthorId (нужно получить ID автора, пока заглушка или из токена)
+                // Если автор выбирается текстом, возможно, нужен другой эндпоинт или поиск автора сначала.
+                // Для примера берем ID из токена или ставим 1
+                const userId = token ? JSON.parse(atob(token.split('.')[1])).userId : 1;
+                formData.append('authorId', String(userId));
+
+                formData.append('typeId', '1'); // Заглушка типа альбома
+                formData.append('releasedAt', new Date().toISOString());
+
+                if (coverFile) formData.append('coverFile', coverFile);
+
+                // Треки (массив ID)
+                albumTracks.forEach(t => {
+                    formData.append('trackIds', String(t.id));
+                });
+
+                const response = await fetch(`${API_URL}/api/albums`, {
+                    method: 'POST',
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`Ошибка альбома: ${response.status} ${errText}`);
+                }
             }
 
-            const contentType = response.headers.get('content-type');
-            const created = contentType?.includes('application/json')
-                ? await response.json()
-                : { name: playlistName, id: 0 }; // Заглушка, если бэкенд не вернул JSON
-
-            console.log("✅ Плейлист создан:", created);
-
-            // ✅ АВТОМАТИЧЕСКОЕ ДОБАВЛЕНИЕ В ИЗБРАННОЕ
-            if (created.id) {
-                await addFavoritePlaylist(Number(created.id));
-                console.log("❤️ Плейлист добавлен в избранное");
-            }
-
-            if (onSuccess) onSuccess();
+            // Успех
+            alert(type === 'track' ? 'Трек загружен!' : 'Альбом создан!');
             onClose();
+            // Можно сделать навигацию или обновление списка
+            // navigate('/profile');
 
-        } catch (err: any) {
-            console.error("❌ Ошибка:", err);
-            alert("Не удалось создать плейлист:\n" + err.message);
+        } catch (err) {
+            console.error(err);
+            alert(err.message || 'Произошла ошибка при загрузке');
         } finally {
-            setIsLoading(false);
+            setIsSubmitting(false);
         }
     };
 
-    const handleCancel = () => {
-        onClose();
-    };
-
-    const handleNameClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        setIsEditingName(true);
-    };
-
-    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setPlaylistName(e.target.value);
-    };
-
-    const handleNameBlur = () => {
-        setIsEditingName(false);
-    };
-
-    const handleNameKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            setIsEditingName(false);
-        }
-    };
+    const getTitle = () => type === "track" ? "Загрузка трека" : "Загрузка альбома";
 
     return (
-        <div className="cpl-overlay" style={{ opacity: isPositionCalculated ? 1 : 0 }}>
+        <div className="caotm-overlay" onClick={onClose}>
             <div
                 ref={modalRef}
-                className={`cpl-container ${isMobile ? 'mobile' : ''}`}
+                className={`caotm-container ${isMobile ? 'mobile' : ''}`}
                 style={{ left: `${position.x}px`, top: `${position.y}px` }}
                 onMouseDown={handleMouseDown}
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className={`cpl-header ${isMobile ? 'mobile-centered' : ''}`}>
-                    <div className="cpl-playlist-cover" onClick={handleCoverClick}>
-                        {playlistCoverPreview ? (
-                            <img src={playlistCoverPreview} alt="Обложка" style={{ width: '156px', height: '156px', borderRadius: '12px', objectFit: 'cover' }} />
-                        ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 156 156" width="156" height="156" fill="none" stroke="#f1f1f1" strokeWidth="5">
-                                <rect x="28" y="28" width="100" height="100" rx="10" />
-                                <path d="M52 52v64 M78 52v64 M104 52v64" />
-                            </svg>
-                        )}
-                    </div>
-
-                    <div className="cpl-playlist-info">
-                        {isEditingName ? (
-                            <input
-                                type="text"
-                                className="cpl-title-input"
-                                value={playlistName}
-                                onChange={handleNameChange}
-                                onBlur={handleNameBlur}
-                                onKeyDown={handleNameKeyDown}
-                                autoFocus
-                                onClick={(e) => e.stopPropagation()}
-                                maxLength={50}
-                            />
-                        ) : (
-                            <div className="cpl-title" onClick={handleNameClick}>
-                                {playlistName}
-                            </div>
-                        )}
-                        <div className="cpl-meta">
-                            <div className="cpl-count">0 треков</div>
-                            <div className="cpl-duration">0:00</div>
-                        </div>
-                    </div>
-
-                    <button className="cpl-close" onClick={(e) => {
-                        e.stopPropagation();
-                        onClose();
-                    }} aria-label="Закрыть" disabled={isLoading}>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#ffffff" strokeWidth="2">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
+                {/* Header */}
+                <div className="caotm-header">
+                    <div className="caotm-title">{getTitle()}</div>
+                    <button className="caotm-close-btn" onClick={onClose}>
+                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="#fff" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </button>
                 </div>
+                <div className="caotm-divider"></div>
 
-                <div className="cpl-divider"></div>
+                {/* Type Selector */}
+                <div className="caotm-type-selector">
+                    <button className={`caotm-type-btn ${type === "track" ? "active" : ""}`} onClick={() => setType("track")}>Трект</button>
+                    <button className={`caotm-type-btn ${type === "album" ? "active" : ""}`} onClick={() => setType("album")}>Альбом</button>
+                </div>
+                <div className="caotm-divider"></div>
 
-                <div style={{ padding: '20px', textAlign: 'center', color: '#aaa' }}>
-                    Плейлист будет создан пустым. Треки можно добавить позже.
+                {/* Cover Upload */}
+                <div className="caotm-cover-section">
+                    <div className="caotm-cover-wrapper" onClick={handleCoverClick}>
+                        {coverImagePreview ? (
+                            <img src={coverImagePreview} alt="Cover" className="caotm-cover-img" />
+                        ) : (
+                            <div className="caotm-cover-placeholder">
+                                <svg viewBox="0 0 156 156" width="156" height="156" fill="none" stroke="#f1f1f1" strokeWidth="5">
+                                    <rect x="28" y="28" width="100" height="100" rx="10"/><path d="M52 52v64 M78 52v64 M104 52v64"/>
+                                </svg>
+                            </div>
+                        )}
+                    </div>
+                    <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" style={{display:'none'}}/>
+                    <button className="caotm-file-btn" onClick={handleCoverClick}>Загрузить обложку</button>
                 </div>
 
-                <div className={`cpl-buttons ${isMobile ? 'mobile-center' : ''}`}>
-                    <button className="cpl-btn-cancel" onClick={handleCancel} disabled={isLoading}>Отменить</button>
-                    <button
-                        className="cpl-btn-save"
-                        onClick={handleSave}
-                        disabled={isLoading || !playlistName.trim()}
-                    >
-                        {isLoading ? 'Создание...' : 'Создать'}
+                {/* Fields */}
+                <div className="caotm-content-scrollable">
+                    {type === "track" ? (
+                        <div className="caotm-input-group">
+                            <input className="caotm-input" placeholder="Название трека" value={trackName} onChange={e => setTrackName(e.target.value)} />
+                            <input className="caotm-input" placeholder="Исполнитель" value={authorName} onChange={e => setAuthorName(e.target.value)} />
+                        </div>
+                    ) : (
+                        <>
+                            <input className="caotm-input" placeholder="Название альбома" value={albumName} onChange={e => setAlbumName(e.target.value)} />
+
+                            <div className="caotm-tracks-manager">
+                                <h4>Треки в альбоме:</h4>
+                                {albumTracks.length === 0 && <div className="caotm-empty">Нет треков</div>}
+                                <div className="caotm-track-list">
+                                    {albumTracks.map((t, i) => (
+                                        <div key={t.id} className="caotm-track-row" draggable onDragStart={e => handleDragStart(e, i)} onDragOver={handleDragOver} onDrop={e => handleDrop(e, i)}>
+                                            <span>{i+1}. {t.title} - {t.artist}</span>
+                                            <button onClick={() => removeTrackFromAlbum(t.id)}>✕</button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="caotm-add-track-area">
+                                    <h4>Добавить трек:</h4>
+                                    {isLoadingTracks ? <small>Загрузка...</small> : (
+                                        <div className="caotm-available-list">
+                                            {availableTracks.filter(t => !albumTracks.find(x => x.id === t.id)).map(t => (
+                                                <div key={t.id} className="caotm-available-item" onClick={() => addTrackToAlbum(t)}>
+                                                    + {t.title}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                <div className="caotm-footer">
+                    <button className="caotm-submit-btn" onClick={handleSubmit} disabled={isSubmitting}>
+                        {isSubmitting ? 'Загрузка...' : 'Опубликовать'}
                     </button>
                 </div>
             </div>
-            <input type="file" id="cover-upload" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
         </div>
     );
 };
 
-export default CreatePlaylistModal;
+export default CreateAlbumOrTrackModal;

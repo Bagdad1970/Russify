@@ -1,184 +1,159 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import '../assets/styles/pages/ModerationPage.css';
-import {
-    type ColumnDef,
-    getCoreRowModel,
-    getFilteredRowModel,
-    useReactTable,
-    type FilterFn,
-    type SortingState,
-    getSortedRowModel,
-} from '@tanstack/react-table';
 import SearchBar from '../components/SearchBar.tsx';
 import GridContainer from '../components/GridContainer.tsx';
 import AlbumCard from '../components/AlbumCard.tsx';
 import AlbumModalModeration from '../components/AlbumModalModeration.tsx';
-import {AlbumStatus} from "../types/AlbumStatus.ts";
-import { AlbumManager } from '../api/AlbumManager.ts'; // Добавляем менеджер
-import type { Album } from '../types/Album.ts'; // Импортируем тип Album
+import type { Album } from '../types/Album.ts';
+import { AlbumManager } from '../api/AlbumManager.ts';
+
+type AlbumStatus = 'IN_PROGRESS' | 'APPROVED' | 'REJECTED';
 
 interface ModerationPageProps {
     onModerateAlbum?: (album: Album, action: AlbumStatus) => void;
 }
 
-// Кастомный фильтр для поиска по нескольким полям
-const fuzzyTextFilterFn: FilterFn<Album> = (row, columnId, filterValue) => {
-    const search = filterValue.toLowerCase();
-    return (
-        row.original.title.toLowerCase().includes(search) ||
-        row.original.artist?.toLowerCase().includes(search) ||
-        row.original.year?.includes(filterValue)
-    );
-};
-
 const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
-    // Состояния
     const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+    const [fullAlbumData, setFullAlbumData] = useState<Album | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [globalFilter, setGlobalFilter] = useState<string>('');
-    const [sorting, setSorting] = useState<SortingState>([]);
     const [albumsForModeration, setAlbumsForModeration] = useState<Album[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
+
+    const [loadingList, setLoadingList] = useState<boolean>(true);
+    const [actionLoading, setActionLoading] = useState<boolean>(false);
 
     const albumManager = new AlbumManager();
 
-    // Загружаем альбомы со статусом IN_PROGRESS
     useEffect(() => {
-        const loadAlbumsForModeration = async () => {
+        const loadAlbums = async () => {
             try {
-                setLoading(true);
-                // Получаем все альбомы
+                setLoadingList(true);
                 const allAlbums = await albumManager.findAll();
-
-                // Фильтруем только те, что в статусе IN_PROGRESS
-                const inProgressAlbums = allAlbums.filter(
-                    album => album.status === 'IN_PROGRESS'
-                );
-
-                setAlbumsForModeration(inProgressAlbums);
+                // Фильтруем только те, что на модерации
+                const inProgress = allAlbums.filter(a => a.status === 'IN_PROGRESS');
+                setAlbumsForModeration(inProgress);
             } catch (error) {
-                console.error('Error loading albums for moderation:', error);
+                console.error('Error loading albums:', error);
+                alert('Не удалось загрузить список альбомов');
             } finally {
-                setLoading(false);
+                setLoadingList(false);
             }
         };
-
-        loadAlbumsForModeration();
+        loadAlbums();
     }, []);
 
-    // Обработчики модального окна
-    const handleOpenModal = useCallback((album: Album) => {
-        setSelectedAlbum(album);
-        setIsModalOpen(true);
+    const handleOpenModal = useCallback(async (album: Album) => {
+        try {
+            setActionLoading(true); // Показываем лоадер пока грузятся детали
+            const fullData = await albumManager.findAllTrackById(album.id);
+            setFullAlbumData(fullData);
+            setSelectedAlbum(album);
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error('Error loading album details:', error);
+            alert('Ошибка при загрузке данных альбома');
+        } finally {
+            setActionLoading(false);
+        }
     }, []);
 
     const handleCloseModal = useCallback(() => {
         setIsModalOpen(false);
         setSelectedAlbum(null);
+        setFullAlbumData(null);
     }, []);
 
-    const handleApprove = useCallback((album: Album) => {
-        onModerateAlbum?.(album, 'APPROVED'); // Используем APPROVED как в БД
-        // Обновляем список, убирая одобренный альбом
-        setAlbumsForModeration(prev => prev.filter(a => a.id !== album.id));
-        handleCloseModal();
-    }, [onModerateAlbum, handleCloseModal]);
+    const updateAlbumStatus = async (newStatus: 'APPROVED' | 'DENIED') => {
+        if (!fullAlbumData) return;
 
-    const handleReject = useCallback((album: Album) => {
-        onModerateAlbum?.(album, 'REJECTED'); // Используем REJECTED как в БД
-        // Обновляем список, убирая отклонённый альбом
-        setAlbumsForModeration(prev => prev.filter(a => a.id !== album.id));
-        handleCloseModal();
-    }, [onModerateAlbum, handleCloseModal]);
+        try {
+            setActionLoading(true);
 
-    // Колонки (для сортировки и фильтрации)
-    const columns = useMemo<ColumnDef<Album>[]>(() => [
-        { accessorKey: 'id', header: 'ID' },
-        { accessorKey: 'title', header: 'Название' },
-        { accessorKey: 'artist', header: 'Исполнитель' },
-        { accessorKey: 'releasedAt', header: 'Дата релиза' },
-        { accessorKey: 'status', header: 'Статус' },
-    ], []);
+            const updatedAlbum = { ...fullAlbumData };
 
-    const table = useReactTable({
-        data: albumsForModeration,
-        columns,
-        state: { globalFilter, sorting },
-        globalFilterFn: fuzzyTextFilterFn,
-        onGlobalFilterChange: setGlobalFilter,
-        onSortingChange: setSorting,
-        getCoreRowModel: getCoreRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        getSortedRowModel: getSortedRowModel()
-    });
+            updatedAlbum.status = newStatus;
 
-    // Получаем отфильтрованные данные для рендера
-    const albumsToShow = table.getRowModel().rows.map(row => row.original);
+            await albumManager.updateAlbumMultipart(updatedAlbum);
 
-    if (loading) {
-        return (
-            <div className="moderation-page-container">
-                <div className="moderation-content">
-                    <div className="loading-spinner">Загрузка альбомов...</div>
-                </div>
-            </div>
+            onModerateAlbum?.(updatedAlbum, newStatus);
+
+            setAlbumsForModeration(prev => prev.filter(a => a.id !== updatedAlbum.id));
+
+            handleCloseModal();
+        } catch (err: any) {
+            console.error('Error updating album:', err);
+            alert(`Ошибка при сохранении: ${err.message}`);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleApprove = () => updateAlbumStatus('APPROVED');
+    const handleReject = () => updateAlbumStatus('DENIED');
+
+    // Фильтрация для поиска
+    const filteredAlbums = useMemo(() => {
+        if (!globalFilter) return albumsForModeration;
+        const search = globalFilter.toLowerCase();
+        return albumsForModeration.filter(album =>
+            album.title.toLowerCase().includes(search) ||
+            (album.artist && album.artist.toLowerCase().includes(search)) ||
+            (album.releasedAt && album.releasedAt.includes(globalFilter))
         );
+    }, [albumsForModeration, globalFilter]);
+
+    if (loadingList) {
+        return <div className="moderation-page-container"><div className="loading-spinner">Загрузка...</div></div>;
     }
 
     return (
         <div className="moderation-page-container">
             <div className="moderation-header">
-                <h1 className="moderation-title">Модерация</h1>
+                <h1 className="moderation-title">Модерация альбомов</h1>
             </div>
 
             <div className="moderation-content">
                 <SearchBar
-                    placeholder="Поиск по названию, исполнителю или году..."
+                    placeholder="Поиск по названию, исполнителю..."
                     value={globalFilter}
-                    onChange={(value: string) => setGlobalFilter(value)}
+                    onChange={setGlobalFilter}
                     onClick={() => {}}
                 />
 
                 <div className="moderation-stats">
-                    <span className="stats-badge">
-                        На модерации: {albumsForModeration.length}
-                    </span>
-                    {globalFilter && (
-                        <span className="stats-badge secondary">
-                            Найдено: {albumsToShow.length}
-                        </span>
-                    )}
+                    <span className="stats-badge">На модерации: {albumsForModeration.length}</span>
+                    {globalFilter && <span className="stats-badge secondary">Найдено: {filteredAlbums.length}</span>}
                 </div>
 
                 <div className="scrollable-grid-container">
                     <GridContainer>
-                        {albumsToShow.length > 0 ? (
-                            albumsToShow.map((album) => (
+                        {filteredAlbums.length > 0 ? (
+                            filteredAlbums.map((album) => (
                                 <AlbumCard
-                                    key={album.id.toString()}
+                                    key={String(album.id)}
                                     title={album.title}
-                                    artist={album.artist || "Исполнитель"}
+                                    artist={album.artist || "Неизвестно"}
                                     year={new Date(album.releasedAt).getFullYear().toString()}
                                     cover={album.coverHash}
                                     onClick={() => handleOpenModal(album)}
                                 />
                             ))
                         ) : (
-                            <div className="no-albums-message">
-                                Нет альбомов на модерации
-                            </div>
+                            <div className="no-albums-message">Альбомов на модерации нет</div>
                         )}
                     </GridContainer>
                 </div>
             </div>
 
-            {/* Модальное окно */}
-            {isModalOpen && selectedAlbum && (
+            {/* Модалка */}
+            {isModalOpen && fullAlbumData && (
                 <AlbumModalModeration
-                    album={selectedAlbum}
+                    album={fullAlbumData}
                     onClose={handleCloseModal}
                     onApprove={handleApprove}
                     onReject={handleReject}
+                    isLoading={actionLoading}
                 />
             )}
         </div>
