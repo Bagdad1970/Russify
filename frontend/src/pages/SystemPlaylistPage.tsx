@@ -3,12 +3,15 @@ import CreatePlaylistModal from '../components/CreatePlaylistModal.tsx';
 import PlaylistModal from '../components/PlaylistModal.tsx';
 import '../assets/styles/pages/SystemPlaylistsPage.css';
 import { PlaylistManager } from '../api/PlaylistManager.ts';
+import { FileManager } from '../api/FileManager.ts';
 import type { Playlist } from '../types/Playlist.ts';
 import type { Track } from '../types/Track.ts';
 import type { PlaylistWithTracks } from '../types/PlaylistWithTracks.ts';
+import noCover from '../assets/images/no-cover.svg';
 
 interface SystemPlaylistExtended extends Playlist {
     color?: string;
+    coverUrl?: string;
 }
 
 interface SystemPlaylistsPageProps {
@@ -33,6 +36,7 @@ const SystemPlaylistsPage: React.FC<SystemPlaylistsPageProps> = ({
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
     const playlistManager = new PlaylistManager();
+    const fileManager = new FileManager();
 
     useEffect(() => {
         loadPlaylists();
@@ -46,11 +50,25 @@ const SystemPlaylistsPage: React.FC<SystemPlaylistsPageProps> = ({
             // ✅ ФИЛЬТРАЦИЯ: Оставляем только системные плейлисты
             const systemOnly = all.filter(p => p.isSystem === true);
 
-            const withColors = systemOnly.map((p, index) => ({
-                ...p,
-                color: p.coverHash ? undefined : generateColor(p.id || index)
+            // Загружаем обложки для плейлистов
+            const playlistsWithCovers = await Promise.all(systemOnly.map(async (p, index) => {
+                let coverUrl = '';
+                if (p.coverHash) {
+                    try {
+                        coverUrl = await fileManager.getFileUrl("images", p.coverHash);
+                        console.log(`✅ Playlist ${p.id} cover URL:`, coverUrl);
+                    } catch (err) {
+                        console.log(`Error loading cover for playlist ${p.id}:`, err);
+                    }
+                }
+                return {
+                    ...p,
+                    color: p.coverHash ? undefined : generateColor(p.id || index),
+                    coverUrl: coverUrl
+                };
             }));
-            setPlaylists(withColors);
+
+            setPlaylists(playlistsWithCovers);
         } catch (error) {
             console.error('Error loading system playlists:', error);
         } finally {
@@ -124,9 +142,21 @@ const SystemPlaylistsPage: React.FC<SystemPlaylistsPageProps> = ({
             }
 
             const created = await playlistManager.createMultipart(formData);
+
+            // Загружаем обложку для созданного плейлиста
+            let coverUrl = '';
+            if (created.coverHash) {
+                try {
+                    coverUrl = await fileManager.getFileUrl("images", created.coverHash);
+                } catch (err) {
+                    console.log('Error loading cover for new playlist:', err);
+                }
+            }
+
             const newPlaylist: SystemPlaylistExtended = {
                 ...created,
                 color: generateColor(created.id || Date.now()),
+                coverUrl: coverUrl,
             };
             setPlaylists(prev => [...prev, newPlaylist]);
             onPlaylistCreate?.(newPlaylist);
@@ -183,9 +213,24 @@ const SystemPlaylistsPage: React.FC<SystemPlaylistsPageProps> = ({
                                 onClick={() => handleOpenViewModal(playlist)}
                             >
                                 <div className="playlist-card-content">
-                                    {(playlist as any).coverHash && (
-                                        <img src={`http://localhost:9000/covers/${(playlist as any).coverHash}`} alt="" style={{position:'absolute', top:0, left:0, width:'100%', height:'100%', objectFit:'cover', opacity:0.3}} />
-                                    )}
+                                    {playlist.coverUrl ? (
+                                        <img
+                                            src={playlist.coverUrl}
+                                            alt={playlist.name}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover',
+                                                opacity: 0.7
+                                            }}
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                            }}
+                                        />
+                                    ) : null}
 
                                     <button
                                         className="playlist-play-btnSPP"
@@ -201,7 +246,6 @@ const SystemPlaylistsPage: React.FC<SystemPlaylistsPageProps> = ({
                                 </div>
 
                                 <div className="playlist-actions">
-                                    {/* ✅ Кнопка удаления видна всегда, так как все плейлисты здесь системные */}
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();

@@ -26,7 +26,9 @@ const FavoritesPage = () => {
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
     const [tracks, setTracks] = useState<Track[]>([]);
     const [albums, setAlbums] = useState<Album[]>([]);
-    const [covers, setCovers] = useState<Record<string, string>>({});
+    const [playlistCovers, setPlaylistCovers] = useState<Record<string, string>>({});
+    const [trackCovers, setTrackCovers] = useState<Record<string, string>>({});
+    const [albumCovers, setAlbumCovers] = useState<Record<string, string>>({});
 
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -54,22 +56,54 @@ const FavoritesPage = () => {
                 const favoriteAlbums = await favoriteManager.getFavoriteAlbums();
                 setAlbums(favoriteAlbums);
 
-                const coversMap: Record<string, string> = {};
-                for (const playlist of userPlaylists) {
-                    console.log(playlist);
-                    const coverHash = playlist.coverHash;
-                    if (coverHash) {
+                // Загружаем обложки для плейлистов
+                const playlistCoversMap: Record<string, string> = {};
+                await Promise.all(userPlaylists.map(async (playlist) => {
+                    if (playlist.coverHash) {
                         try {
-                            const coverSrc = await fileManager.getFileUrl("images", coverHash) ?? "";
+                            const coverSrc = await fileManager.getFileUrl("images", playlist.coverHash);
                             if (coverSrc) {
-                                coversMap[playlist.id.toString()] = coverSrc;
+                                playlistCoversMap[playlist.id.toString()] = coverSrc;
                             }
                         } catch (err) {
                             console.log(`Error loading cover for playlist ${playlist.id}:`, err);
                         }
                     }
-                }
-                setCovers(coversMap);
+                }));
+                setPlaylistCovers(playlistCoversMap);
+
+                // Загружаем обложки для треков
+                const trackCoversMap: Record<string, string> = {};
+                await Promise.all(favoriteTracks.map(async (track) => {
+                    if (track.coverHash) {
+                        try {
+                            const coverSrc = await fileManager.getFileUrl("images", track.coverHash);
+                            if (coverSrc) {
+                                trackCoversMap[track.id.toString()] = coverSrc;
+                            }
+                        } catch (err) {
+                            console.log(`Error loading cover for track ${track.id}:`, err);
+                        }
+                    }
+                }));
+                setTrackCovers(trackCoversMap);
+
+                // Загружаем обложки для альбомов
+                const albumCoversMap: Record<string, string> = {};
+                await Promise.all(favoriteAlbums.map(async (album) => {
+                    if (album.coverHash) {
+                        try {
+                            const coverSrc = await fileManager.getFileUrl("images", album.coverHash);
+                            if (coverSrc) {
+                                albumCoversMap[album.id.toString()] = coverSrc;
+                            }
+                        } catch (err) {
+                            console.log(`Error loading cover for album ${album.id}:`, err);
+                        }
+                    }
+                }));
+                setAlbumCovers(albumCoversMap);
+
             } catch (err) {
                 console.log('Error loading data:', err);
             }
@@ -322,8 +356,9 @@ const FavoritesPage = () => {
                                 const trackTitle = track.name || "Неизвестный трек";
                                 const authorCount = track.authorIds ? track.authorIds.size : 0;
                                 const trackArtist = authorCount > 0 ? `${authorCount} исполнителей` : "Неизвестный исполнитель";
-                                const displayDuration = "--:--";
+                                const displayDuration = formatDuration(track.duration);
                                 const isPendingRemoval = pendingRemovalIds.has(track.id.toString());
+                                const coverUrl = trackCovers[track.id.toString()];
 
                                 return (
                                     <div
@@ -340,7 +375,18 @@ const FavoritesPage = () => {
                                         <div className="favorites-track-number">{index + 1}</div>
 
                                         <div className="favorites-track-cover">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="40" height="40" fill="none" stroke="#f1f1f1" strokeWidth="1.5">
+                                            {coverUrl ? (
+                                                <img
+                                                    src={coverUrl}
+                                                    alt={trackTitle}
+                                                    style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
+                                                    onError={(e) => {
+                                                        e.currentTarget.style.display = 'none';
+                                                        e.currentTarget.nextSibling?.style?.setProperty('display', 'block');
+                                                    }}
+                                                />
+                                            ) : null}
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="40" height="40" fill="none" stroke="#f1f1f1" strokeWidth="1.5" style={{ display: coverUrl ? 'none' : 'block' }}>
                                                 <rect x="4" y="4" width="24" height="24" rx="2" />
                                                 <path d="M12 12v8" />
                                                 <path d="M16 12v8" />
@@ -431,7 +477,7 @@ const FavoritesPage = () => {
                                             onClick={() => openPlaylistModal(playlist)}
                                         >
                                             <img
-                                                src={covers[playlist.id.toString()] || noCover}
+                                                src={playlistCovers[playlist.id.toString()] || noCover}
                                                 alt={playlist.name}
                                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                 onError={(e) => {
@@ -490,20 +536,19 @@ const FavoritesPage = () => {
                             </div>
                         ) : (
                             filteredAlbums.map((album) => (
-                                <div key={album.id} className="favorites-album-card">
+                                <div key={album.id.toString()} className="favorites-album-card">
                                     <div
                                         className="album-cover"
                                         onClick={() => handleAlbumClick(album)}
                                     >
-                                        {album.coverHash ? (
-                                            <img
-                                                src={`/api/files/covers/${album.coverHash}`}
-                                                alt={album.title}
-                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                            />
-                                        ) : (
-                                            <div style={{ width: '100%', height: '100%', backgroundColor: '#333' }} />
-                                        )}
+                                        <img
+                                            src={albumCovers[album.id.toString()] || noCover}
+                                            alt={album.title}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            onError={(e) => {
+                                                e.currentTarget.src = noCover;
+                                            }}
+                                        />
                                         <div
                                             className="album-fav-cover-play-button"
                                             onClick={(e) => {

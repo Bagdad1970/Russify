@@ -1,11 +1,19 @@
 import '../assets/styles/components/AlbumCard.css';
+import noCover from '../assets/images/no-cover.svg';
 
 const AlbumCard = ({ title, artist, year, cover, onClick }) => {
     return (
         <div className="album-card" onClick={onClick}>
             <div className="album-cover">
-                {cover ? (
-                    <img src={cover} alt={title} />
+                {cover && cover !== noCover ? (
+                    <img
+                        src={cover}
+                        alt={title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => {
+                            e.currentTarget.src = noCover;
+                        }}
+                    />
                 ) : (
                     <div className="album-cover-placeholder">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="currentColor">

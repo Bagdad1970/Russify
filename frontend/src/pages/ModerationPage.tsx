@@ -6,6 +6,8 @@ import AlbumCard from '../components/AlbumCard.tsx';
 import AlbumModalModeration from '../components/AlbumModalModeration.tsx';
 import type { Album } from '../types/Album.ts';
 import { AlbumManager } from '../api/AlbumManager.ts';
+import { FileManager } from '../api/FileManager.ts';
+import noCover from '../assets/images/no-cover.svg';
 
 type AlbumStatus = 'IN_PROGRESS' | 'APPROVED' | 'REJECTED';
 
@@ -19,11 +21,13 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [globalFilter, setGlobalFilter] = useState<string>('');
     const [albumsForModeration, setAlbumsForModeration] = useState<Album[]>([]);
+    const [albumCovers, setAlbumCovers] = useState<Record<string, string>>({});
 
     const [loadingList, setLoadingList] = useState<boolean>(true);
     const [actionLoading, setActionLoading] = useState<boolean>(false);
 
     const albumManager = new AlbumManager();
+    const fileManager = new FileManager();
 
     useEffect(() => {
         const loadAlbums = async () => {
@@ -33,6 +37,23 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
                 // Фильтруем только те, что на модерации
                 const inProgress = allAlbums.filter(a => a.status === 'IN_PROGRESS');
                 setAlbumsForModeration(inProgress);
+
+                // Загружаем обложки для альбомов
+                const coversMap: Record<string, string> = {};
+                await Promise.all(inProgress.map(async (album) => {
+                    if (album.coverHash) {
+                        try {
+                            const coverSrc = await fileManager.getFileUrl("images", album.coverHash);
+                            if (coverSrc) {
+                                coversMap[album.id.toString()] = coverSrc;
+                            }
+                        } catch (err) {
+                            console.log(`Error loading cover for album ${album.id}:`, err);
+                        }
+                    }
+                }));
+                setAlbumCovers(coversMap);
+
             } catch (error) {
                 console.error('Error loading albums:', error);
                 alert('Не удалось загрузить список альбомов');
@@ -45,7 +66,7 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
 
     const handleOpenModal = useCallback(async (album: Album) => {
         try {
-            setActionLoading(true); // Показываем лоадер пока грузятся детали
+            setActionLoading(true);
             const fullData = await albumManager.findAllTrackById(album.id);
             setFullAlbumData(fullData);
             setSelectedAlbum(album);
@@ -71,7 +92,6 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
             setActionLoading(true);
 
             const updatedAlbum = { ...fullAlbumData };
-
             updatedAlbum.status = newStatus;
 
             await albumManager.updateAlbumMultipart(updatedAlbum);
@@ -135,7 +155,7 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
                                     title={album.title}
                                     artist={album.artist || "Неизвестно"}
                                     year={new Date(album.releasedAt).getFullYear().toString()}
-                                    cover={album.coverHash}
+                                    cover={albumCovers[album.id.toString()]}
                                     onClick={() => handleOpenModal(album)}
                                 />
                             ))
@@ -146,7 +166,6 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
                 </div>
             </div>
 
-            {/* Модалка */}
             {isModalOpen && fullAlbumData && (
                 <AlbumModalModeration
                     album={fullAlbumData}
