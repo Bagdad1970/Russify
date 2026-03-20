@@ -2,7 +2,7 @@ import axios, {type AxiosResponse, type InternalAxiosRequestConfig} from 'axios'
 import {camelizeKeys, decamelizeKeys} from 'humps';
 
 const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_BASE_URL_PROD || import.meta.env.VITE_BASE_URL_DEV
+    baseURL: import.meta.env.VITE_BASE_URL_PROD || import.meta.env.VITE_BASE_URL_DEV || 'http://localhost:8080'
 });
 
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
