@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -39,22 +40,26 @@ public class TrackController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public TrackResponse create(@ModelAttribute TrackCreateRequest request) {
-        return service.create(request);
+    public TrackResponse create(
+            @Valid @ModelAttribute TrackCreateRequest request,
+            Authentication authentication
+    ) {
+        return service.create(authentication.getName(), request);
     }
 
     @PutMapping("/{id}")
     public TrackDto update(
             @PathVariable Long id,
-            @RequestBody @Valid TrackDto dto
+            @RequestBody @Valid TrackDto dto,
+            Authentication authentication
     ) {
-        return service.update(id, dto);
+        return service.update(authentication.getName(), id, dto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteById(@PathVariable Long id) {
-        service.deleteById(id);
+    public void deleteById(@PathVariable Long id, Authentication authentication) {
+        service.deleteById(authentication.getName(), id);
     }
 
     @PostMapping("/search")

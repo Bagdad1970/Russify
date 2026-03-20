@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,17 +31,33 @@ public class AlbumController {
 
     @GetMapping
     public List<AlbumDto> findAll() {
-        return service.findAllWithRelations();
+        return service.findPublicWithRelations();
+    }
+
+    @GetMapping("/admin/all")
+    public List<AlbumDto> findAllManaged(Authentication authentication) {
+        return service.findAllManaged(authentication.getName());
+    }
+
+    @GetMapping("/moderation")
+    public List<AlbumDto> findModerationQueue(Authentication authentication) {
+        return service.findModerationQueue(authentication.getName());
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public AlbumDto createAlbum(@ModelAttribute AlbumCreateRequest request) {
-        return service.createAlbum(request);
+    public AlbumDto createAlbum(
+            @ModelAttribute AlbumCreateRequest request,
+            Authentication authentication
+    ) {
+        return service.createAlbum(authentication.getName(), request);
     }
 
     @GetMapping("/{albumId}")
-    public AlbumDto getAlbum(@PathVariable Long albumId) {
-        return service.getAlbumById(albumId);
+    public AlbumDto getAlbum(@PathVariable Long albumId, Authentication authentication) {
+        return service.getAlbumByIdVisibleTo(
+                albumId,
+                authentication != null ? authentication.getName() : null
+        );
     }
 
     @DeleteMapping("/{id}")
@@ -54,8 +69,9 @@ public class AlbumController {
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public AlbumDto updateAlbum(
             @PathVariable Long id,
-            @ModelAttribute AlbumUpdateRequest request
+            @ModelAttribute AlbumUpdateRequest request,
+            Authentication authentication
     ) {
-        return service.updateAlbum(id, request);
+        return service.updateAlbum(authentication.getName(), id, request);
     }
 }

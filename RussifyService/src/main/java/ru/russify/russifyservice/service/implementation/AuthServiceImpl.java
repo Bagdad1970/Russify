@@ -10,8 +10,10 @@ import ru.russify.models.response.MeResponse;
 import ru.russify.russifyservice.exception.AlreadyExistsException;
 import ru.russify.russifyservice.exception.AuthException;
 import ru.russify.russifyservice.exception.UserNotFoundException;
+import ru.russify.russifyservice.model.Author;
 import ru.russify.russifyservice.model.Role;
 import ru.russify.russifyservice.model.User;
+import ru.russify.russifyservice.repository.AuthorRepository;
 import ru.russify.russifyservice.repository.RoleRepository;
 import ru.russify.russifyservice.repository.UserRepository;
 import ru.russify.russifyservice.security.JwtBlacklistService;
@@ -23,6 +25,7 @@ import ru.russify.russifyservice.service.interfaces.AuthService;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
+    private final AuthorRepository authorRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -48,14 +51,21 @@ public class AuthServiceImpl implements AuthService {
                 .role(role)
                 .build();
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
-        String token = jwtService.generateToken(user.getId(), user.getEmail());
+        Author author = Author.builder()
+                .name(savedUser.getUsername())
+                .user(savedUser)
+                .build();
+
+        authorRepository.save(author);
+
+        String token = jwtService.generateToken(savedUser.getId(), savedUser.getEmail());
 
         return AuthResponse.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
+                .id(savedUser.getId())
+                .username(savedUser.getUsername())
+                .email(savedUser.getEmail())
                 .token(token)
                 .build();
     }

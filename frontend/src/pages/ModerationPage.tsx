@@ -5,18 +5,15 @@ import GridContainer from '../components/GridContainer.tsx';
 import AlbumCard from '../components/AlbumCard.tsx';
 import AlbumModalModeration from '../components/AlbumModalModeration.tsx';
 import type { Album } from '../types/Album.ts';
+import { AlbumStatus } from '../types/AlbumStatus.ts';
 import { AlbumManager } from '../api/AlbumManager.ts';
 import { FileManager } from '../api/FileManager.ts';
-import noCover from '../assets/images/no-cover.svg';
-
-type AlbumStatus = 'IN_PROGRESS' | 'APPROVED' | 'REJECTED';
 
 interface ModerationPageProps {
     onModerateAlbum?: (album: Album, action: AlbumStatus) => void;
 }
 
 const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
-    const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
     const [fullAlbumData, setFullAlbumData] = useState<Album | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [globalFilter, setGlobalFilter] = useState<string>('');
@@ -33,9 +30,7 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
         const loadAlbums = async () => {
             try {
                 setLoadingList(true);
-                const allAlbums = await albumManager.findAll();
-                // Фильтруем только те, что на модерации
-                const inProgress = allAlbums.filter(a => a.status === 'IN_PROGRESS');
+                const inProgress = await albumManager.findModerationQueue();
                 setAlbumsForModeration(inProgress);
 
                 // Загружаем обложки для альбомов
@@ -69,7 +64,6 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
             setActionLoading(true);
             const fullData = await albumManager.findAllTrackById(album.id);
             setFullAlbumData(fullData);
-            setSelectedAlbum(album);
             setIsModalOpen(true);
         } catch (error) {
             console.error('Error loading album details:', error);
@@ -81,11 +75,10 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
 
     const handleCloseModal = useCallback(() => {
         setIsModalOpen(false);
-        setSelectedAlbum(null);
         setFullAlbumData(null);
     }, []);
 
-    const updateAlbumStatus = async (newStatus: 'APPROVED' | 'DENIED') => {
+    const updateAlbumStatus = async (newStatus: AlbumStatus) => {
         if (!fullAlbumData) return;
 
         try {
@@ -94,7 +87,7 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
             const updatedAlbum = { ...fullAlbumData };
             updatedAlbum.status = newStatus;
 
-            await albumManager.updateAlbumMultipart(updatedAlbum);
+            await albumManager.moderate(Number(updatedAlbum.id), newStatus);
 
             onModerateAlbum?.(updatedAlbum, newStatus);
 
@@ -109,8 +102,8 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
         }
     };
 
-    const handleApprove = () => updateAlbumStatus('APPROVED');
-    const handleReject = () => updateAlbumStatus('DENIED');
+    const handleApprove = () => updateAlbumStatus(AlbumStatus.APPROVED);
+    const handleReject = () => updateAlbumStatus(AlbumStatus.DENIED);
 
     // Фильтрация для поиска
     const filteredAlbums = useMemo(() => {
@@ -119,7 +112,7 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
         return albumsForModeration.filter(album =>
             album.title.toLowerCase().includes(search) ||
             (album.artist && album.artist.toLowerCase().includes(search)) ||
-            (album.releasedAt && album.releasedAt.includes(globalFilter))
+            String(album.releasedAt ?? '').includes(globalFilter)
         );
     }, [albumsForModeration, globalFilter]);
 
@@ -154,7 +147,7 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onModerateAlbum }) => {
                                     key={String(album.id)}
                                     title={album.title}
                                     artist={album.artist || "Неизвестно"}
-                                    year={new Date(album.releasedAt).getFullYear().toString()}
+                                    year={new Date(album.releasedAt ?? Date.now()).getFullYear().toString()}
                                     cover={albumCovers[album.id.toString()]}
                                     onClick={() => handleOpenModal(album)}
                                 />

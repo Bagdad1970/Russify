@@ -7,21 +7,28 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Set;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class TrackCreateRequest {
 
     @NotEmpty
+    private Set<Long> albumIds;
+
+    @NotEmpty
     private Set<Long> authorIds;
 
     @NotNull
     private MultipartFile audioFile;
+
+    private MultipartFile coverFile;
 
     @NotBlank(message = "Track name cannot be empty")
     private String name;

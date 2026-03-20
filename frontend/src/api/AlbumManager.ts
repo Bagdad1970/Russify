@@ -1,15 +1,30 @@
 import api from "./ApiClient.ts";
 import type { Album } from "../types/Album.ts";
+import { AlbumStatus } from "../types/AlbumStatus.ts";
+
+const toFormData = (payload: Record<string, unknown>): FormData => {
+    const formData = new FormData();
+
+    Object.entries(payload).forEach(([key, value]) => {
+        if (value === null || value === undefined || value === "") {
+            return;
+        }
+
+        if (Array.isArray(value)) {
+            value.forEach((item) => formData.append(key, String(item)));
+            return;
+        }
+
+        formData.append(key, value instanceof Blob ? value : String(value));
+    });
+
+    return formData;
+};
 
 export class AlbumManager {
     async findAll(): Promise<Album[]> {
-        try {
-            const response = await api.get<Album[]>("albums");
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching albums:", error);
-            throw error;
-        }
+        const response = await api.get<Album[]>("albums");
+        return response.data;
     }
 
     async findAllTrackById(id: bigint | number): Promise<Album> {
@@ -17,66 +32,44 @@ export class AlbumManager {
         return response.data;
     }
 
+    async findAllManaged(): Promise<Album[]> {
+        const response = await api.get<Album[]>("albums/admin/all");
+        return response.data;
+    }
 
-    async create(album: any): Promise<Album> {
-        const response = await api.post<Album>("albums", album);
+    async findModerationQueue(): Promise<Album[]> {
+        const response = await api.get<Album[]>("albums/moderation");
+        return response.data;
+    }
+
+    async create(album: FormData | Record<string, unknown>): Promise<Album> {
+        const response = await api.post<Album>("albums", album, {
+            headers: album instanceof FormData ? { "Content-Type": "multipart/form-data" } : undefined
+        });
+        return response.data;
+    }
+
+    async update(album: Album | FormData): Promise<Album> {
+        const id = album instanceof FormData ? album.get("id") : album.id;
+        const payload = album instanceof FormData ? album : toFormData(album as unknown as Record<string, unknown>);
+        const response = await api.put<Album>(`albums/${id}`, payload, {
+            headers: { "Content-Type": "multipart/form-data" }
+        });
         return response.data;
     }
 
     async updateAlbumMultipart(album: Album): Promise<Album> {
+        return this.update(album);
+    }
+
+    async moderate(id: number | bigint, status: AlbumStatus): Promise<Album> {
         const formData = new FormData();
-
-        formData.append('title', album.title);
-
-        if (album.authorId) {
-            formData.append('authorId', String(album.authorId));
-        }
-
-        if (album.typeId) {
-            formData.append('typeId', String(album.typeId));
-        }
-
-        if (album.releasedAt) {
-            formData.append('releasedAt', new Date(album.releasedAt).toISOString());
-        }
-
-        formData.append('status', album.status || 'IN_PROGRESS');
-
-        const trackIds = album.trackIds || (album as any).tracks?.map((t: any) => t.id) || [];
-
-        if (Array.isArray(trackIds)) {
-            trackIds.forEach((id: number) => {
-                formData.append('trackIds', String(id));
-            });
-        }
-
-        const API_URL = import.meta.env.VITE_BASE_URL_PROD || import.meta.env.VITE_BASE_URL_DEV || 'http://localhost:8080';
-        const token = localStorage.getItem('auth_token');
-
-        try {
-            const response = await fetch(`${API_URL}/api/albums/${album.id}`, {
-                method: 'PUT',
-                headers: token ? {
-                    'Authorization': `Bearer ${token}`,
-                    // Content-Type НЕ указываем вручную, браузер сам поставит multipart/form-data с boundary
-                } : {},
-                body: formData,
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Server error ${response.status}: ${errorText}`);
-            }
-
-            const contentType = response.headers.get('content-type');
-            return contentType?.includes('application/json')
-                ? await response.json()
-                : album; // Возвращаем локальные данные, если сервер ничего не вернул
-
-        } catch (error) {
-            console.error('Error updating album via multipart:', error);
-            throw error;
-        }
+        formData.append("id", String(id));
+        formData.append("status", status);
+        const response = await api.put<Album>(`albums/${id}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" }
+        });
+        return response.data;
     }
 
     async deleteById(id: bigint): Promise<void> {

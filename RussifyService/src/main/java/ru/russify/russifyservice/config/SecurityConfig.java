@@ -26,6 +26,9 @@ public class SecurityConfig {
                         //надо залогиниться
                         //POST
                         .requestMatchers("/auth/logout").authenticated()
+                        .requestMatchers("/api/user/**").authenticated()
+                        .requestMatchers("/api/albums/admin/**").authenticated()
+                        .requestMatchers("/api/albums/moderation").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/albums/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/tracks/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/playlists/**").authenticated()

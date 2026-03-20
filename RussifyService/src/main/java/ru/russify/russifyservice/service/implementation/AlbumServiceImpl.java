@@ -14,6 +14,7 @@ import ru.russify.models.projection.AlbumFlatDto;
 import ru.russify.models.request.album.AlbumCreateRequest;
 import ru.russify.models.request.album.AlbumUpdateRequest;
 import ru.russify.russifyservice.exception.AlbumNotFoundException;
+import ru.russify.russifyservice.exception.BadRequestException;
 import ru.russify.russifyservice.exception.UserNotFoundException;
 import ru.russify.russifyservice.model.Album;
 import ru.russify.russifyservice.model.Author;
@@ -57,6 +58,24 @@ public class AlbumServiceImpl implements AlbumService {
         return albumRepository.findAllAlbumsDto();
     }
 
+    public List<AlbumDto> findPublicWithRelations() {
+        return findAllWithRelations().stream()
+                .filter(album -> album.getStatus() == AlbumStatus.APPROVED)
+                .toList();
+    }
+
+    public List<AlbumDto> findAllManaged(String email) {
+        requireAdmin(email);
+        return findAllWithRelations();
+    }
+
+    public List<AlbumDto> findModerationQueue(String email) {
+        requireAdmin(email);
+        return findAllWithRelations().stream()
+                .filter(album -> album.getStatus() == AlbumStatus.IN_PROGRESS)
+                .toList();
+    }
+
     @Transactional
     public void delete(String email, Long id){
         Album album = albumRepository.findById(id)
@@ -68,7 +87,15 @@ public class AlbumServiceImpl implements AlbumService {
     }
 
     @Transactional
-    public AlbumDto createAlbum(AlbumCreateRequest request) {
+    public AlbumDto createAlbum(String email, AlbumCreateRequest request) {
+        requireAdmin(email);
+        ensureAuthorProvided(request.getAuthorId());
+        validateTrackPayload(
+                request.getTrackNames(),
+                request.getTrackGenreIds(),
+                request.getTrackAudioFiles(),
+                request.getTrackAuthorIds()
+        );
 
         Album album = new Album();
 
@@ -92,62 +119,14 @@ public class AlbumServiceImpl implements AlbumService {
 
         Album savedAlbum = albumRepository.save(album);
 
-        Author albumAuthor = authorRepository.getReferenceById(request.getAuthorId());
-
-        AuthorAlbum authorAlbum = new AuthorAlbum(
-                new AuthorAlbumPK(albumAuthor.getId(), savedAlbum.getId()),
-                albumAuthor,
-                savedAlbum
+        linkAlbumAuthor(savedAlbum, authorRepository.getReferenceById(request.getAuthorId()));
+        attachUploadedTracks(
+                savedAlbum,
+                request.getTrackNames(),
+                request.getTrackGenreIds(),
+                request.getTrackAudioFiles(),
+                request.getTrackAuthorIds()
         );
-
-        savedAlbum.getAuthorAlbums().add(authorAlbum);
-
-        List<String> trackNames = request.getTrackNames();
-        List<Long> trackGenreIds = request.getTrackGenreIds();
-        List<MultipartFile> trackAudioFiles = request.getTrackAudioFiles();
-        List<Long> trackAuthorIds = request.getTrackAuthorIds();
-
-        if (trackNames != null) {
-
-            for (int i = 0; i < trackNames.size(); i++) {
-
-                String name = trackNames.get(i);
-                Long genreId = trackGenreIds.get(i);
-                MultipartFile audioFile = trackAudioFiles.get(i);
-                Long authorId = trackAuthorIds.get(i);
-
-                String audioHash = fileService.uploadFile("music", audioFile);
-
-                int duration = audioMetadataService.extractDurationSeconds(audioFile);
-
-                Track track = Track.builder()
-                        .name(name)
-                        .genre(genreRepository.getReferenceById(genreId))
-                        .audioHash(audioHash)
-                        .duration(duration)
-                        .build();
-
-                Track savedTrack = trackRepository.save(track);
-
-                TrackAlbum trackAlbum = new TrackAlbum(
-                        new TrackAlbumPK(savedTrack.getId(), savedAlbum.getId()),
-                        savedTrack,
-                        savedAlbum
-                );
-
-                savedAlbum.getTrackAlbums().add(trackAlbum);
-
-                Author author = authorRepository.getReferenceById(authorId);
-
-                AuthorTrack authorTrack = new AuthorTrack(
-                        new AuthorTrackPK(author.getId(), savedTrack.getId()),
-                        author,
-                        savedTrack
-                );
-
-                savedTrack.getAuthorTracks().add(authorTrack);
-            }
-        }
 
         Album result = albumRepository.save(savedAlbum);
 
@@ -155,7 +134,8 @@ public class AlbumServiceImpl implements AlbumService {
     }
 
     @Transactional
-    public AlbumDto updateAlbum(Long id, AlbumUpdateRequest request) {
+    public AlbumDto updateAlbum(String email, Long id, AlbumUpdateRequest request) {
+        requireAdmin(email);
 
         Album album = albumRepository.findById(id)
                 .orElseThrow(() -> new AlbumNotFoundException(id));
@@ -242,6 +222,22 @@ public class AlbumServiceImpl implements AlbumService {
         return albumRepository.findAlbumsByAuthorEmail(email);
     }
 
+    public AlbumDto getAlbumByIdVisibleTo(Long albumId, String email) {
+        Album album = albumRepository.findById(albumId)
+                .orElseThrow(() -> new AlbumNotFoundException(albumId));
+
+        if (album.getStatus() == AlbumStatus.APPROVED) {
+            return getAlbumById(albumId);
+        }
+
+        if (email == null || email.isBlank()) {
+            throw new AccessDeniedException("Access denied");
+        }
+
+        checkAccess(email, album);
+        return getAlbumById(albumId);
+    }
+
     public AlbumDto getAlbumById(Long albumId) {
 
         List<AlbumFlatDto> rows = albumRepository.findAlbumFlatById(albumId);
@@ -297,10 +293,13 @@ public class AlbumServiceImpl implements AlbumService {
     @Transactional
     public AlbumDto updateUserAlbum(String email, Long albumId, AlbumUpdateRequest request) {
 
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
+
         Album album = albumRepository.findById(albumId)
                 .orElseThrow(() -> new AlbumNotFoundException(albumId));
 
-        checkAccess(email, album);
+        checkAccess(user, album);
 
         if (request.getTitle() != null) {
             album.setTitle(request.getTitle());
@@ -325,15 +324,7 @@ public class AlbumServiceImpl implements AlbumService {
         if (request.getAuthorId() != null) {
             album.getAuthorAlbums().clear();
 
-            Author author = authorRepository.getReferenceById(request.getAuthorId());
-
-            AuthorAlbum authorAlbum = new AuthorAlbum(
-                    new AuthorAlbumPK(author.getId(), album.getId()),
-                    author,
-                    album
-            );
-
-            album.getAuthorAlbums().add(authorAlbum);
+            linkAlbumAuthor(album, resolveOwnedAuthor(user, request.getAuthorId()));
         }
 
         if (request.getTrackIds() != null) {
@@ -370,46 +361,18 @@ public class AlbumServiceImpl implements AlbumService {
         return getAlbumById(album.getId());
     }
 
-    private void checkAccess(String email, Album album) {
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException());
-
-        if ("ADMIN".equals(user.getRole().getName())) {
-            return;
-        }
-
-        boolean isOwner = album.getAuthorAlbums().stream()
-                .anyMatch(aa -> aa.getAuthor().getUser().getId().equals(user.getId()));
-
-        if (isOwner) {
-            return;
-        }
-
-        throw new AccessDeniedException("Access denied");
-    }
-
     @Transactional
     public AlbumDto publishAlbum(String email, AlbumCreateRequest request) {
-
-        Author author = authorRepository.findById(request.getAuthorId())
-                .orElseThrow(() -> new RuntimeException("Author not found"));
-
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(UserNotFoundException::new);
+        Author author = resolveOwnedAuthor(user, request.getAuthorId());
 
-        boolean isAdmin = "ADMIN".equalsIgnoreCase(user.getRole().getName());
-        boolean isOwner = author.getUser().getId().equals(user.getId());
-
-        if (!isAdmin && !isOwner) {
-            throw new AccessDeniedException("Access denied");
-        }
-
-        List<String> trackNames = request.getTrackNames();
-
-        if (trackNames == null || trackNames.isEmpty()) {
-            throw new RuntimeException("Album must contain tracks");
-        }
+        validateTrackPayload(
+                request.getTrackNames(),
+                request.getTrackGenreIds(),
+                request.getTrackAudioFiles(),
+                request.getTrackAuthorIds()
+        );
 
         Album album = new Album();
 
@@ -432,36 +395,95 @@ public class AlbumServiceImpl implements AlbumService {
         album.setAuthorAlbums(new HashSet<>());
 
         Album savedAlbum = albumRepository.save(album);
-
-        AuthorAlbum authorAlbum = new AuthorAlbum(
-                new AuthorAlbumPK(author.getId(), savedAlbum.getId()),
-                author,
-                savedAlbum
+        linkAlbumAuthor(savedAlbum, author);
+        attachUploadedTracksForUser(
+                savedAlbum,
+                user,
+                request.getTrackNames(),
+                request.getTrackGenreIds(),
+                request.getTrackAudioFiles(),
+                request.getTrackAuthorIds()
         );
 
-        savedAlbum.getAuthorAlbums().add(authorAlbum);
+        Album result = albumRepository.save(savedAlbum);
 
-        List<Long> trackGenreIds = request.getTrackGenreIds();
-        List<MultipartFile> trackAudioFiles = request.getTrackAudioFiles();
-        List<Long> trackAuthorIds = request.getTrackAuthorIds();
+        return getAlbumById(result.getId());
+    }
 
-        if (
-                trackNames.size() != trackGenreIds.size() ||
-                        trackNames.size() != trackAudioFiles.size() ||
-                        trackNames.size() != trackAuthorIds.size()
-        ) {
-            throw new RuntimeException("Track arrays size mismatch");
+    private void checkAccess(String email, Album album) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
+        checkAccess(user, album);
+    }
+
+    private void checkAccess(User user, Album album) {
+        if (isAdmin(user) || isAlbumOwner(user, album)) {
+            return;
         }
 
-        for (int i = 0; i < trackNames.size(); i++) {
+        throw new AccessDeniedException("Access denied");
+    }
 
+    private void requireAdmin(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
+
+        if (!isAdmin(user)) {
+            throw new AccessDeniedException("Access denied");
+        }
+    }
+
+    private void ensureAuthorProvided(Long authorId) {
+        if (authorId == null) {
+            throw new BadRequestException("Author id is required");
+        }
+    }
+
+    private void validateTrackPayload(
+            List<String> trackNames,
+            List<Long> trackGenreIds,
+            List<MultipartFile> trackAudioFiles,
+            List<Long> trackAuthorIds
+    ) {
+        if (trackNames == null || trackNames.isEmpty()) {
+            throw new BadRequestException("Album must contain tracks");
+        }
+
+        if (trackGenreIds == null || trackAudioFiles == null || trackAuthorIds == null) {
+            throw new BadRequestException("Track payload is incomplete");
+        }
+
+        if (
+                trackNames.size() != trackGenreIds.size()
+                        || trackNames.size() != trackAudioFiles.size()
+                        || trackNames.size() != trackAuthorIds.size()
+        ) {
+            throw new BadRequestException("Track arrays size mismatch");
+        }
+    }
+
+    private void linkAlbumAuthor(Album album, Author author) {
+        album.getAuthorAlbums().add(new AuthorAlbum(
+                new AuthorAlbumPK(author.getId(), album.getId()),
+                author,
+                album
+        ));
+    }
+
+    private void attachUploadedTracks(
+            Album album,
+            List<String> trackNames,
+            List<Long> trackGenreIds,
+            List<MultipartFile> trackAudioFiles,
+            List<Long> trackAuthorIds
+    ) {
+        for (int i = 0; i < trackNames.size(); i++) {
             String name = trackNames.get(i);
             Long genreId = trackGenreIds.get(i);
             MultipartFile audioFile = trackAudioFiles.get(i);
             Long authorId = trackAuthorIds.get(i);
 
-            String audioHash = fileService.uploadFile("audio", audioFile);
-
+            String audioHash = fileService.uploadFile("music", audioFile);
             int duration = audioMetadataService.extractDurationSeconds(audioFile);
 
             Track track = Track.builder()
@@ -473,27 +495,96 @@ public class AlbumServiceImpl implements AlbumService {
 
             Track savedTrack = trackRepository.save(track);
 
-            TrackAlbum trackAlbum = new TrackAlbum(
-                    new TrackAlbumPK(savedTrack.getId(), savedAlbum.getId()),
+            album.getTrackAlbums().add(new TrackAlbum(
+                    new TrackAlbumPK(savedTrack.getId(), album.getId()),
                     savedTrack,
-                    savedAlbum
-            );
-
-            savedAlbum.getTrackAlbums().add(trackAlbum);
+                    album
+            ));
 
             Author trackAuthor = authorRepository.getReferenceById(authorId);
-
-            AuthorTrack authorTrack = new AuthorTrack(
+            savedTrack.getAuthorTracks().add(new AuthorTrack(
                     new AuthorTrackPK(trackAuthor.getId(), savedTrack.getId()),
                     trackAuthor,
                     savedTrack
-            );
+            ));
+        }
+    }
 
-            savedTrack.getAuthorTracks().add(authorTrack);
+    private void attachUploadedTracksForUser(
+            Album album,
+            User user,
+            List<String> trackNames,
+            List<Long> trackGenreIds,
+            List<MultipartFile> trackAudioFiles,
+            List<Long> trackAuthorIds
+    ) {
+        for (int i = 0; i < trackNames.size(); i++) {
+            String name = trackNames.get(i);
+            Long genreId = trackGenreIds.get(i);
+            MultipartFile audioFile = trackAudioFiles.get(i);
+            Long authorId = trackAuthorIds.get(i);
+
+            String audioHash = fileService.uploadFile("music", audioFile);
+            int duration = audioMetadataService.extractDurationSeconds(audioFile);
+
+            Track track = Track.builder()
+                    .name(name)
+                    .genre(genreRepository.getReferenceById(genreId))
+                    .audioHash(audioHash)
+                    .duration(duration)
+                    .build();
+
+            Track savedTrack = trackRepository.save(track);
+
+            album.getTrackAlbums().add(new TrackAlbum(
+                    new TrackAlbumPK(savedTrack.getId(), album.getId()),
+                    savedTrack,
+                    album
+            ));
+
+            Author trackAuthor = resolveOwnedAuthor(user, authorId);
+            savedTrack.getAuthorTracks().add(new AuthorTrack(
+                    new AuthorTrackPK(trackAuthor.getId(), savedTrack.getId()),
+                    trackAuthor,
+                    savedTrack
+            ));
+        }
+    }
+
+    private Author resolveOwnedAuthor(User user, Long requestedAuthorId) {
+        if (requestedAuthorId != null) {
+            Author requestedAuthor = authorRepository.findById(requestedAuthorId)
+                    .orElseThrow(() -> new BadRequestException("Author not found"));
+
+            if (isAdmin(user) || isOwnedByUser(user, requestedAuthor)) {
+                return requestedAuthor;
+            }
         }
 
-        Album result = albumRepository.save(savedAlbum);
+        if (user.getAuthors() != null && !user.getAuthors().isEmpty()) {
+            return user.getAuthors().iterator().next();
+        }
 
-        return getAlbumById(result.getId());
+        Author author = Author.builder()
+                .name(user.getUsername())
+                .user(user)
+                .build();
+
+        return authorRepository.save(author);
+    }
+
+    private boolean isAlbumOwner(User user, Album album) {
+        return album.getAuthorAlbums() != null
+                && album.getAuthorAlbums().stream()
+                .map(AuthorAlbum::getAuthor)
+                .anyMatch(author -> isOwnedByUser(user, author));
+    }
+
+    private boolean isOwnedByUser(User user, Author author) {
+        return author.getUser() != null && author.getUser().getId().equals(user.getId());
+    }
+
+    private boolean isAdmin(User user) {
+        return user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
     }
 }

@@ -10,13 +10,13 @@ import java.util.List;
 
 public interface TrackService {
 
-    TrackResponse create(TrackCreateRequest request);
+    TrackResponse create(String email, TrackCreateRequest request);
 
-    TrackDto update(Long id, TrackDto album);
+    TrackDto update(String email, Long id, TrackDto album);
 
     TrackDto findById(Long id);
 
-    void deleteById(Long id);
+    void deleteById(String email, Long id);
 
     List<TrackFlatDto> searchTracks(TrackSearchRequest request);
 }

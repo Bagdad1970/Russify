@@ -8,14 +8,22 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     const newConfig = { ...config };
 
-    newConfig.url = `api/${config.url}`;
+    if (config.url && !config.url.startsWith("http")) {
+        if (config.url.startsWith("/api/")) {
+            newConfig.url = config.url;
+        } else if (config.url.startsWith("/")) {
+            newConfig.url = `/api${config.url}`;
+        } else {
+            newConfig.url = `/api/${config.url}`;
+        }
+    }
 
     const token = localStorage.getItem('auth_token');
     if (token) {
         newConfig.headers.Authorization = `Bearer ${token}`;
     }
 
-    if (newConfig.headers['content-Type'] === 'multipart/form-data') {
+    if (config.data instanceof FormData) {
         return newConfig;
     }
 
@@ -36,7 +44,7 @@ apiClient.interceptors.response.use((response: AxiosResponse) => {
     }
 
     if (response.data &&
-        response.headers['content-type'] === 'application/json'
+        response.headers['content-type']?.includes('application/json')
     ) {
         response.data = camelizeKeys(response.data);
     }

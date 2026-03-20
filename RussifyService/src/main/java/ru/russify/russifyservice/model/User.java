@@ -48,6 +48,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<FavouriteTrack> favouriteTracks;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = false)
+    private Set<Author> authors;
+
     @Column(name = "username", nullable = false, length = 50, unique = true)
     private String username;
 

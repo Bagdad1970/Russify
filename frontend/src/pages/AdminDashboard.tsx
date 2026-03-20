@@ -105,7 +105,9 @@ const AdminDashboard: React.FC = () => {
             setLoading(true);
             setError(null);
             try {
-                const items = await currentConfig.manager.findAll();
+                const items = selectedTable === 'albums'
+                    ? await new AlbumManager().findAllManaged()
+                    : await currentConfig.manager.findAll();
                 setData(items);
             } catch (err: any) {
                 console.error(err);

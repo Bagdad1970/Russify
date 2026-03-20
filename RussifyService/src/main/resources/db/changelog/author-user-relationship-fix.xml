@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="author-user-relationship-fix-1" author="codex">
+        <dropNotNullConstraint
+                schemaName="app"
+                tableName="authors"
+                columnName="user_id"
+                columnDataType="BIGINT"/>
+
+        <sql splitStatements="false">
+            DO $$
+            DECLARE
+                constraint_name text;
+            BEGIN
+                SELECT con.conname
+                INTO constraint_name
+                FROM pg_constraint con
+                JOIN pg_class rel ON rel.oid = con.conrelid
+                JOIN pg_namespace nsp ON nsp.oid = rel.relnamespace
+                JOIN unnest(con.conkey) AS colnum(attnum) ON TRUE
+                JOIN pg_attribute attr
+                  ON attr.attrelid = rel.oid
+                 AND attr.attnum = colnum.attnum
+                WHERE nsp.nspname = 'app'
+                  AND rel.relname = 'authors'
+                  AND con.contype = 'u'
+                  AND attr.attname = 'user_id'
+                LIMIT 1;
+
+                IF constraint_name IS NOT NULL THEN
+                    EXECUTE format('ALTER TABLE app.authors DROP CONSTRAINT %I', constraint_name);
+                END IF;
+            END $$;
+        </sql>
+    </changeSet>
+</databaseChangeLog>
