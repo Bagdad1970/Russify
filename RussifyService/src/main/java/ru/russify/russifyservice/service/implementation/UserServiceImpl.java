@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                null,
+                user.getAvatarHash(),
                 user.getCreatedAt(),
                 null // заглушка
         );

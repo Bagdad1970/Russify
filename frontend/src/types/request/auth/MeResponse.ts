@@ -1,6 +1,11 @@
-export type MeResponse = {
+export interface MeResponse {
     id: number;
     username: string;
     email: string;
-    roleID: number;
+    avatarHash?: string;
+    createdAt?: string;
+    role?: {
+        id: number;
+        name: string;
+    };
 }

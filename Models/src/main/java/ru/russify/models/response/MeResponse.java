@@ -4,5 +4,5 @@ public record MeResponse(
         Long id,
         String username,
         String email,
-        Long roleID
+        String avatarHash, Long roleID
 ) {}

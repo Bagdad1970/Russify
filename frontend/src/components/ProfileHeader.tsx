@@ -1,38 +1,41 @@
 import '../assets/styles/components/ProfileHeader.css';
-import {useEffect, useState} from "react";
-import type {MeResponse} from "../types/request/auth/MeResponse.ts";
-import {AuthManager} from "../api/AuthManager.ts";
+import { useEffect, useState } from "react";
+import type { MeResponse } from "../types/request/auth/MeResponse.ts";
+import { AuthManager } from "../api/AuthManager.ts";
+import { FileManager } from "../api/FileManager.ts";
+import defaultAvatar from '../assets/images/no-cover.svg';
 
 const ProfileHeader = () => {
-
-    /*
-    const user = {
-        avatar: "",
-        username: "Иван",
-        registrationDate: "2024-05-15",
-        monthlyPlays: 1234
-    };
-    */
-
     const [userData, setUserData] = useState<MeResponse>();
+    const [avatarUrl, setAvatarUrl] = useState<string>("");
     const authManager = new AuthManager();
+    const fileManager = new FileManager();
 
     useEffect(() => {
         const loadUserData = async () => {
             try {
                 const data = await authManager.getCurrentUser();
-
                 setUserData(data);
-            }
-            catch (err) {
-                console.log("Error", err)
+                if (data.avatarHash) {
+                    try {
+                        const avatar = await fileManager.getFileUrl("images", data.avatarHash);
+                        if (avatar) {
+                            setAvatarUrl(avatar);
+                        }
+                    } catch (err) {
+                        console.error('Error loading avatar:', err);
+                    }
+                }
+            } catch (err) {
+                console.log("Error loading user data:", err);
             }
         };
 
-        loadUserData()
-    }, []); // тут перерендеревалось
+        loadUserData();
+    }, []);
 
-    const formatDate = (dateStr) => {
+    const formatDate = (dateStr?: string) => {
+        if (!dateStr) return "";
         const months = [
             "января", "февраля", "марта", "апреля", "мая", "июня",
             "июля", "августа", "сентября", "октября", "ноября", "декабря"
@@ -50,28 +53,37 @@ const ProfileHeader = () => {
                 <div className="profile-header">
                     <div className="profile-avatar">
                         <div className="avatar-image">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" fill="#f1f1f1">
-                                <circle cx="60" cy="48" r="24" />
-                                <path d="M36 96c0-18 12-30 24-30s24 12 24 30" />
-                            </svg>
+                            {avatarUrl ? (
+                                <img
+                                    src={avatarUrl}
+                                    alt="Avatar"
+                                    width="120"
+                                    height="120"
+                                    style={{ borderRadius: '50%', objectFit: 'cover' }}
+                                    onError={(e) => {
+                                        console.log('Avatar load error, using default');
+                                        e.currentTarget.src = defaultAvatar;
+                                    }}
+                                />
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" fill="#f1f1f1">
+                                    <circle cx="60" cy="48" r="24" />
+                                    <path d="M36 96c0-18 12-30 24-30s24 12 24 30" />
+                                </svg>
+                            )}
                         </div>
                     </div>
                     <div className="profile-info">
                         <div className="profile-name-line">
                             <div className="profile-full-name">
-                                {userData?.username}
+                                {userData?.username || "Пользователь"}
                             </div>
                         </div>
-                        {/*<div className="profile-registration-line">
-                            Дата регистрации: {formatDate(user.registrationDate)}
-                        </div>
-                        <div className="profile-monthly-plays-line">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="#aaa" style={{ marginRight: '8px' }}>
-                                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
-                            </svg>
-                            {user.monthlyPlays} прослушиваний в месяц
-                        </div>
-                        */}
+                        {userData?.createdAt && (
+                            <div className="profile-registration-line">
+                                Дата регистрации: {formatDate(userData.createdAt)}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

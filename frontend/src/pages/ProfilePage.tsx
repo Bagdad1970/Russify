@@ -8,12 +8,31 @@ import { UserManager } from '../api/UserManager.ts';
 import { AlbumManager } from '../api/AlbumManager.ts';
 import { FileManager } from '../api/FileManager.ts';
 import type { Album } from '../types/Album.ts';
-import type { FileGetRequest } from '../types/request/FileGetRequest.ts';
 import noCover from '../assets/images/no-cover.svg';
+import defaultAvatar from '../assets/images/no-cover.svg';
+
+// Интерфейс для данных из токена
+interface TokenPayload {
+    userId?: number;
+    sub?: string;
+    email?: string;
+    username?: string;
+    avatarHash?: string;
+    role?: string;
+    iat?: number;
+    exp?: number;
+}
 
 const ProfilePage = () => {
     const [albums, setAlbums] = useState<Album[]>([]);
     const [covers, setCovers] = useState<Record<string, string>>({});
+    const [user, setUser] = useState<{
+        id: number;
+        email: string;
+        username: string;
+        avatarHash?: string;
+    } | null>(null);
+    const [avatarUrl, setAvatarUrl] = useState<string>("");
     const [loading, setLoading] = useState(false);
 
     const userManager = new UserManager();
@@ -24,7 +43,62 @@ const ProfilePage = () => {
     const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-    // Загрузка реальных альбомов пользователя
+    // Извлечение данных пользователя из токена
+    const getUserFromToken = (): TokenPayload | null => {
+        const token = localStorage.getItem('auth_token');
+        if (!token) return null;
+
+        try {
+            const payload = token.split('.')[1];
+            const decoded = JSON.parse(atob(payload));
+            console.log('📦 Token payload:', decoded); // Для отладки
+            return decoded;
+        } catch (err) {
+            console.error('Error parsing token:', err);
+            return null;
+        }
+    };
+
+    // Загрузка информации о пользователе из токена
+    useEffect(() => {
+        const loadUserData = async () => {
+            const tokenData = getUserFromToken();
+            if (tokenData) {
+                const userData = {
+                    id: tokenData.userId || 0,
+                    email: tokenData.email || '',
+                    username: tokenData.username || tokenData.sub || 'Пользователь',
+                    avatarHash: tokenData.avatarHash
+                };
+                setUser(userData);
+
+                // Загружаем аватар, если есть хэш
+                if (userData.avatarHash) {
+                    try {
+                        console.log('🖼️ Loading avatar with hash:', userData.avatarHash);
+                        const avatar = await fileManager.getFileUrl("images", userData.avatarHash);
+                        if (avatar) {
+                            console.log('✅ Avatar loaded:', avatar);
+                            setAvatarUrl(avatar);
+                        } else {
+                            console.log('⚠️ No avatar URL returned');
+                            setAvatarUrl(defaultAvatar);
+                        }
+                    } catch (err) {
+                        console.error('❌ Error loading avatar:', err);
+                        setAvatarUrl(defaultAvatar);
+                    }
+                } else {
+                    console.log('ℹ️ No avatarHash in token');
+                    setAvatarUrl(defaultAvatar);
+                }
+            }
+        };
+
+        loadUserData();
+    }, []);
+
+    // Загрузка альбомов пользователя
     useEffect(() => {
         const loadUserAlbums = async () => {
             try {
@@ -37,11 +111,7 @@ const ProfilePage = () => {
                     await Promise.all(userAlbums.map(async (album) => {
                         if (album.coverHash) {
                             try {
-                                const fileGetRequest: FileGetRequest = {
-                                    bucket: "covers",
-                                    hash: album.coverHash
-                                };
-                                const coverSrc = await fileManager.getFileUrl(fileGetRequest);
+                                const coverSrc = await fileManager.getFileUrl("images", album.coverHash);
                                 if (coverSrc) {
                                     coversMap[album.id.toString()] = coverSrc;
                                 }
@@ -61,12 +131,6 @@ const ProfilePage = () => {
         };
 
         loadUserAlbums();
-
-        return () => {
-            Object.values(covers).forEach(url => {
-                if (url) fileManager.revokeFileUrl(url);
-            });
-        };
     }, []);
 
     const openAlbumModal = async (album: Album) => {
@@ -105,8 +169,11 @@ const ProfilePage = () => {
         try {
             await albumManager.deleteById(albumId);
             setAlbums(prev => prev.filter(a => a.id !== albumId));
-            const coverUrl = covers[albumId.toString()];
-
+            setCovers(prev => {
+                const newCovers = { ...prev };
+                delete newCovers[albumId.toString()];
+                return newCovers;
+            });
         } catch (err) {
             console.error('Error deleting album:', err);
             alert('Не удалось удалить альбом. Попробуйте позже.');
@@ -125,35 +192,36 @@ const ProfilePage = () => {
         return `${day} ${month} ${year}`;
     };
 
-    // ✅ Функция для получения стиля в зависимости от статуса
     const getAlbumStatusStyle = (status?: string) => {
         const baseStyle: React.CSSProperties = {
             transition: 'box-shadow 0.2s, border-color 0.2s',
             border: '1px solid transparent',
-            borderRadius: '8px' // Убедитесь, что радиус соответствует вашему CSS
+            borderRadius: '8px'
         };
 
         if (status === 'APPROVED') {
             return {
                 ...baseStyle,
-                borderColor: '#4caf50', // Зеленый
+                borderColor: '#4caf50',
                 boxShadow: '0 0 8px rgba(76, 175, 80, 0.4)'
             };
         } else if (status === 'DENIED' || status === 'REJECTED') {
             return {
                 ...baseStyle,
-                borderColor: '#f44336', // Красный
+                borderColor: '#f44336',
                 boxShadow: '0 0 8px rgba(244, 67, 54, 0.4)'
             };
         }
 
-        // Для IN_PROGRESS и остальных возвращаем пустой стиль (стандартный CSS)
         return baseStyle;
     };
 
     return (
         <div className="profile-page-container">
-            <ProfileHeader />
+            <ProfileHeader
+                user={user}
+                avatarUrl={avatarUrl || defaultAvatar}
+            />
 
             <div className="profile-bottom-section">
                 <div className="profile-albums-header">
@@ -204,8 +272,6 @@ const ProfilePage = () => {
                                     <div className="album-title">{album.title}</div>
                                     <div className="album-meta">
                                         <span>{formatDate(album.releasedAt)}</span>
-                                        {/* Можно вывести статус текстом, если нужно */}
-                                        {/* <span style={{fontSize: '10px', color: album.status === 'APPROVED' ? '#4caf50' : album.status === 'DENIED' ? '#f44336' : '#aaa'}}>{album.status}</span> */}
                                     </div>
                                 </div>
                                 <div
@@ -240,7 +306,7 @@ const ProfilePage = () => {
                 <CreateAlbumOrTrackModal
                     isOpen={true}
                     onClose={closeCreateModal}
-                    mode="album" // Исправлено на album
+                    mode="album"
                 />
             )}
         </div>
