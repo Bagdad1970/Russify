@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     type ColumnDef,
@@ -15,6 +15,7 @@ import { PlaylistManager } from '../api/PlaylistManager.ts';
 import { AlbumManager } from '../api/AlbumManager.ts';
 import { TrackManager } from '../api/TrackManager.ts';
 import { AuthorManager } from '../api/AuthorManager.ts';
+import { FileManager } from '../api/FileManager.ts';
 
 import type { Genre } from '../types/Genre';
 import type { Playlist } from '../types/Playlist';
@@ -23,6 +24,8 @@ import type { Track } from '../types/Track';
 import type { Author } from '../types/Author';
 
 import '../assets/styles/pages/AdminDashboard.css';
+
+const fileManager = new FileManager();
 
 const tableConfigs = {
     genres: {
@@ -42,7 +45,23 @@ const tableConfigs = {
             { accessorKey: 'id', header: 'ID' },
             { accessorKey: 'name', header: 'Название' },
             { accessorKey: 'userId', header: 'ID владельца' },
-            { accessorKey: 'isSystem', header: 'Системный', cell: info => (info.getValue() ? 'Да' : 'Нет') },
+            { accessorKey: 'isSystem', header: 'Системный', cell: ({ getValue }) => (getValue() ? 'Да' : 'Нет') },
+            {
+                accessorKey: 'coverHash',
+                header: 'Обложка',
+                cell: ({ getValue }) => {
+                    const hash = getValue();
+                    if (!hash) return '—';
+                    return (
+                        <img
+                            src={`http://localhost:9000/images/${hash}`}
+                            alt="cover"
+                            style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                    );
+                }
+            },
         ] as ColumnDef<Playlist>[],
     },
     albums: {
@@ -52,8 +71,28 @@ const tableConfigs = {
         columns: [
             { accessorKey: 'id', header: 'ID' },
             { accessorKey: 'title', header: 'Название' },
-            { accessorKey: 'albumTypeId', header: 'Тип альбома (ID)' },
-            { accessorKey: 'releasedAt', header: 'Дата релиза' },
+            { accessorKey: 'albumTypeId', header: 'Тип альбома' },
+            { accessorKey: 'releasedAt', header: 'Дата релиза', cell: ({ getValue }) => {
+                    const date = getValue();
+                    return date ? new Date(date).toLocaleDateString('ru-RU') : '—';
+                } },
+            { accessorKey: 'status', header: 'Статус' },
+            {
+                accessorKey: 'coverHash',
+                header: 'Обложка',
+                cell: ({ getValue }) => {
+                    const hash = getValue();
+                    if (!hash) return '—';
+                    return (
+                        <img
+                            src={`http://localhost:9000/images/${hash}`}
+                            alt="cover"
+                            style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                    );
+                }
+            },
         ] as ColumnDef<Album>[],
     },
     tracks: {
@@ -63,9 +102,30 @@ const tableConfigs = {
         columns: [
             { accessorKey: 'id', header: 'ID' },
             { accessorKey: 'name', header: 'Название' },
-            { accessorKey: 'genreId', header: 'Жанр (ID)' },
-            { accessorKey: 'coverHash', header: 'Обложка (hash)' },
-            { accessorKey: 'audioHash', header: 'Аудио (hash)' },
+            { accessorKey: 'genreId', header: 'Жанр ID' },
+            { accessorKey: 'duration', header: 'Длительность', cell: ({ getValue }) => {
+                    const sec = getValue();
+                    if (!sec) return '—';
+                    const mins = Math.floor(sec / 60);
+                    const secs = sec % 60;
+                    return `${mins}:${secs.toString().padStart(2, '0')}`;
+                } },
+            {
+                accessorKey: 'coverHash',
+                header: 'Обложка',
+                cell: ({ getValue }) => {
+                    const hash = getValue();
+                    if (!hash) return '—';
+                    return (
+                        <img
+                            src={`http://localhost:9000/images/${hash}`}
+                            alt="cover"
+                            style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                    );
+                }
+            },
         ] as ColumnDef<Track>[],
     },
     authors: {
@@ -75,7 +135,22 @@ const tableConfigs = {
         columns: [
             { accessorKey: 'id', header: 'ID' },
             { accessorKey: 'name', header: 'Имя' },
-            { accessorKey: 'photoFilepath', header: 'Фото' },
+            {
+                accessorKey: 'photoHash',
+                header: 'Фото',
+                cell: ({ getValue }) => {
+                    const hash = getValue();
+                    if (!hash) return '—';
+                    return (
+                        <img
+                            src={`http://localhost:9000/images/${hash}`}
+                            alt="photo"
+                            style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '50%' }}
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                    );
+                }
+            },
             { accessorKey: 'description', header: 'Описание' },
         ] as ColumnDef<Author>[],
     },
@@ -85,7 +160,6 @@ type TableKey = keyof typeof tableConfigs;
 
 const AdminDashboard: React.FC = () => {
     const navigate = useNavigate();
-
     const tableKeys = Object.keys(tableConfigs) as TableKey[];
 
     const [selectedTable, setSelectedTable] = useState<TableKey>('genres');
@@ -94,30 +168,30 @@ const AdminDashboard: React.FC = () => {
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
     const [globalFilter, setGlobalFilter] = useState('');
     const [modalOpen, setModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<any | null>(null);
     const [formValues, setFormValues] = useState<Record<string, any>>({});
 
-    useEffect(() => {
-        const loadData = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const items = await currentConfig.manager.findAll();
-                setData(items);
-            } catch (err: any) {
-                console.error(err);
-                setError('Не удалось загрузить данные');
-                alert('Ошибка загрузки: ' + (err.message || 'Неизвестная ошибка'));
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadData();
-    }, [selectedTable]);
+    const loadData = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const items = await currentConfig.manager.findAll();
+            setData(items);
+        } catch (err: any) {
+            console.error('Error loading data:', err);
+            setError(`Не удалось загрузить данные: ${err.message || 'Неизвестная ошибка'}`);
+        } finally {
+            setLoading(false);
+        }
+    }, [selectedTable, currentConfig]);
 
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    // Колонки с кнопками действий
     const columns = useMemo<ColumnDef<any>[]>(() => {
         return [
             ...currentConfig.columns,
@@ -128,13 +202,27 @@ const AdminDashboard: React.FC = () => {
                     <div style={{ display: 'flex', gap: '8px' }}>
                         <button
                             onClick={() => handleEdit(row.original)}
-                            style={{ background: '#0d6efd', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px' }}
+                            style={{
+                                background: '#0d6efd',
+                                color: 'white',
+                                border: 'none',
+                                padding: '6px 12px',
+                                borderRadius: '6px',
+                                cursor: 'pointer'
+                            }}
                         >
                             Изменить
                         </button>
                         <button
                             onClick={() => handleDelete(row.original)}
-                            style={{ background: '#dc3545', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px' }}
+                            style={{
+                                background: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                padding: '6px 12px',
+                                borderRadius: '6px',
+                                cursor: 'pointer'
+                            }}
                         >
                             Удалить
                         </button>
@@ -142,7 +230,7 @@ const AdminDashboard: React.FC = () => {
                 ),
             },
         ];
-    }, [currentConfig]);
+    }, [currentConfig.columns]);
 
     const table = useReactTable({
         data,
@@ -161,10 +249,12 @@ const AdminDashboard: React.FC = () => {
     };
 
     const handleDelete = async (item: any) => {
-        if (!window.confirm(`Удалить запись #${item[currentConfig.pk]}?`)) return;
+        const pkValue = item[currentConfig.pk];
+        if (!window.confirm(`Удалить запись #${pkValue}?`)) return;
+
         try {
-            await currentConfig.manager.deleteById(item[currentConfig.pk]);
-            setData(prev => prev.filter(r => r[currentConfig.pk] !== item[currentConfig.pk]));
+            await currentConfig.manager.deleteById(pkValue);
+            setData(prev => prev.filter(r => r[currentConfig.pk] !== pkValue));
             alert('Запись удалена');
         } catch (err: any) {
             console.error(err);
@@ -174,10 +264,12 @@ const AdminDashboard: React.FC = () => {
 
     const handleAddNew = () => {
         setEditingItem(null);
-        const empty = {} as Record<string, any>;
-        currentConfig.columns.forEach(c => {
-            const key = c.accessorKey as string;
-            if (key !== currentConfig.pk) empty[key] = '';
+        const empty: Record<string, any> = {};
+        currentConfig.columns.forEach(col => {
+            const key = col.accessorKey as string;
+            if (key && key !== currentConfig.pk && key !== 'coverHash' && key !== 'photoHash') {
+                empty[key] = '';
+            }
         });
         setFormValues(empty);
         setModalOpen(true);
@@ -186,16 +278,15 @@ const AdminDashboard: React.FC = () => {
     const handleSave = async () => {
         try {
             let savedItem;
+
             if (editingItem) {
                 const updated = { ...editingItem, ...formValues };
                 savedItem = await currentConfig.manager.update(updated);
-                setData(prev =>
-                    prev.map(r => r[currentConfig.pk] === savedItem[currentConfig.pk] ? savedItem : r)
-                );
             } else {
                 savedItem = await currentConfig.manager.create(formValues);
-                setData(prev => [...prev, savedItem]);
             }
+
+            await loadData(); // Перезагружаем данные
             setModalOpen(false);
             alert(editingItem ? 'Запись обновлена' : 'Запись создана');
         } catch (err: any) {
@@ -204,14 +295,30 @@ const AdminDashboard: React.FC = () => {
         }
     };
 
+    const getFieldLabel = (key: string) => {
+        const labels: Record<string, string> = {
+            name: 'Название',
+            title: 'Название',
+            userId: 'ID владельца',
+            isSystem: 'Системный',
+            albumTypeId: 'Тип альбома (ID)',
+            releasedAt: 'Дата релиза',
+            status: 'Статус',
+            genreId: 'ID жанра',
+            description: 'Описание',
+            duration: 'Длительность (сек)',
+        };
+        return labels[key] || key;
+    };
+
     return (
-        <div className="admin-dashboard">
-            <div className="admin-sidebar">
-                <h2 style={{ margin: '0 0 24px 0' }}>Админ-панель</h2>
+        <div className="admin-dashboard" style={{ display: 'flex', minHeight: '100vh', background: '#121212' }}>
+            {/* Sidebar */}
+            <div style={{ width: '250px', background: '#1e1e1e', padding: '24px', display: 'flex', flexDirection: 'column' }}>
+                <h2 style={{ margin: '0 0 24px 0', color: 'white' }}>Админ-панель</h2>
                 {tableKeys.map(key => (
                     <button
                         key={key}
-                        className={selectedTable === key ? 'active' : ''}
                         onClick={() => setSelectedTable(key)}
                         style={{
                             width: '100%',
@@ -223,6 +330,7 @@ const AdminDashboard: React.FC = () => {
                             border: 'none',
                             borderRadius: '6px',
                             cursor: 'pointer',
+                            fontSize: '14px'
                         }}
                     >
                         {tableConfigs[key].displayName}
@@ -238,18 +346,20 @@ const AdminDashboard: React.FC = () => {
                         border: 'none',
                         borderRadius: '6px',
                         cursor: 'pointer',
+                        marginTop: '20px'
                     }}
                 >
                     На главную
                 </button>
             </div>
 
-            <div className="admin-content">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h1>{currentConfig.displayName}</h1>
+            {/* Main content */}
+            <div style={{ flex: 1, padding: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
+                    <h1 style={{ margin: 0, color: 'white' }}>{currentConfig.displayName}</h1>
                     <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                         <SearchBar
-                            placeholder={`Поиск по ${currentConfig.displayName.toLowerCase()}...`}
+                            placeholder="Поиск..."
                             value={globalFilter}
                             onChange={setGlobalFilter}
                         />
@@ -262,53 +372,86 @@ const AdminDashboard: React.FC = () => {
                                 border: 'none',
                                 borderRadius: '6px',
                                 cursor: 'pointer',
+                                fontSize: '14px'
                             }}
                         >
                             + Добавить
                         </button>
+                        <button
+                            onClick={loadData}
+                            style={{
+                                padding: '10px 20px',
+                                background: '#0d6efd',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontSize: '14px'
+                            }}
+                        >
+                            Обновить
+                        </button>
                     </div>
                 </div>
 
-                {loading && <p>Загрузка...</p>}
-                {error && <p style={{ color: '#dc3545' }}>{error}</p>}
-
-                {!loading && !error && (
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                        {table.getHeaderGroups().map(headerGroup => (
-                            <tr key={headerGroup.id}>
-                                {headerGroup.headers.map(header => (
-                                    <th
-                                        key={header.id}
-                                        style={{
-                                            padding: '12px',
-                                            background: '#2c2c2c',
-                                            textAlign: 'left',
-                                            cursor: header.column.getCanSort() ? 'pointer' : 'default',
-                                        }}
-                                        onClick={header.column.getToggleSortingHandler()}
-                                    >
-                                        {flexRender(header.column.columnDef.header, header.getContext())}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                        </thead>
-                        <tbody>
-                        {table.getRowModel().rows.map(row => (
-                            <tr key={row.id}>
-                                {row.getVisibleCells().map(cell => (
-                                    <td key={cell.id} style={{ padding: '12px', borderBottom: '1px solid #444' }}>
-                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                {loading && (
+                    <div style={{ textAlign: 'center', padding: '40px', color: '#aaa' }}>
+                        Загрузка данных...
+                    </div>
                 )}
 
-                {/* Модалка — без изменений */}
+                {error && (
+                    <div style={{ textAlign: 'center', padding: '40px', color: '#dc3545' }}>
+                        {error}
+                    </div>
+                )}
+
+                {!loading && !error && (
+                    <div style={{ overflowX: 'auto' }}>
+                        {data.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '40px', color: '#aaa' }}>
+                                Нет данных. Нажмите "+ Добавить" чтобы создать первую запись.
+                            </div>
+                        ) : (
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead>
+                                {table.getHeaderGroups().map(headerGroup => (
+                                    <tr key={headerGroup.id}>
+                                        {headerGroup.headers.map(header => (
+                                            <th
+                                                key={header.id}
+                                                style={{
+                                                    padding: '12px',
+                                                    background: '#2c2c2c',
+                                                    textAlign: 'left',
+                                                    borderBottom: '1px solid #444',
+                                                    cursor: header.column.getCanSort() ? 'pointer' : 'default',
+                                                }}
+                                                onClick={header.column.getToggleSortingHandler()}
+                                            >
+                                                {flexRender(header.column.columnDef.header, header.getContext())}
+                                            </th>
+                                        ))}
+                                    </tr>
+                                ))}
+                                </thead>
+                                <tbody>
+                                {table.getRowModel().rows.map(row => (
+                                    <tr key={row.id} style={{ borderBottom: '1px solid #333' }}>
+                                        {row.getVisibleCells().map(cell => (
+                                            <td key={cell.id} style={{ padding: '12px' }}>
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+                )}
+
+                {/* Модалка */}
                 {modalOpen && (
                     <div
                         style={{
@@ -328,35 +471,77 @@ const AdminDashboard: React.FC = () => {
                                 padding: '24px',
                                 borderRadius: '12px',
                                 width: '90%',
-                                maxWidth: '700px',
+                                maxWidth: '500px',
                                 maxHeight: '90vh',
                                 overflowY: 'auto',
                             }}
                             onClick={e => e.stopPropagation()}
                         >
-                            <h2>{editingItem ? 'Редактировать' : 'Создать'} запись</h2>
+                            <h2 style={{ margin: '0 0 20px 0', color: 'white' }}>
+                                {editingItem ? 'Редактировать' : 'Создать'} запись
+                            </h2>
 
-                            <div style={{ display: 'grid', gap: '16px', margin: '24px 0' }}>
+                            <div style={{ display: 'grid', gap: '16px', marginBottom: '24px' }}>
                                 {currentConfig.columns.map(col => {
                                     const key = col.accessorKey as string;
-                                    if (key === currentConfig.pk && !editingItem) return null;
+                                    if (!key || key === currentConfig.pk) return null;
+                                    if (key === 'coverHash' || key === 'photoHash') return null;
+
+                                    const value = formValues[key] ?? '';
 
                                     return (
                                         <div key={key}>
-                                            <label style={{ display: 'block', marginBottom: '6px' }}>{col.header}</label>
-                                            <input
-                                                type="text"
-                                                value={formValues[key] ?? ''}
-                                                onChange={e => setFormValues(prev => ({ ...prev, [key]: e.target.value }))}
-                                                style={{
-                                                    width: '100%',
-                                                    padding: '10px',
-                                                    background: '#2c2c2c',
-                                                    border: '1px solid #444',
-                                                    borderRadius: '6px',
-                                                    color: 'white',
-                                                }}
-                                            />
+                                            <label style={{ display: 'block', marginBottom: '6px', color: '#aaa', fontSize: '14px' }}>
+                                                {getFieldLabel(key)}
+                                            </label>
+                                            {key === 'isSystem' ? (
+                                                <select
+                                                    value={value ? 'true' : 'false'}
+                                                    onChange={e => setFormValues(prev => ({ ...prev, [key]: e.target.value === 'true' }))}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '10px',
+                                                        background: '#2c2c2c',
+                                                        border: '1px solid #444',
+                                                        borderRadius: '6px',
+                                                        color: 'white',
+                                                        fontSize: '14px'
+                                                    }}
+                                                >
+                                                    <option value="false">Нет</option>
+                                                    <option value="true">Да</option>
+                                                </select>
+                                            ) : key === 'releasedAt' ? (
+                                                <input
+                                                    type="date"
+                                                    value={value ? new Date(value).toISOString().split('T')[0] : ''}
+                                                    onChange={e => setFormValues(prev => ({ ...prev, [key]: e.target.value }))}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '10px',
+                                                        background: '#2c2c2c',
+                                                        border: '1px solid #444',
+                                                        borderRadius: '6px',
+                                                        color: 'white',
+                                                        fontSize: '14px'
+                                                    }}
+                                                />
+                                            ) : (
+                                                <input
+                                                    type="text"
+                                                    value={value}
+                                                    onChange={e => setFormValues(prev => ({ ...prev, [key]: e.target.value }))}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '10px',
+                                                        background: '#2c2c2c',
+                                                        border: '1px solid #444',
+                                                        borderRadius: '6px',
+                                                        color: 'white',
+                                                        fontSize: '14px'
+                                                    }}
+                                                />
+                                            )}
                                         </div>
                                     );
                                 })}
@@ -365,13 +550,29 @@ const AdminDashboard: React.FC = () => {
                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                                 <button
                                     onClick={() => setModalOpen(false)}
-                                    style={{ padding: '10px 20px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '6px' }}
+                                    style={{
+                                        padding: '10px 20px',
+                                        background: '#6c757d',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        fontSize: '14px'
+                                    }}
                                 >
                                     Отмена
                                 </button>
                                 <button
                                     onClick={handleSave}
-                                    style={{ padding: '10px 20px', background: '#0d6efd', color: 'white', border: 'none', borderRadius: '6px' }}
+                                    style={{
+                                        padding: '10px 20px',
+                                        background: '#0d6efd',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        fontSize: '14px'
+                                    }}
                                 >
                                     Сохранить
                                 </button>
