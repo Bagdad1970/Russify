@@ -32,9 +32,7 @@ const ProfilePage = () => {
                 const userAlbums = await userManager.getUserAlbums();
                 setAlbums(userAlbums);
 
-                // Загружаем обложки для альбомов
                 const coversMap: Record<string, string> = {};
-
                 if (userAlbums.length > 0) {
                     await Promise.all(userAlbums.map(async (album) => {
                         if (album.coverHash) {
@@ -54,7 +52,6 @@ const ProfilePage = () => {
                     }));
                 }
                 setCovers(coversMap);
-
             } catch (err) {
                 console.error('Error loading user albums:', err);
                 setAlbums([]);
@@ -65,7 +62,6 @@ const ProfilePage = () => {
 
         loadUserAlbums();
 
-        // Очистка URL при размонтировании
         return () => {
             Object.values(covers).forEach(url => {
                 if (url) fileManager.revokeFileUrl(url);
@@ -76,7 +72,6 @@ const ProfilePage = () => {
     const openAlbumModal = async (album: Album) => {
         try {
             setLoading(true);
-            // Загружаем полные данные альбома с треками (как в HomePage)
             const fullAlbum = await albumManager.findAllTrackById(album.id);
             setSelectedAlbum(fullAlbum);
             setIsAlbumModalOpen(true);
@@ -100,6 +95,24 @@ const ProfilePage = () => {
         setIsCreateModalOpen(false);
     };
 
+    const handleDeleteAlbum = async (e: React.MouseEvent, albumId: bigint, albumTitle: string) => {
+        e.stopPropagation();
+
+        if (!window.confirm(`Вы уверены, что хотите удалить альбом "${albumTitle}"? Это действие нельзя отменить.`)) {
+            return;
+        }
+
+        try {
+            await albumManager.deleteById(albumId);
+            setAlbums(prev => prev.filter(a => a.id !== albumId));
+            const coverUrl = covers[albumId.toString()];
+
+        } catch (err) {
+            console.error('Error deleting album:', err);
+            alert('Не удалось удалить альбом. Попробуйте позже.');
+        }
+    };
+
     const formatDate = (dateStr: string | Date) => {
         const months = [
             "января", "февраля", "марта", "апреля", "мая", "июня",
@@ -110,6 +123,32 @@ const ProfilePage = () => {
         const month = months[d.getMonth()];
         const year = d.getFullYear();
         return `${day} ${month} ${year}`;
+    };
+
+    // ✅ Функция для получения стиля в зависимости от статуса
+    const getAlbumStatusStyle = (status?: string) => {
+        const baseStyle: React.CSSProperties = {
+            transition: 'box-shadow 0.2s, border-color 0.2s',
+            border: '1px solid transparent',
+            borderRadius: '8px' // Убедитесь, что радиус соответствует вашему CSS
+        };
+
+        if (status === 'APPROVED') {
+            return {
+                ...baseStyle,
+                borderColor: '#4caf50', // Зеленый
+                boxShadow: '0 0 8px rgba(76, 175, 80, 0.4)'
+            };
+        } else if (status === 'DENIED' || status === 'REJECTED') {
+            return {
+                ...baseStyle,
+                borderColor: '#f44336', // Красный
+                boxShadow: '0 0 8px rgba(244, 67, 54, 0.4)'
+            };
+        }
+
+        // Для IN_PROGRESS и остальных возвращаем пустой стиль (стандартный CSS)
+        return baseStyle;
     };
 
     return (
@@ -130,7 +169,12 @@ const ProfilePage = () => {
 
                 <div className="profile-albums-grid">
                     {albums.map((album) => (
-                        <div key={album.id.toString()} className="profile-album-card">
+                        <div
+                            key={album.id.toString()}
+                            className="profile-album-card"
+                            style={getAlbumStatusStyle(album.status)}
+                            title={`Статус: ${album.status || 'Неизвестен'}`}
+                        >
                             <div
                                 className="album-cover"
                                 onClick={() => openAlbumModal(album)}
@@ -160,9 +204,16 @@ const ProfilePage = () => {
                                     <div className="album-title">{album.title}</div>
                                     <div className="album-meta">
                                         <span>{formatDate(album.releasedAt)}</span>
+                                        {/* Можно вывести статус текстом, если нужно */}
+                                        {/* <span style={{fontSize: '10px', color: album.status === 'APPROVED' ? '#4caf50' : album.status === 'DENIED' ? '#f44336' : '#aaa'}}>{album.status}</span> */}
                                     </div>
                                 </div>
-                                <div className="album-trash-icon">
+                                <div
+                                    className="album-trash-icon"
+                                    onClick={(e) => handleDeleteAlbum(e, album.id, album.title)}
+                                    title="Удалить альбом"
+                                    style={{ cursor: 'pointer' }}
+                                >
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#aaa" strokeWidth="2">
                                         <path d="M3 6h18M19 6v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                     </svg>
@@ -189,7 +240,7 @@ const ProfilePage = () => {
                 <CreateAlbumOrTrackModal
                     isOpen={true}
                     onClose={closeCreateModal}
-                    mode="track"
+                    mode="album" // Исправлено на album
                 />
             )}
         </div>
