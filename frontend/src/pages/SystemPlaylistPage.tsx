@@ -1,111 +1,151 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import CreatePlaylistModal from '../components/CreatePlaylistModal.tsx';
+import PlaylistModal from '../components/PlaylistModal.tsx';
 import '../assets/styles/pages/SystemPlaylistsPage.css';
+import { PlaylistManager } from '../api/PlaylistManager.ts';
+import type { Playlist } from '../types/Playlist.ts';
+import type { Track } from '../types/Track.ts';
+import type { PlaylistWithTracks } from '../types/PlaylistWithTracks.ts';
 
-export interface SystemPlaylist {
-    id: number;
-    name: string;
-    color: string;
-    tracksCount: number;
-    isDefault: boolean;
-    description?: string;
+interface SystemPlaylistExtended extends Playlist {
+    color?: string;
 }
 
 interface SystemPlaylistsPageProps {
-    onPlaylistUpdate?: (playlist: SystemPlaylist) => void;
+    onPlaylistUpdate?: (playlist: SystemPlaylistExtended) => void;
     onPlaylistDelete?: (id: number) => void;
-    onPlaylistCreate?: (playlist: Omit<SystemPlaylist, 'id'>) => void;
+    onPlaylistCreate?: (playlist: SystemPlaylistExtended) => void;
 }
-
-// Default system playlists
-const DEFAULT_PLAYLISTS: SystemPlaylist[] = [
-    { id: 1, name: 'Бодрость', color: '#00ffff', tracksCount: 42, isDefault: true, description: 'Энергичные треки для начала дня' },
-    { id: 2, name: 'Динамика', color: '#ff0000', tracksCount: 38, isDefault: true, description: 'Активная музыка для тренировок' },
-    { id: 3, name: 'Грусть', color: '#8b00ff', tracksCount: 56, isDefault: true, description: 'Лирические композиции' },
-    { id: 4, name: 'Свежесть', color: '#90ee90', tracksCount: 29, isDefault: true, description: 'Лёгкие мелодии для расслабления' },
-    { id: 5, name: 'Радость', color: '#ffff00', tracksCount: 64, isDefault: true, description: 'Позитивные хиты' },
-];
 
 const SystemPlaylistsPage: React.FC<SystemPlaylistsPageProps> = ({
                                                                      onPlaylistUpdate,
                                                                      onPlaylistDelete,
                                                                      onPlaylistCreate,
                                                                  }) => {
-    const [playlists, setPlaylists] = useState<SystemPlaylist[]>(DEFAULT_PLAYLISTS);
+    const [playlists, setPlaylists] = useState<SystemPlaylistExtended[]>([]);
     const [searchQuery, setSearchQuery] = useState<string>('');
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [selectedPlaylist, setSelectedPlaylist] = useState<SystemPlaylist | null>(null);
-    const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+    const [loading, setLoading] = useState<boolean>(true);
 
-    // Filter playlists based on search
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+
+    // Состояния для просмотра
+    const [selectedPlaylistData, setSelectedPlaylistData] = useState<PlaylistWithTracks | null>(null);
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
+    const playlistManager = new PlaylistManager();
+
+    useEffect(() => {
+        loadPlaylists();
+    }, []);
+
+    const loadPlaylists = async () => {
+        try {
+            setLoading(true);
+            const all = await playlistManager.findAll();
+
+            // ✅ ФИЛЬТРАЦИЯ: Оставляем только системные плейлисты
+            const systemOnly = all.filter(p => p.isSystem === true);
+
+            const withColors = systemOnly.map((p, index) => ({
+                ...p,
+                color: p.coverHash ? undefined : generateColor(p.id || index)
+            }));
+            setPlaylists(withColors);
+        } catch (error) {
+            console.error('Error loading system playlists:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const generateColor = (seed: number | string) => {
+        const colors = ['#00ffff', '#ff0055', '#8b00ff', '#90ee90', '#ffff00', '#ffaa00', '#ff66cc'];
+        const num = typeof seed === 'number' ? seed : seed.charCodeAt(0);
+        return colors[Math.abs(num) % colors.length];
+    };
+
     const filteredPlaylists = useMemo(() => {
         if (!searchQuery.trim()) return playlists;
         const query = searchQuery.toLowerCase();
         return playlists.filter(
             (p) =>
-                p.name.toLowerCase().includes(query) ||
-                p.description?.toLowerCase().includes(query)
+                p.name?.toLowerCase().includes(query) ||
+                (p as any).description?.toLowerCase().includes(query)
         );
     }, [playlists, searchQuery]);
 
-    // Handlers
-    const handleOpenCreateModal = useCallback(() => {
-        setModalMode('create');
-        setSelectedPlaylist(null);
-        setIsModalOpen(true);
-    }, []);
+    const handleOpenViewModal = useCallback(async (playlist: SystemPlaylistExtended) => {
+        try {
+            setLoading(true);
+            const playlistInfo = await playlistManager.findById(playlist.id);
+            const tracksResult = await playlistManager.findTracksByPlaylistId(playlist.id);
+            const tracksArray = Array.isArray(tracksResult)
+                ? tracksResult
+                : (tracksResult as any)?.tracks || [];
 
-    const handleOpenEditModal = useCallback((playlist: SystemPlaylist) => {
-        setModalMode('edit');
-        setSelectedPlaylist(playlist);
-        setIsModalOpen(true);
-    }, []);
-
-    const handleCloseModal = useCallback(() => {
-        setIsModalOpen(false);
-        setSelectedPlaylist(null);
-    }, []);
-
-    // Обработчик сохранения из модалки
-    const handleSavePlaylist = useCallback((updatedPlaylist: Partial<SystemPlaylist>) => {
-        if (modalMode === 'edit' && selectedPlaylist) {
-            // Обновляем существующий плейлист
-            const updated: SystemPlaylist = {
-                ...selectedPlaylist,
-                ...updatedPlaylist, // применяем все изменённые поля
+            const playlistWithTracks: PlaylistWithTracks = {
+                ...playlistInfo,
+                tracks: tracksArray
             };
 
-            setPlaylists((prev) =>
-                prev.map((p) => (p.id === selectedPlaylist.id ? updated : p))
-            );
-            onPlaylistUpdate?.(updated);
-        } else {
-            // Создаём новый плейлист
-            const newPlaylist: SystemPlaylist = {
-                id: Date.now(),
-                name: updatedPlaylist.name || 'Новый плейлист',
-                color: updatedPlaylist.color || '#666666',
-                tracksCount: updatedPlaylist.tracksCount || 0,
-                isDefault: false,
-                description: updatedPlaylist.description || '',
-            };
-
-            setPlaylists((prev) => [...prev, newPlaylist]);
-            onPlaylistCreate?.(newPlaylist);
+            setSelectedPlaylistData(playlistWithTracks);
+            setIsViewModalOpen(true);
+        } catch (err) {
+            console.error('Error loading playlist details:', err);
+            alert('Не удалось загрузить плейлист');
+        } finally {
+            setLoading(false);
         }
-        handleCloseModal();
-    }, [modalMode, selectedPlaylist, onPlaylistUpdate, onPlaylistCreate, handleCloseModal]);
+    }, []);
 
-    const handleDelete = useCallback(
-        (playlist: SystemPlaylist) => {
-            if (playlist.isDefault) {
-                alert('Системные плейлисты нельзя удалить!');
-                return;
+    const handleCloseViewModal = useCallback(() => {
+        setIsViewModalOpen(false);
+        setSelectedPlaylistData(null);
+    }, []);
+
+    const handleOpenCreateModal = useCallback(() => {
+        setIsCreateModalOpen(true);
+    }, []);
+
+    const handleCloseCreateModal = useCallback(() => {
+        setIsCreateModalOpen(false);
+    }, []);
+
+    const handleSavePlaylist = useCallback(async (data: any) => {
+        try {
+            const formData = new FormData();
+            formData.append('name', data.name);
+            // ✅ СОЗДАНИЕ: Всегда создаем как системный
+            formData.append('isSystem', 'true');
+
+            if (data.coverFile) formData.append('coverFile', data.coverFile);
+            if (data.trackIds && Array.isArray(data.trackIds)) {
+                data.trackIds.forEach((id: number) => formData.append('trackIds', String(id)));
             }
 
-            if (window.confirm(`Удалить плейлист "${playlist.name}"?`)) {
-                setPlaylists((prev) => prev.filter((p) => p.id !== playlist.id));
+            const created = await playlistManager.createMultipart(formData);
+            const newPlaylist: SystemPlaylistExtended = {
+                ...created,
+                color: generateColor(created.id || Date.now()),
+            };
+            setPlaylists(prev => [...prev, newPlaylist]);
+            onPlaylistCreate?.(newPlaylist);
+            handleCloseCreateModal();
+        } catch (err: any) {
+            console.error('Error saving playlist:', err);
+            alert(`Ошибка: ${err.message}`);
+        }
+    }, [onPlaylistCreate, handleCloseCreateModal]);
+
+    const handleDelete = useCallback(
+        async (playlist: SystemPlaylistExtended) => {
+            if (!window.confirm(`Вы уверены, что хотите удалить системный плейлист "${playlist.name}"?`)) return;
+            try {
+                await playlistManager.deleteById(BigInt(playlist.id));
+                setPlaylists(prev => prev.filter(p => p.id !== playlist.id));
                 onPlaylistDelete?.(playlist.id);
+            } catch (err) {
+                alert('Не удалось удалить плейлист');
             }
         },
         [onPlaylistDelete]
@@ -118,127 +158,101 @@ const SystemPlaylistsPage: React.FC<SystemPlaylistsPageProps> = ({
             </div>
 
             <div className="system-playlists-content">
-                {/* Search Bar */}
                 <div className="search-section">
                     <div className="search-input-wrapper">
                         <svg className="search-iconSPP" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="11" cy="11" r="8" />
-                            <path d="m21 21-4.35-4.35" />
+                            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                         </svg>
-                        <input
-                            type="text"
-                            placeholder="Поиск плейлистов..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="search-input"
-                        />
-                        {searchQuery && (
-                            <button
-                                onClick={() => setSearchQuery('')}
-                                className="search-clear-btnSPP"
-                            >
-                                ×
-                            </button>
-                        )}
+                        <input type="text" placeholder="Поиск..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="search-input" />
+                        {searchQuery && <button onClick={() => setSearchQuery('')} className="search-clear-btnSPP">×</button>}
                     </div>
-                    <span className="search-results-count">
-                        Найдено: {filteredPlaylists.length}
-                    </span>
+                    <span className="search-results-count">Найдено: {filteredPlaylists.length}</span>
                 </div>
 
-                {/* Description */}
-                <div className="playlists-description">
-                    Музыкальные подборки под ваше настроение
-                </div>
+                <div className="playlists-description">Музыкальные подборки под ваше настроение</div>
 
-                {/* Playlists Grid */}
-                <div className="playlists-grid">
-                    {filteredPlaylists.map((playlist) => (
-                        <div
-                            key={playlist.id}
-                            className="playlist-card"
-                            style={{ backgroundColor: playlist.color }}
-                            onClick={() => handleOpenEditModal(playlist)}
-                        >
-                            <div className="playlist-card-content">
-                                <button className="playlist-play-btnSPP" onClick={(e) => e.stopPropagation()}>
-                                    <svg viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M8 5v14l11-7z" />
-                                    </svg>
-                                </button>
-                                <h3 className="playlist-name">{playlist.name}</h3>
-                                <span className="playlist-tracks-count">
-                                    {playlist.tracksCount} треков
-                                </span>
-                                {playlist.description && (
-                                    <p className="playlist-description-text">
-                                        {playlist.description}
-                                    </p>
-                                )}
-                            </div>
+                {loading ? (
+                    <div className="loading-spinner">Загрузка...</div>
+                ) : (
+                    <div className="playlists-grid">
+                        {filteredPlaylists.map((playlist) => (
+                            <div
+                                key={playlist.id}
+                                className="playlist-card"
+                                style={{ backgroundColor: playlist.color || '#333' }}
+                                onClick={() => handleOpenViewModal(playlist)}
+                            >
+                                <div className="playlist-card-content">
+                                    {(playlist as any).coverHash && (
+                                        <img src={`http://localhost:9000/covers/${(playlist as any).coverHash}`} alt="" style={{position:'absolute', top:0, left:0, width:'100%', height:'100%', objectFit:'cover', opacity:0.3}} />
+                                    )}
 
-                            <div className="playlist-actions">
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleOpenEditModal(playlist);
-                                    }}
-                                    className="playlist-action-btnSPP edit"
-                                    title="Редактировать"
-                                >
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                    </svg>
-                                </button>
+                                    <button
+                                        className="playlist-play-btnSPP"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleOpenViewModal(playlist);
+                                        }}
+                                    >
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                                    </button>
 
-                                {/* Кнопка удаления только для не-системных */}
-                                {!playlist.isDefault && (
+                                    <h3 className="playlist-name">{playlist.name}</h3>
+                                </div>
+
+                                <div className="playlist-actions">
+                                    {/* ✅ Кнопка удаления видна всегда, так как все плейлисты здесь системные */}
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             handleDelete(playlist);
                                         }}
                                         className="playlist-action-btnSPP delete"
-                                        title="Удалить"
+                                        title="Удалить системный плейлист"
                                     >
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <polyline points="3 6 5 6 21 6" />
                                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                         </svg>
                                     </button>
-                                )}
 
-                                {playlist.isDefault && (
                                     <span className="system-badge">Системный</span>
-                                )}
+                                </div>
+                            </div>
+                        ))}
+
+                        <div className="playlist-card add-new" onClick={handleOpenCreateModal}>
+                            <div className="add-new-content">
+                                <svg className="add-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                                <span className="add-new-text">Новый системный плейлист</span>
                             </div>
                         </div>
-                    ))}
-
-                    {/* Add New Playlist Card */}
-                    <div
-                        className="playlist-card add-new"
-                        onClick={handleOpenCreateModal}
-                    >
-                        <div className="add-new-content">
-                            <svg className="add-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <line x1="12" y1="5" x2="12" y2="19" />
-                                <line x1="5" y1="12" x2="19" y2="12" />
-                            </svg>
-                            <span className="add-new-text">Новый плейлист</span>
-                        </div>
                     </div>
-                </div>
+                )}
             </div>
 
             <CreatePlaylistModal
-                isOpen={isModalOpen}
-                onClose={handleCloseModal}
+                isOpen={isCreateModalOpen}
+                onClose={handleCloseCreateModal}
                 onSave={handleSavePlaylist}
-                initialData={selectedPlaylist}
-                mode={modalMode}
+                mode="create"
+                defaultIsSystem={true}
             />
+
+            {isViewModalOpen && selectedPlaylistData && (
+                <PlaylistModal
+                    isOpen={true}
+                    onClose={handleCloseViewModal}
+                    playlistName={String(selectedPlaylistData.name)}
+                    tracks={selectedPlaylistData.tracks || []}
+                    playlistId={selectedPlaylistData.id ? Number(selectedPlaylistData.id) : undefined}
+                    playlist={selectedPlaylistData}
+                    coverHash={selectedPlaylistData.coverHash}
+                    defaultIsSystem={true}
+                />
+            )}
         </div>
     );
 };
