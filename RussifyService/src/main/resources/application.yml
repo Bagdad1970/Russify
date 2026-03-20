@@ -5,6 +5,11 @@ spring:
     password: password
     driver-class-name: org.postgresql.Driver
 
+  servlet:
+    multipart:
+      max-file-size: 30MB
+      max-request-size: 50MB
+
   domain-name: russify.k-lab.su
 
   jpa:

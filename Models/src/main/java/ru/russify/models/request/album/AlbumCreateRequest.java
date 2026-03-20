@@ -5,7 +5,7 @@ import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.OffsetDateTime;
-import java.util.Set;
+import java.util.List;
 
 @Data
 public class AlbumCreateRequest {
@@ -20,6 +20,12 @@ public class AlbumCreateRequest {
 
     private Long typeId;
 
-    private Set<Long> trackIds;
+    private List<String> trackNames;
+
+    private List<Long> trackGenreIds;
+
+    private List<MultipartFile> trackAudioFiles;
+
+    private List<Long> trackAuthorIds;
 
 }
