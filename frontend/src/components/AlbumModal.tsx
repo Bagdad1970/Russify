@@ -3,6 +3,8 @@ import '../assets/styles/components/AlbumModal.css';
 import type { Track } from '../types/Track.ts';
 import type { Album } from '../types/Album.ts';
 import { useFavorites } from '../hooks/useFavorites';
+import { FileManager } from '../api/FileManager';
+import noCover from '../assets/images/no-cover.svg';
 
 interface AlbumModalProps {
     isOpen: boolean;
@@ -32,12 +34,33 @@ const AlbumModal = ({
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [isPositionCalculated, setIsPositionCalculated] = useState(false);
     const [menuTrack, setMenuTrack] = useState<Track | null>(null);
+    const [coverSrc, setCoverSrc] = useState<string>("");
 
     const { favoriteTrackIds, favoriteAlbumIds, addFavoriteTrack, removeFavoriteTrack, addFavoriteAlbum, removeFavoriteAlbum } = useFavorites();
+    const fileManager = new FileManager();
     const actualAlbumId = albumId || album?.id;
-
-    // Проверяем, в избранном ли альбом
     const isAlbumFavorite = actualAlbumId ? favoriteAlbumIds.has(Number(actualAlbumId)) : false;
+
+    useEffect(() => {
+        const loadCover = async () => {
+            const coverHash = album?.coverHash;
+            if (!coverHash) {
+                setCoverSrc("");
+                return;
+            }
+            try {
+                const src = await fileManager.getFileUrl("images", coverHash);
+                if (src) setCoverSrc(src);
+            } catch (err) {
+                console.error('Error loading cover:', err);
+                setCoverSrc("");
+            }
+        };
+
+        if (isOpen) {
+            loadCover();
+        }
+    }, [isOpen, album?.coverHash]);
 
     useEffect(() => {
         if (!isOpen) {
@@ -122,7 +145,6 @@ const AlbumModal = ({
 
     if (!isOpen) return null;
 
-    // Подсчёт длительности
     const totalSec = tracks.reduce((sum, t) => sum + (t.duration || 0), 0);
     const hours = Math.floor(totalSec / 3600);
     const minutes = Math.floor((totalSec % 3600) / 60);
@@ -148,16 +170,17 @@ const AlbumModal = ({
                 onMouseDown={handleMouseDown}
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Шапка */}
                 <div className="alm-header">
-                    {/* Обложка */}
                     <div className="alm-album-cover-wrapper">
                         <div className="alm-album-cover">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 156 156" width="156" height="156"
-                                 fill="none" stroke="#f1f1f1" strokeWidth="5">
-                                <rect x="28" y="28" width="100" height="100" rx="10"/>
-                                <path d="M52 52v64 M78 52v64 M104 52v64"/>
-                            </svg>
+                            <img
+                                src={coverSrc || noCover}
+                                alt={albumName}
+                                style={{ width: '156px', height: '156px', objectFit: 'cover', borderRadius: '12px' }}
+                                onError={(e) => {
+                                    e.currentTarget.src = noCover;
+                                }}
+                            />
                         </div>
                     </div>
 

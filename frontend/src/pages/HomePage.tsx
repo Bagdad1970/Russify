@@ -12,12 +12,14 @@ import type { PlaylistWithTracks } from "../types/PlaylistWithTracks.ts";
 import { PlaylistManager } from "../api/PlaylistManager.ts";
 import { TrackManager } from "../api/TrackManager.ts";
 import { AlbumManager } from "../api/AlbumManager.ts";
+import { FileManager } from "../api/FileManager.ts";
 import { useEffect, useState } from "react";
 import {useFavorites} from "../hooks/useFavorites.ts";
 
 const playlistManager = new PlaylistManager();
 const trackManager = new TrackManager();
 const albumManager = new AlbumManager();
+const fileManager = new FileManager();
 
 const HomePage = ({
                       onOpenPlaylistModal: parentOnOpenPlaylistModal,
@@ -35,6 +37,9 @@ const HomePage = ({
     const [allTracks, setAllTracks] = useState<Track[]>([]);
     const [allPlaylists, setAllPlaylists] = useState<Playlist[]>([]);
     const [moodPlaylists, setMoodPlaylists] = useState<Playlist[]>([]);
+    const [albumCovers, setAlbumCovers] = useState<Record<string, string>>({});
+    const [playlistCovers, setPlaylistCovers] = useState<Record<string, string>>({});
+    const [trackCovers, setTrackCovers] = useState<Record<string, string>>({});
 
     const [searchResults, setSearchResults] = useState<{
         tracks: Track[];
@@ -48,11 +53,9 @@ const HomePage = ({
 
     const [isSearching, setIsSearching] = useState(false);
 
-    // Состояния для модалок
     const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
     const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
 
-    // Храним полные данные плейлиста (с треками)
     const [selectedPlaylistData, setSelectedPlaylistData] = useState<PlaylistWithTracks | null>(null);
     const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
 
@@ -72,9 +75,54 @@ const HomePage = ({
 
             setAllTracks(tracks);
 
-            // ✅ ФИЛЬТРАЦИЯ: Оставляем только альбомы со статусом APPROVED
+            const trackCoversMap: Record<string, string> = {};
+            await Promise.all(tracks.map(async (track) => {
+                if (track.coverHash) {
+                    try {
+                        const coverSrc = await fileManager.getFileUrl("images", track.coverHash);
+                        if (coverSrc) {
+                            trackCoversMap[track.id.toString()] = coverSrc;
+                        }
+                    } catch (err) {
+                        console.log(`Error loading cover for track ${track.id}:`, err);
+                    }
+                }
+            }));
+            setTrackCovers(trackCoversMap);
+
             const approvedAlbums = albums.filter(album => album.status === 'APPROVED');
             setAllAlbums(approvedAlbums);
+
+            const albumCoversMap: Record<string, string> = {};
+            await Promise.all(approvedAlbums.map(async (album) => {
+                if (album.coverHash) {
+                    try {
+                        const coverSrc = await fileManager.getFileUrl("images", album.coverHash);
+                        if (coverSrc) {
+                            albumCoversMap[album.id.toString()] = coverSrc;
+                        }
+                    } catch (err) {
+                        console.log(`Error loading cover for album ${album.id}:`, err);
+                    }
+                }
+            }));
+            setAlbumCovers(albumCoversMap);
+
+            // Загружаем обложки для плейлистов
+            const playlistCoversMap: Record<string, string> = {};
+            await Promise.all(playlists.map(async (playlist) => {
+                if (playlist.coverHash) {
+                    try {
+                        const coverSrc = await fileManager.getFileUrl("images", playlist.coverHash);
+                        if (coverSrc) {
+                            playlistCoversMap[playlist.id.toString()] = coverSrc;
+                        }
+                    } catch (err) {
+                        console.log(`Error loading cover for playlist ${playlist.id}:`, err);
+                    }
+                }
+            }));
+            setPlaylistCovers(playlistCoversMap);
 
             setAllPlaylists(playlists);
 
@@ -112,7 +160,6 @@ const HomePage = ({
             return trackName.includes(searchQuery) || trackArtist.includes(searchQuery) || trackAlbum.includes(searchQuery);
         });
 
-        // ✅ Поиск тоже идет только по уже отфильтрованным (APPROVED) альбомам
         const filteredAlbums = allAlbums.filter(album => {
             if (!album) return false;
             const albumTitle = album.title?.toLowerCase() || '';
@@ -239,7 +286,13 @@ const HomePage = ({
                                         <div className="scrollable-grid-container">
                                             <GridContainer>
                                                 {searchResults.tracks.map((track) => (
-                                                    <ColorTile key={track.id} title={track.name || 'Без названия'} subtitle={track.artist || track.album || ''} onClick={() => handleTrackClick(track)} />
+                                                    <ColorTile
+                                                        key={track.id}
+                                                        title={track.name || 'Без названия'}
+                                                        subtitle={track.artist || track.album || ''}
+                                                        imageUrl={trackCovers[track.id.toString()]}
+                                                        onClick={() => handleTrackClick(track)}
+                                                    />
                                                 ))}
                                             </GridContainer>
                                         </div>
@@ -251,7 +304,13 @@ const HomePage = ({
                                         <div className="scrollable-grid-container">
                                             <GridContainer>
                                                 {searchResults.albums.map((album) => (
-                                                    <ColorTile key={album.id} title={album.title || 'Без названия'} subtitle={`Статус: ${album.status === 'APPROVED' ? 'Опубликован' : album.status === 'IN_PROGRESS' ? 'В процессе' : 'Отклонён'}`} onClick={() => handleAlbumClick(album)} />
+                                                    <ColorTile
+                                                        key={album.id}
+                                                        title={album.title || 'Без названия'}
+                                                        subtitle={`Статус: ${album.status === 'APPROVED' ? 'Опубликован' : album.status === 'IN_PROGRESS' ? 'В процессе' : 'Отклонён'}`}
+                                                        imageUrl={albumCovers[album.id.toString()]}
+                                                        onClick={() => handleAlbumClick(album)}
+                                                    />
                                                 ))}
                                             </GridContainer>
                                         </div>
@@ -263,7 +322,13 @@ const HomePage = ({
                                         <div className="scrollable-grid-container">
                                             <GridContainer>
                                                 {searchResults.playlists.map((playlist) => (
-                                                    <ColorTile key={playlist.id} title={playlist.name || 'Без названия'} subtitle="Плейлист" onClick={() => handlePlaylistClick(playlist)} />
+                                                    <ColorTile
+                                                        key={playlist.id}
+                                                        title={playlist.name || 'Без названия'}
+                                                        subtitle="Плейлист"
+                                                        imageUrl={playlistCovers[playlist.id.toString()]}
+                                                        onClick={() => handlePlaylistClick(playlist)}
+                                                    />
                                                 ))}
                                             </GridContainer>
                                         </div>
@@ -282,7 +347,12 @@ const HomePage = ({
                         <div className="scrollable-grid-container">
                             <GridContainer>
                                 {moodPlaylists.map((playlist) => (
-                                    <ColorTile key={playlist.id} title={playlist.name} onClick={() => handleSystemTileClick(playlist)} />
+                                    <ColorTile
+                                        key={playlist.id}
+                                        title={playlist.name}
+                                        imageUrl={playlistCovers[playlist.id.toString()]}
+                                        onClick={() => handleSystemTileClick(playlist)}
+                                    />
                                 ))}
                             </GridContainer>
                         </div>
@@ -307,10 +377,11 @@ const HomePage = ({
                     isOpen={true}
                     onClose={closeAlbumModal}
                     albumName={String(selectedAlbum.title)}
-                    authorName={selectedAlbum.authors?.[0]?.name || "Исполнитель"}
-                    tracks={selectedAlbum.tracks}
+                    authorName={selectedAlbum.authors?.[0]?.name || "Автор"}
+                    tracks={selectedAlbum.tracks || []}
                     albumAuthors={selectedAlbum.authors || []}
                     albumId={selectedAlbum.id}
+                    album={selectedAlbum}
                 />
             )}
         </div>

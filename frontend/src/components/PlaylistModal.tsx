@@ -36,7 +36,6 @@ const PlaylistModal = ({
     const [menuTrack, setMenuTrack] = useState<Track | null>(null);
     const [coverSrc, setCoverSrc] = useState<string>("");
 
-    // Состояния для управления треками
     const [currentTracks, setCurrentTracks] = useState<Track[]>([]);
     const [isAddMode, setIsAddMode] = useState(false);
     const [availableTracks, setAvailableTracks] = useState<Track[]>([]);
@@ -96,7 +95,6 @@ const PlaylistModal = ({
         }
     };
 
-    // Позиционирование модалки
     useEffect(() => {
         if (!isOpen) { setIsPositionCalculated(false); return; }
         const updateLayout = () => {
@@ -116,7 +114,6 @@ const PlaylistModal = ({
         return () => window.removeEventListener('resize', updateLayout);
     }, [isOpen]);
 
-    // Логика перетаскивания окна
     const handleMouseDown = (e: React.MouseEvent) => {
         if (window.innerWidth < 1024) return;
         if (e.target instanceof Element && e.target.closest('.pml-header') && !e.target.closest('.pml-close')) {
@@ -145,8 +142,6 @@ const PlaylistModal = ({
             };
         }
     }, [isDragging]);
-
-    // --- Действия с треками ---
 
     const handleAddTrack = async (track: Track) => {
         if (!actualPlaylistId) return;
@@ -203,7 +198,6 @@ const PlaylistModal = ({
                 onMouseDown={handleMouseDown}
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Шапка */}
                 <div className="pml-header">
                     <div className="pml-playlist-cover-wrapper">
                         <img
@@ -245,9 +239,7 @@ const PlaylistModal = ({
 
                 <div className="pml-divider"></div>
 
-                {/* Контент */}
                 {!isAddMode ? (
-                    // РЕЖИМ ПРОСМОТРА СПИСКА
                     <div className="pml-track-list">
                         {currentTracks.length > 0 ? (
                             currentTracks.map((track, idx) => (
@@ -282,7 +274,7 @@ const PlaylistModal = ({
                         )}
                     </div>
                 ) : (
-                    // РЕЖИМ ВЫБОРА ТРЕКА ДЛЯ ДОБАВЛЕНИЯ
+
                     <div className="pml-track-list" style={{ maxHeight: '500px' }}>
                         {availableTracks.length > 0 ? (
                             availableTracks.map(track => (
@@ -315,7 +307,6 @@ const PlaylistModal = ({
                     </div>
                 )}
 
-                {/* Мобильное меню (только для просмотра) */}
                 {isMobile && !isAddMode && menuTrack && (
                     <div className="pml-context-menu-overlay" onClick={() => setMenuTrack(null)}>
                         <div className={`pml-context-menu ${menuTrack ? 'active' : ''}`} onClick={(e) => e.stopPropagation()}>

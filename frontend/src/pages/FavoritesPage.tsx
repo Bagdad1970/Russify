@@ -589,10 +589,11 @@ const FavoritesPage = () => {
                         isOpen={true}
                         onClose={closeAlbumModal}
                         albumName={String(selectedAlbum.title)}
-                        authorName={selectedAlbum.authors?.[0]?.name || "Исполнитель"}
+                        authorName={selectedAlbum.authors?.[0]?.name || "Автор"}
                         tracks={selectedAlbum.tracks || []}
                         albumAuthors={selectedAlbum.authors || []}
                         albumId={selectedAlbum.id}
+                        coverHash={selectedAlbum.coverHash}
                     />
                 )}
             </div>

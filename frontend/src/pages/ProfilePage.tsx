@@ -11,7 +11,6 @@ import type { Album } from '../types/Album.ts';
 import noCover from '../assets/images/no-cover.svg';
 import defaultAvatar from '../assets/images/no-cover.svg';
 
-// Интерфейс для данных из токена
 interface TokenPayload {
     userId?: number;
     sub?: string;
@@ -43,7 +42,6 @@ const ProfilePage = () => {
     const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-    // Извлечение данных пользователя из токена
     const getUserFromToken = (): TokenPayload | null => {
         const token = localStorage.getItem('auth_token');
         if (!token) return null;
@@ -51,7 +49,6 @@ const ProfilePage = () => {
         try {
             const payload = token.split('.')[1];
             const decoded = JSON.parse(atob(payload));
-            console.log('📦 Token payload:', decoded); // Для отладки
             return decoded;
         } catch (err) {
             console.error('Error parsing token:', err);
@@ -59,7 +56,6 @@ const ProfilePage = () => {
         }
     };
 
-    // Загрузка информации о пользователе из токена
     useEffect(() => {
         const loadUserData = async () => {
             const tokenData = getUserFromToken();
@@ -72,7 +68,6 @@ const ProfilePage = () => {
                 };
                 setUser(userData);
 
-                // Загружаем аватар, если есть хэш
                 if (userData.avatarHash) {
                     try {
                         console.log('🖼️ Loading avatar with hash:', userData.avatarHash);
@@ -81,15 +76,14 @@ const ProfilePage = () => {
                             console.log('✅ Avatar loaded:', avatar);
                             setAvatarUrl(avatar);
                         } else {
-                            console.log('⚠️ No avatar URL returned');
+                            console.log('No avatar URL returned');
                             setAvatarUrl(defaultAvatar);
                         }
                     } catch (err) {
-                        console.error('❌ Error loading avatar:', err);
+                        console.error('Error loading avatar:', err);
                         setAvatarUrl(defaultAvatar);
                     }
                 } else {
-                    console.log('ℹ️ No avatarHash in token');
                     setAvatarUrl(defaultAvatar);
                 }
             }
@@ -98,7 +92,6 @@ const ProfilePage = () => {
         loadUserData();
     }, []);
 
-    // Загрузка альбомов пользователя
     useEffect(() => {
         const loadUserAlbums = async () => {
             try {
@@ -299,6 +292,7 @@ const ProfilePage = () => {
                     tracks={selectedAlbum.tracks || []}
                     albumAuthors={selectedAlbum.authors || []}
                     albumId={selectedAlbum.id}
+                    album={selectedAlbum}
                 />
             )}
 
