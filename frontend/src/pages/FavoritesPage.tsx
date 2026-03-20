@@ -28,6 +28,8 @@ const FavoritesPage = () => {
     const [albums, setAlbums] = useState<Album[]>([]);
     const [covers, setCovers] = useState<Record<string, string>>({});
 
+    const [searchQuery, setSearchQuery] = useState("");
+
     const [pendingRemovalIds, setPendingRemovalIds] = useState<Set<string>>(new Set());
     const removalTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
@@ -53,13 +55,12 @@ const FavoritesPage = () => {
                 setAlbums(favoriteAlbums);
 
                 const coversMap: Record<string, string> = {};
-                userPlaylists.map(async (playlist) => {
+                for (const playlist of userPlaylists) {
                     console.log(playlist);
                     const coverHash = playlist.coverHash;
                     if (coverHash) {
                         try {
                             const coverSrc = await fileManager.getFileUrl("images", coverHash) ?? "";
-
                             if (coverSrc) {
                                 coversMap[playlist.id.toString()] = coverSrc;
                             }
@@ -67,7 +68,7 @@ const FavoritesPage = () => {
                             console.log(`Error loading cover for playlist ${playlist.id}:`, err);
                         }
                     }
-                });
+                }
                 setCovers(coversMap);
             } catch (err) {
                 console.log('Error loading data:', err);
@@ -90,6 +91,31 @@ const FavoritesPage = () => {
 
     const handleCategoryChange = (cat: string) => {
         setCategory(cat);
+        setSearchQuery("");
+    };
+
+    const getFilteredTracks = () => {
+        if (!searchQuery.trim()) return tracks;
+        const query = searchQuery.toLowerCase().trim();
+        return tracks.filter(track =>
+            track.name?.toLowerCase().includes(query)
+        );
+    };
+
+    const getFilteredPlaylists = () => {
+        if (!searchQuery.trim()) return playlists;
+        const query = searchQuery.toLowerCase().trim();
+        return playlists.filter(playlist =>
+            playlist.name?.toLowerCase().includes(query)
+        );
+    };
+
+    const getFilteredAlbums = () => {
+        if (!searchQuery.trim()) return albums;
+        const query = searchQuery.toLowerCase().trim();
+        return albums.filter(album =>
+            album.title?.toLowerCase().includes(query)
+        );
     };
 
     const toggleRemoveTrack = (trackId: bigint) => {
@@ -264,6 +290,12 @@ const FavoritesPage = () => {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
+    const filteredTracks = getFilteredTracks();
+    const filteredPlaylists = getFilteredPlaylists();
+    const filteredAlbums = getFilteredAlbums();
+
+    const isSearchActive = searchQuery.trim().length > 0;
+
     return (
         <div className="favorites-page-container">
             <div className="favorites-main-content">
@@ -273,216 +305,236 @@ const FavoritesPage = () => {
             <div className="favorites-bottom-section">
                 <SearchBar
                     placeholder="Введите название..."
-                    value=""
-                    onChange={() => {}}
+                    value={searchQuery}
+                    onChange={(value) => setSearchQuery(value)}
                     onClick={() => {}}
                 />
                 <div className="favorites-section-title">Избранные {category}</div>
 
                 {category === "Треки" && (
                     <div className="favorites-track-list">
-                        {tracks.map((track, index) => {
-                            const trackTitle = track.name || "Неизвестный трек";
-                            const authorCount = track.authorIds ? track.authorIds.size : 0;
-                            const trackArtist = authorCount > 0 ? `${authorCount} исполнителей` : "Неизвестный исполнитель";
-                            const displayDuration = "--:--";
-                            const isPendingRemoval = pendingRemovalIds.has(track.id.toString());
+                        {isSearchActive && filteredTracks.length === 0 ? (
+                            <div className="favorites-search-empty">
+                                Ничего не найдено
+                            </div>
+                        ) : (
+                            filteredTracks.map((track, index) => {
+                                const trackTitle = track.name || "Неизвестный трек";
+                                const authorCount = track.authorIds ? track.authorIds.size : 0;
+                                const trackArtist = authorCount > 0 ? `${authorCount} исполнителей` : "Неизвестный исполнитель";
+                                const displayDuration = "--:--";
+                                const isPendingRemoval = pendingRemovalIds.has(track.id.toString());
 
-                            return (
-                                <div
-                                    key={track.id.toString()}
-                                    className={`favorites-track-row ${isPendingRemoval ? 'removing' : ''}`}
-                                    onMouseEnter={(e) => !isPendingRemoval && e.currentTarget.classList.add('hover')}
-                                    onMouseLeave={(e) => e.currentTarget.classList.remove('hover')}
-                                    style={{
-                                        opacity: isPendingRemoval ? 0.3 : 1,
-                                        transition: 'opacity 0.2s ease',
-                                        pointerEvents: 'auto'
-                                    }}
-                                >
-                                    <div className="favorites-track-number">{index + 1}</div>
-
-                                    <div className="favorites-track-cover">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="40" height="40" fill="none" stroke="#f1f1f1" strokeWidth="1.5">
-                                            <rect x="4" y="4" width="24" height="24" rx="2" />
-                                            <path d="M12 12v8" />
-                                            <path d="M16 12v8" />
-                                            <path d="M20 12v8" />
-                                        </svg>
-                                    </div>
-
-                                    <div className="favorites-track-info">
-                                        <div className="favorites-track-title">{trackTitle}</div>
-                                        <div className="favorites-track-artist">{trackArtist}</div>
-                                    </div>
-
-                                    <div className="favorites-track-actions-desktop">
-                                        <button className="favorites-action-btn" title="Играть">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#aaa" strokeWidth="2">
-                                                <path d="M8 5v14l11-7z" />
-                                            </svg>
-                                        </button>
-                                        <button className="favorites-action-btn" title="Играть следующим">
-                                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2">
-                                                <path d="M2 6h20M2 12h12M2 18h8" />
-                                                <path d="M18 15l3 3-3 3M21 18h-6" />
-                                            </svg>
-                                        </button>
-                                    </div>
-
-                                    <div className="favorites-track-duration">
-                                        {displayDuration}
-                                    </div>
-
+                                return (
                                     <div
-                                        className="favorites-track-favorite"
-                                        onClick={() => toggleRemoveTrack(track.id)}
+                                        key={track.id.toString()}
+                                        className={`favorites-track-row ${isPendingRemoval ? 'removing' : ''}`}
+                                        onMouseEnter={(e) => !isPendingRemoval && e.currentTarget.classList.add('hover')}
+                                        onMouseLeave={(e) => e.currentTarget.classList.remove('hover')}
                                         style={{
-                                            cursor: 'pointer',
-                                            transform: isPendingRemoval ? 'scale(1.2)' : 'scale(1)',
-                                            transition: 'transform 0.2s'
+                                            opacity: isPendingRemoval ? 0.3 : 1,
+                                            transition: 'opacity 0.2s ease',
+                                            pointerEvents: 'auto'
                                         }}
-                                        title={isPendingRemoval ? "Нажмите еще раз, чтобы отменить" : "Удалить"}
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="#ff2d55" stroke="#ff2d55" strokeWidth="2">
-                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                                        </svg>
-                                    </div>
+                                        <div className="favorites-track-number">{index + 1}</div>
 
-                                    <div className="favorites-track-add-to-playlist">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                                            <path d="M14 10H2v2h12v-2zm0-4H2v2h12V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM2 16h8v-2H2v2z"/>
-                                        </svg>
-                                    </div>
-
-                                    <div className="favorites-track-actions-mobile">
-                                        <button className="favorites-action-btn">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#aaa" strokeWidth="2">
-                                                <path d="M8 5v14l11-7z" />
+                                        <div className="favorites-track-cover">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="40" height="40" fill="none" stroke="#f1f1f1" strokeWidth="1.5">
+                                                <rect x="4" y="4" width="24" height="24" rx="2" />
+                                                <path d="M12 12v8" />
+                                                <path d="M16 12v8" />
+                                                <path d="M20 12v8" />
                                             </svg>
-                                        </button>
-                                        <button
-                                            className="favorites-dots-btn"
-                                            onClick={(e) => showMenu(e, Number(track.id))}
+                                        </div>
+
+                                        <div className="favorites-track-info">
+                                            <div className="favorites-track-title">{trackTitle}</div>
+                                            <div className="favorites-track-artist">{trackArtist}</div>
+                                        </div>
+
+                                        <div className="favorites-track-actions-desktop">
+                                            <button className="favorites-action-btn" title="Играть">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#aaa" strokeWidth="2">
+                                                    <path d="M8 5v14l11-7z" />
+                                                </svg>
+                                            </button>
+                                            <button className="favorites-action-btn" title="Играть следующим">
+                                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2">
+                                                    <path d="M2 6h20M2 12h12M2 18h8" />
+                                                    <path d="M18 15l3 3-3 3M21 18h-6" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <div className="favorites-track-duration">
+                                            {displayDuration}
+                                        </div>
+
+                                        <div
+                                            className="favorites-track-favorite"
+                                            onClick={() => toggleRemoveTrack(track.id)}
+                                            style={{
+                                                cursor: 'pointer',
+                                                transform: isPendingRemoval ? 'scale(1.2)' : 'scale(1)',
+                                                transition: 'transform 0.2s'
+                                            }}
+                                            title={isPendingRemoval ? "Нажмите еще раз, чтобы отменить" : "Удалить"}
                                         >
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#aaa" strokeWidth="2">
-                                                <circle cx="12" cy="12" r="1" />
-                                                <circle cx="12" cy="5" r="1" />
-                                                <circle cx="12" cy="19" r="1" />
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="#ff2d55" stroke="#ff2d55" strokeWidth="2">
+                                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                                             </svg>
-                                        </button>
+                                        </div>
+
+                                        <div className="favorites-track-add-to-playlist">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                                <path d="M14 10H2v2h12v-2zm0-4H2v2h12V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM2 16h8v-2H2v2z"/>
+                                            </svg>
+                                        </div>
+
+                                        <div className="favorites-track-actions-mobile">
+                                            <button className="favorites-action-btn">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#aaa" strokeWidth="2">
+                                                    <path d="M8 5v14l11-7z" />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                className="favorites-dots-btn"
+                                                onClick={(e) => showMenu(e, Number(track.id))}
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#aaa" strokeWidth="2">
+                                                    <circle cx="12" cy="12" r="1" />
+                                                    <circle cx="12" cy="5" r="1" />
+                                                    <circle cx="12" cy="19" r="1" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })
+                        )}
                     </div>
                 )}
 
                 {category === "Плейлисты" && (
                     <div className="favorites-playlist-grid">
-                        {playlists.map((playlist) => (
-                            <div key={playlist.id.toString()} className="favorites-playlist-card">
-                                <div
-                                    className="playlist-cover"
-                                    onClick={() => openPlaylistModal(playlist)}
-                                >
-                                    <img
-                                        src={covers[playlist.id.toString()] || noCover}
-                                        alt={playlist.name}
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                        onError={(e) => {
-                                            e.currentTarget.src = noCover;
-                                        }}
-                                    />
-                                    <div
-                                        className="playlist-cover-play-button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            openPlaylistModal(playlist);
-                                        }}
-                                    >
-                                        <svg className="playlist-cover-play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                            <path d="M8 5v14l11-7z" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div className="playlist-info-layer">
-                                    <div className="playlist-info-text">
-                                        <div className="playlist-title">{playlist.name}</div>
-                                        <div className="playlist-meta">
-                                            <span>Пользователь</span>
+                        {isSearchActive && filteredPlaylists.length === 0 ? (
+                            <div className="favorites-search-empty">
+                                Ничего не найдено
+                            </div>
+                        ) : (
+                            <>
+                                {filteredPlaylists.map((playlist) => (
+                                    <div key={playlist.id.toString()} className="favorites-playlist-card">
+                                        <div
+                                            className="playlist-cover"
+                                            onClick={() => openPlaylistModal(playlist)}
+                                        >
+                                            <img
+                                                src={covers[playlist.id.toString()] || noCover}
+                                                alt={playlist.name}
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                onError={(e) => {
+                                                    e.currentTarget.src = noCover;
+                                                }}
+                                            />
+                                            <div
+                                                className="playlist-cover-play-button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openPlaylistModal(playlist);
+                                                }}
+                                            >
+                                                <svg className="playlist-cover-play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                                    <path d="M8 5v14l11-7z" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div className="playlist-info-layer">
+                                            <div className="playlist-info-text">
+                                                <div className="playlist-title">{playlist.name}</div>
+                                                <div className="playlist-meta">
+                                                    <span>Пользователь</span>
+                                                </div>
+                                            </div>
+                                            <div
+                                                className="playlist-trash-icon"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    removePlaylist(playlist.id);
+                                                }}
+                                                style={{ cursor: 'pointer' }}
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#aaa" strokeWidth="2">
+                                                    <path d="M3 6h18M19 6v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                </svg>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div
-                                        className="playlist-trash-icon"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            removePlaylist(playlist.id);
-                                        }}
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#aaa" strokeWidth="2">
-                                            <path d="M3 6h18M19 6v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                        </svg>
-                                    </div>
+                                ))}
+                                <div className="favorites-playlist-card add-placeholder" onClick={openCreatePlaylistModal}>
+                                    <svg className="add-plus-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                    </svg>
                                 </div>
-                            </div>
-                        ))}
-                        <div className="favorites-playlist-card add-placeholder" onClick={openCreatePlaylistModal}>
-                            <svg className="add-plus-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                            </svg>
-                        </div>
+                            </>
+                        )}
                     </div>
                 )}
 
                 {category === "Альбомы" && (
                     <div className="favorites-album-grid">
-                        {albums.map((album) => (
-                            <div key={album.id} className="favorites-album-card">
-                                <div
-                                    className="album-cover"
-                                    onClick={() => handleAlbumClick(album)}
-                                >
-                                    {album.coverHash ? (
-                                        <img
-                                            src={`/api/files/covers/${album.coverHash}`}
-                                            alt={album.title}
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                        />
-                                    ) : (
-                                        <div style={{ width: '100%', height: '100%', backgroundColor: '#333' }} />
-                                    )}
+                        {isSearchActive && filteredAlbums.length === 0 ? (
+                            <div className="favorites-search-empty">
+                                Ничего не найдено
+                            </div>
+                        ) : (
+                            filteredAlbums.map((album) => (
+                                <div key={album.id} className="favorites-album-card">
                                     <div
-                                        className="album-fav-cover-play-button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleAlbumClick(album);
-                                        }}
+                                        className="album-cover"
+                                        onClick={() => handleAlbumClick(album)}
                                     >
-                                        <svg className="album-cover-play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                            <path d="M8 5v14l11-7z" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div className="album-info-layer">
-                                    <div className="album-info-text">
-                                        <div className="album-title-FP">{album.title}</div>
-                                        <div className="album-meta">
-                                            <span>{formatDate(album.releasedAt)}</span>
+                                        {album.coverHash ? (
+                                            <img
+                                                src={`/api/files/covers/${album.coverHash}`}
+                                                alt={album.title}
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            />
+                                        ) : (
+                                            <div style={{ width: '100%', height: '100%', backgroundColor: '#333' }} />
+                                        )}
+                                        <div
+                                            className="album-fav-cover-play-button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleAlbumClick(album);
+                                            }}
+                                        >
+                                            <svg className="album-cover-play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                                <path d="M8 5v14l11-7z" />
+                                            </svg>
                                         </div>
                                     </div>
-                                    <div
-                                        className="album-trash-icon"
-                                        onClick={() => removeAlbum(album.id)}
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#aaa" strokeWidth="2">
-                                            <path d="M3 6h18M19 6v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                        </svg>
+                                    <div className="album-info-layer">
+                                        <div className="album-info-text">
+                                            <div className="album-title-FP">{album.title}</div>
+                                            <div className="album-meta">
+                                                <span>{formatDate(album.releasedAt)}</span>
+                                            </div>
+                                        </div>
+                                        <div
+                                            className="album-trash-icon"
+                                            onClick={() => removeAlbum(album.id)}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#aaa" strokeWidth="2">
+                                                <path d="M3 6h18M19 6v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                            </svg>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
                 )}
 

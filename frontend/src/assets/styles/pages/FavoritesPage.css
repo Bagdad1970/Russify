@@ -841,3 +841,24 @@ album-cover-FP:hover album-cover-FP-play-icon {
         font-size: 14px;
     }
 }
+
+.favorites-search-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 20px;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--fav-text-secondary);
+    width: 100%;
+    height: 100%;
+    min-height: 200px;
+}
+
+.favorites-playlist-grid .favorites-search-empty,
+.favorites-album-grid .favorites-search-empty {
+    grid-column: 1 / -1;
+    justify-self: center;
+    align-self: center;
+}
