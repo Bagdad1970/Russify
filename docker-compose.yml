@@ -53,9 +53,13 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - POSTGRES_URL=jdbc:postgresql://localhost:15532/postgres
+      - POSTGRES_URL=jdbc:postgresql://postgres:5432/postgres
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
+      - MINIO_URL=http://minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=miniopassword
+      - DOMAIN_NAME=localhost
     depends_on:
       postgres:
         condition: service_healthy

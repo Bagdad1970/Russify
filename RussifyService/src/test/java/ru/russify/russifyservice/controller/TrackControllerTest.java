@@ -47,7 +47,7 @@ public class TrackControllerTest {
                 .albumIds(Set.of(1L))
                 .build();
 
-        Mockito.when(service.create(request))
+        Mockito.when(service.create(Mockito.anyString(), Mockito.eq(request)))
                 .thenReturn(saved);
 
         // act & assert
@@ -60,7 +60,7 @@ public class TrackControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(content().json(JsonMapper.asJsonString(saved)));
         Mockito.verify(service, times(1))
-                .create(request);
+                .create(Mockito.anyString(), Mockito.eq(request));
     }
 
     @Test
@@ -85,7 +85,7 @@ public class TrackControllerTest {
                 .albumIds(Set.of(1L))
                 .build();
 
-        Mockito.when(service.update(1L, request))
+        Mockito.when(service.update(Mockito.anyString(), Mockito.eq(1L), Mockito.eq(request)))
                 .thenReturn(updated);
 
         // act & assert
@@ -98,7 +98,7 @@ public class TrackControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(JsonMapper.asJsonString(updated)));
         Mockito.verify(service, times(1))
-                .update(1L, request);
+                .update(Mockito.anyString(), Mockito.eq(1L), Mockito.eq(request));
     }
 
     @Test
@@ -136,7 +136,7 @@ public class TrackControllerTest {
                 )
                 .andExpect(status().isNoContent());
         Mockito.verify(service)
-                .deleteById(1L);
+                .deleteById(Mockito.anyString(), Mockito.eq(1L));
     }
 
 }

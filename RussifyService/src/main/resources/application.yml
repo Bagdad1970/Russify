@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:15532/postgres
-    username: admin
-    password: password
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:15532/postgres}
+    username: ${POSTGRES_USER:admin}
+    password: ${POSTGRES_PASSWORD:password}
     driver-class-name: org.postgresql.Driver
 
   servlet:
@@ -10,7 +10,7 @@ spring:
       max-file-size: 30MB
       max-request-size: 50MB
 
-  domain-name: russify.k-lab.su
+  domain-name: ${DOMAIN_NAME:russify.k-lab.su}
 
   jpa:
     hibernate:
@@ -35,10 +35,10 @@ app:
 
 s3:
   minio:
-    url: http://localhost:9000
-    access-key: minioadmin
-    secret-key: miniopassword
-    buckets: music, images
+    url: ${MINIO_URL:http://localhost:9000}
+    access-key: ${MINIO_ACCESS_KEY:minioadmin}
+    secret-key: ${MINIO_SECRET_KEY:miniopassword}
+    buckets: ${MINIO_BUCKETS:music, images}
 
 jwt:
   secret: my-super-secret-key-my-super-secret-key-my-super-secret-key
