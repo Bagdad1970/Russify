@@ -28,7 +28,9 @@ const FavoritesPage = () => {
     const [albums, setAlbums] = useState<Album[]>([]);
     const [covers, setCovers] = useState<Record<string, string>>({});
 
-    // ✅ Добавили removeFavoritePlaylist
+    const [pendingRemovalIds, setPendingRemovalIds] = useState<Set<string>>(new Set());
+    const removalTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
+
     const {
         favoriteTrackIds,
         favoriteAlbumIds,
@@ -38,7 +40,6 @@ const FavoritesPage = () => {
         removeFavoritePlaylist
     } = useFavorites();
 
-    // Загрузка всех данных при монтировании
     useEffect(() => {
         const loadAllData = async () => {
             try {
@@ -91,15 +92,44 @@ const FavoritesPage = () => {
         setCategory(cat);
     };
 
-    const removeTrack = async (trackId: bigint) => {
-        try {
-            const numericId = Number(trackId);
-            await removeFavoriteTrack(numericId);
-            setTracks(tracks.filter(t => t.id !== trackId));
-        } catch (err) {
-            console.error('Error removing track from favorites:', err);
-            alert('Не удалось удалить трек из избранного');
+    const toggleRemoveTrack = (trackId: bigint) => {
+        const idStr = trackId.toString();
+
+        if (pendingRemovalIds.has(idStr)) {
+            const timer = removalTimers.current.get(idStr);
+            if (timer) {
+                clearTimeout(timer);
+                removalTimers.current.delete(idStr);
+            }
+
+            setPendingRemovalIds(prev => {
+                const next = new Set(prev);
+                next.delete(idStr);
+                return next;
+            });
+            return;
         }
+
+        setPendingRemovalIds(prev => new Set(prev).add(idStr));
+
+        const timer = setTimeout(async () => {
+            try {
+                await removeFavoriteTrack(Number(trackId));
+                setTracks(currentTracks => currentTracks.filter(t => t.id !== trackId));
+            } catch (err) {
+                console.error('Error removing track from favorites:', err);
+                alert('Не удалось удалить трек из избранного');
+            } finally {
+                removalTimers.current.delete(idStr);
+                setPendingRemovalIds(prev => {
+                    const next = new Set(prev);
+                    next.delete(idStr);
+                    return next;
+                });
+            }
+        }, 2000);
+
+        removalTimers.current.set(idStr, timer);
     };
 
     const removeAlbum = async (albumId: bigint) => {
@@ -124,11 +154,8 @@ const FavoritesPage = () => {
 
         try {
             const numericId = Number(playlistId);
-
             await playlistManager.deleteById(playlistId);
-
             setPlaylists(prev => prev.filter(p => p.id !== playlistId));
-
         } catch (err) {
             console.error('Error deleting playlist:', err);
             alert('Не удалось удалить плейлист. Возможно, у вас нет прав.');
@@ -164,7 +191,7 @@ const FavoritesPage = () => {
     };
 
     const handleRemoveFromFavorites = (trackId: number) => {
-        removeTrack(BigInt(trackId));
+        toggleRemoveTrack(BigInt(trackId));
         hideMenu();
     };
 
@@ -173,7 +200,6 @@ const FavoritesPage = () => {
         hideMenu();
     };
 
-    // ✅ Открытие модалки плейлиста с загрузкой треков
     const openPlaylistModal = async (playlist: Playlist) => {
         try {
             const playlistInfo = await playlistManager.findById(playlist.id);
@@ -255,86 +281,100 @@ const FavoritesPage = () => {
 
                 {category === "Треки" && (
                     <div className="favorites-track-list">
-                        {tracks.map((track, index) => (
-                            <div
-                                key={track.id.toString()}
-                                className="favorites-track-row"
-                                onMouseEnter={(e) => e.currentTarget.classList.add('hover')}
-                                onMouseLeave={(e) => e.currentTarget.classList.remove('hover')}
-                            >
-                                <div className="favorites-track-number">{index + 1}</div>
-                                <div className="favorites-track-cover">
-                                    {track.coverHash ? (
-                                        <img
-                                            src={`/api/files/covers/${track.coverHash}`}
-                                            alt={track.name}
-                                            style={{ width: '32px', height: '32px', objectFit: 'cover' }}
-                                        />
-                                    ) : (
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="#f1f1f1" strokeWidth="1.2">
+                        {tracks.map((track, index) => {
+                            const trackTitle = track.name || "Неизвестный трек";
+                            const authorCount = track.authorIds ? track.authorIds.size : 0;
+                            const trackArtist = authorCount > 0 ? `${authorCount} исполнителей` : "Неизвестный исполнитель";
+                            const displayDuration = "--:--";
+                            const isPendingRemoval = pendingRemovalIds.has(track.id.toString());
+
+                            return (
+                                <div
+                                    key={track.id.toString()}
+                                    className={`favorites-track-row ${isPendingRemoval ? 'removing' : ''}`}
+                                    onMouseEnter={(e) => !isPendingRemoval && e.currentTarget.classList.add('hover')}
+                                    onMouseLeave={(e) => e.currentTarget.classList.remove('hover')}
+                                    style={{
+                                        opacity: isPendingRemoval ? 0.3 : 1,
+                                        transition: 'opacity 0.2s ease',
+                                        pointerEvents: 'auto'
+                                    }}
+                                >
+                                    <div className="favorites-track-number">{index + 1}</div>
+
+                                    <div className="favorites-track-cover">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="40" height="40" fill="none" stroke="#f1f1f1" strokeWidth="1.5">
                                             <rect x="4" y="4" width="24" height="24" rx="2" />
                                             <path d="M12 12v8" />
                                             <path d="M16 12v8" />
                                             <path d="M20 12v8" />
                                         </svg>
-                                    )}
-                                </div>
-                                <div className="favorites-track-info">
-                                    <div className="favorites-track-title">{track.name}</div>
-                                    <div className="favorites-track-artist">
-                                        {Array.from(track.authorIds || []).join(', ')}
+                                    </div>
+
+                                    <div className="favorites-track-info">
+                                        <div className="favorites-track-title">{trackTitle}</div>
+                                        <div className="favorites-track-artist">{trackArtist}</div>
+                                    </div>
+
+                                    <div className="favorites-track-actions-desktop">
+                                        <button className="favorites-action-btn" title="Играть">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#aaa" strokeWidth="2">
+                                                <path d="M8 5v14l11-7z" />
+                                            </svg>
+                                        </button>
+                                        <button className="favorites-action-btn" title="Играть следующим">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#aaa" strokeWidth="2">
+                                                <path d="M8 5v14l11-7z" />
+                                                <path d="M18 5v14" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <div className="favorites-track-duration">
+                                        {displayDuration}
+                                    </div>
+
+                                    <div
+                                        className="favorites-track-favorite"
+                                        onClick={() => toggleRemoveTrack(track.id)}
+                                        style={{
+                                            cursor: 'pointer',
+                                            transform: isPendingRemoval ? 'scale(1.2)' : 'scale(1)',
+                                            transition: 'transform 0.2s'
+                                        }}
+                                        title={isPendingRemoval ? "Нажмите еще раз, чтобы отменить" : "Удалить"}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="#ff2d55" stroke="#ff2d55" strokeWidth="2">
+                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                        </svg>
+                                    </div>
+
+                                    <div className="favorites-track-add-to-playlist">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                            <path d="M14 10H2v2h12v-2zm0-4H2v2h12V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM2 16h8v-2H2v2z"/>
+                                        </svg>
+                                    </div>
+
+                                    <div className="favorites-track-actions-mobile">
+                                        <button className="favorites-action-btn">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#aaa" strokeWidth="2">
+                                                <path d="M8 5v14l11-7z" />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            className="favorites-dots-btn"
+                                            onClick={(e) => showMenu(e, Number(track.id))}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#aaa" strokeWidth="2">
+                                                <circle cx="12" cy="12" r="1" />
+                                                <circle cx="12" cy="5" r="1" />
+                                                <circle cx="12" cy="19" r="1" />
+                                            </svg>
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="favorites-track-actions-desktop">
-                                    <button className="favorites-action-btn">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#aaa" strokeWidth="2">
-                                            <path d="M8 5v14l11-7z" />
-                                        </svg>
-                                    </button>
-                                    <button className="favorites-action-btn">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#aaa" strokeWidth="2">
-                                            <path d="M8 5v14l11-7z" />
-                                            <path d="M18 5v14" />
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div className="favorites-track-duration">{formatDuration(track.duration)}</div>
-                                <div className="favorites-track-favorite">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 24 24"
-                                        width="18"
-                                        height="18"
-                                        fill="none"
-                                        stroke="#ff2d55"
-                                        strokeWidth="2"
-                                        onClick={() => removeTrack(track.id)}
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                        <path d="M3 6h18M19 6v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                    </svg>
-                                </div>
-                                <div className="favorites-track-add-to-playlist">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                                        <path d="M14 10H2v2h12v-2zm0-4H2v2h12V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM2 16h8v-2H2v2z"/>
-                                    </svg>
-                                </div>
-                                <div className="favorites-track-actions-mobile">
-                                    <button className="favorites-action-btn">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#aaa" strokeWidth="2">
-                                            <path d="M8 5v14l11-7z" />
-                                        </svg>
-                                    </button>
-                                    <button className="favorites-dots-btn" onClick={(e) => showMenu(e, Number(track.id))}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#aaa" strokeWidth="2">
-                                            <circle cx="12" cy="12" r="1" />
-                                            <circle cx="12" cy="5" r="1" />
-                                            <circle cx="12" cy="19" r="1" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
 
@@ -373,7 +413,6 @@ const FavoritesPage = () => {
                                             <span>Пользователь</span>
                                         </div>
                                     </div>
-                                    {/* ✅ Вызов функции удаления плейлиста */}
                                     <div
                                         className="playlist-trash-icon"
                                         onClick={(e) => {
@@ -474,7 +513,6 @@ const FavoritesPage = () => {
                     </div>
                 )}
 
-                {/* ✅ PlaylistModal с правильными пропами для отображения содержимого */}
                 {isModalOpen && selectedPlaylistData && (
                     <PlaylistModal
                         isOpen={true}
