@@ -17,6 +17,26 @@ export class PlaylistManager {
     }
     */
 
+    async addTrackToPlaylist(playlistId: number | bigint, trackId: number): Promise<void> {
+        try {
+            await api.post(`playlists/${playlistId}/tracks`, {
+                track_id: trackId
+            });
+        } catch (error) {
+            console.error('Error adding track to playlist:', error);
+            throw error;
+        }
+    }
+
+    async removeTrackFromPlaylist(playlistId: number | bigint, trackId: number): Promise<void> {
+        try {
+            await api.delete(`playlists/${playlistId}/${trackId}`);
+        } catch (error) {
+            console.error('Error removing track from playlist:', error);
+            throw error;
+        }
+    }
+
     async findTracksByPlaylistId(id: number | bigint): Promise<Track[]> {
         try {
             const response = await api.get<Track[]>(`playlists/${id}/tracks`);

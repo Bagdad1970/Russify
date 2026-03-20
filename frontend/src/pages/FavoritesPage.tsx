@@ -117,19 +117,21 @@ const FavoritesPage = () => {
         }
     };
 
-    // ✅ Функция удаления плейлиста (как у альбомов)
     const removePlaylist = async (playlistId: bigint) => {
-        if (!window.confirm('Удалить этот плейлист из избранного?')) {
+        if (!window.confirm('Вы уверены? Плейлист будет удален безвозвратно.')) {
             return;
         }
 
         try {
             const numericId = Number(playlistId);
-            await removeFavoritePlaylist(numericId);
+
+            await playlistManager.deleteById(playlistId);
+
             setPlaylists(prev => prev.filter(p => p.id !== playlistId));
+
         } catch (err) {
-            console.error('Error removing playlist from favorites:', err);
-            alert('Не удалось удалить плейлист из избранного');
+            console.error('Error deleting playlist:', err);
+            alert('Не удалось удалить плейлист. Возможно, у вас нет прав.');
         }
     };
 

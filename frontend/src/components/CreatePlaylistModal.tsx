@@ -1,9 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import '../assets/styles/components/CreatePlaylistModal.css';
 import { PlaylistManager } from '../api/PlaylistManager';
-import { TrackManager } from '../api/TrackManager';
-import { FileManager } from '../api/FileManager';
-import type { Track } from '../types/Track';
+import { useFavorites } from '../hooks/useFavorites'; // ✅ Добавлен импорт хука
 import noCover from '../assets/images/no-cover.svg';
 
 interface CreatePlaylistModalProps {
@@ -23,45 +21,25 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSuccess }: CreatePlaylistModal
     const [playlistCoverFile, setPlaylistCoverFile] = useState<File | null>(null);
     const [playlistCoverPreview, setPlaylistCoverPreview] = useState<string | null>(null);
     const [playlistName, setPlaylistName] = useState("Новый плейлист");
-    const [playlistTracks, setPlaylistTracks] = useState<Track[]>([]);
-    const [availableTracks, setAvailableTracks] = useState<Track[]>([]);
 
     const [isLoading, setIsLoading] = useState(false);
-    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [isPositionCalculated, setIsPositionCalculated] = useState(false);
     const [isEditingName, setIsEditingName] = useState(false);
 
     const playlistManager = new PlaylistManager();
-    const trackManager = new TrackManager();
-    const fileManager = new FileManager();
 
-    // Загрузка доступных треков при открытии
+    // ✅ Инициализируем хук для работы с избранным
+    const { addFavoritePlaylist } = useFavorites();
+
+    // Сброс состояния при открытии
     useEffect(() => {
         if (isOpen) {
-            loadAvailableTracks();
-        }
-    }, [isOpen]);
-
-    const loadAvailableTracks = async () => {
-        try {
-            const tracks = await trackManager.findAll();
-            setAvailableTracks(tracks);
-            setPlaylistTracks([]);
             setPlaylistName("Новый плейлист");
             setPlaylistCoverFile(null);
             setPlaylistCoverPreview(null);
-        } catch (error) {
-            console.error('Error loading tracks:', error);
-            alert('Не удалось загрузить список треков');
+            setIsLoading(false);
         }
-    };
-
-    const formatTime = (seconds?: number) => {
-        if (!seconds) return "0:00";
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    };
+    }, [isOpen]);
 
     useEffect(() => {
         if (!isOpen) {
@@ -71,12 +49,11 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSuccess }: CreatePlaylistModal
         const updateLayout = () => {
             const w = window.innerWidth;
             setIsMobile(w < 768);
-            let modalWidth = 800;
-            if (w < 1024) modalWidth = Math.min(760, w - 32);
+            let modalWidth = 500;
             if (w < 768) modalWidth = w - 24;
-            const modalHeight = Math.min(640, window.innerHeight - 112);
+            const modalHeight = 300;
             const left = (window.innerWidth - modalWidth) / 2;
-            const top = Math.max(40, (window.innerHeight - modalHeight) / 2 - 40);
+            const top = Math.max(40, (window.innerHeight - modalHeight) / 2);
             setPosition({ x: left, y: top });
             setIsPositionCalculated(true);
         };
@@ -121,36 +98,6 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSuccess }: CreatePlaylistModal
 
     if (!isOpen) return null;
 
-    const handleDragStart = (e: React.DragEvent, index: number) => {
-        setDraggedIndex(index);
-        e.dataTransfer.effectAllowed = 'move';
-    };
-
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-    };
-
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        if (draggedIndex === null) return;
-        const targetElement = e.target.closest('.cpl-track-item');
-        if (!targetElement) return;
-        const children = Array.from(targetElement.parentNode?.children || []);
-        const targetIndex = children.indexOf(targetElement);
-
-        if (targetIndex === draggedIndex || targetIndex === -1) return;
-
-        const newTracks = [...playlistTracks];
-        const [movedTrack] = newTracks.splice(draggedIndex, 1);
-        newTracks.splice(targetIndex, 0, movedTrack);
-        setPlaylistTracks(newTracks);
-        setDraggedIndex(null);
-    };
-
-    const playlistCount = playlistTracks.length;
-    const totalDuration = playlistTracks.reduce((sum, t) => sum + (t.duration || 0), 0);
-    const durationFormatted = formatTime(totalDuration);
-
     const handleCoverClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         document.getElementById('cover-upload')?.click();
@@ -168,17 +115,6 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSuccess }: CreatePlaylistModal
         }
     };
 
-    const addTrackToPlaylist = (track: Track) => {
-        setPlaylistTracks(prev => [...prev, track]);
-        setAvailableTracks(prev => prev.filter(t => t.id !== track.id));
-    };
-
-    const removeTrackFromPlaylist = (track: Track) => {
-        setAvailableTracks(prev => [...prev, track]);
-        setPlaylistTracks(prev => prev.filter(t => t.id !== track.id));
-    };
-
-    // В handleSave
     const handleSave = async () => {
         if (isLoading) return;
         setIsLoading(true);
@@ -212,12 +148,17 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSuccess }: CreatePlaylistModal
             const contentType = response.headers.get('content-type');
             const created = contentType?.includes('application/json')
                 ? await response.json()
-                : { name: playlistName };
+                : { name: playlistName, id: 0 }; // Заглушка, если бэкенд не вернул JSON
 
             console.log("✅ Плейлист создан:", created);
-            alert(`Плейлист "${created.name}" создан!`);
 
-            onSuccess?.();
+            // ✅ АВТОМАТИЧЕСКОЕ ДОБАВЛЕНИЕ В ИЗБРАННОЕ
+            if (created.id) {
+                await addFavoritePlaylist(Number(created.id));
+                console.log("❤️ Плейлист добавлен в избранное");
+            }
+
+            if (onSuccess) onSuccess();
             onClose();
 
         } catch (err: any) {
@@ -227,7 +168,6 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSuccess }: CreatePlaylistModal
             setIsLoading(false);
         }
     };
-
 
     const handleCancel = () => {
         onClose();
@@ -292,8 +232,8 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSuccess }: CreatePlaylistModal
                             </div>
                         )}
                         <div className="cpl-meta">
-                            <div className="cpl-count">{playlistCount} треков</div>
-                            <div className="cpl-duration">{durationFormatted}</div>
+                            <div className="cpl-count">0 треков</div>
+                            <div className="cpl-duration">0:00</div>
                         </div>
                     </div>
 
@@ -310,82 +250,8 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSuccess }: CreatePlaylistModal
 
                 <div className="cpl-divider"></div>
 
-                <div className="cpl-main-content">
-                    <div className="cpl-column cpl-playlist-column">
-                        <h3 className="cpl-column-title">Плейлист</h3>
-                        <div
-                            className="cpl-track-list"
-                            onDragOver={handleDragOver}
-                            onDrop={handleDrop}
-                        >
-                            {playlistTracks.length === 0 && (
-                                <div className="cpl-empty-message">Перетащите треки сюда</div>
-                            )}
-                            {playlistTracks.map((track, index) => (
-                                <div
-                                    key={String(track.id)}
-                                    className={`cpl-track-item ${draggedIndex === index ? 'dragging' : ''}`}
-                                    draggable
-                                    onDragStart={(e) => handleDragStart(e, index)}
-                                >
-                                    <div className="cpl-track-cover">
-                                        {track.coverHash ? (
-                                            <img src={`/api/files/covers/${track.coverHash}`} alt="" style={{width: 32, height: 32, objectFit: 'cover'}} />
-                                        ) : (
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="#f1f1f1" strokeWidth="1.2">
-                                                <rect x="4" y="4" width="24" height="24" rx="2" />
-                                                <path d="M12 12v8" /><path d="M16 12v8" /><path d="M20 12v8" />
-                                            </svg>
-                                        )}
-                                    </div>
-                                    <div className="cpl-track-text">
-                                        <div className="cpl-track-title">{track.name || "Без названия"}</div>
-                                        <div className="cpl-track-artist">{track.artist || "Неизвестно"}</div>
-                                    </div>
-                                    <div className="cpl-track-duration">{formatTime(track.duration)}</div>
-                                    <button className="cpl-remove-btn" onClick={() => removeTrackFromPlaylist(track)} disabled={isLoading}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#aaa" strokeWidth="2">
-                                            <line x1="18" y1="6" x2="6" y2="18" />
-                                            <line x1="6" y1="6" x2="18" y2="18" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="cpl-column cpl-favorites-column">
-                        <h3 className="cpl-column-title">Доступные треки</h3>
-                        <div className="cpl-track-list">
-                            {availableTracks.length === 0 && (
-                                <div className="cpl-empty-message">Треков нет</div>
-                            )}
-                            {availableTracks.map((track) => (
-                                <div key={String(track.id)} className="cpl-track-item">
-                                    <div className="cpl-track-cover">
-                                        {track.coverHash ? (
-                                            <img src={`/api/files/covers/${track.coverHash}`} alt="" style={{width: 32, height: 32, objectFit: 'cover'}} />
-                                        ) : (
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="#f1f1f1" strokeWidth="1.2">
-                                                <rect x="4" y="4" width="24" height="24" rx="2" />
-                                                <path d="M12 12v8" /><path d="M16 12v8" /><path d="M20 12v8" />
-                                            </svg>
-                                        )}
-                                    </div>
-                                    <div className="cpl-track-text">
-                                        <div className="cpl-track-title">{track.name || "Без названия"}</div>
-                                        <div className="cpl-track-artist">{track.artist || "Неизвестно"}</div>
-                                    </div>
-                                    <div className="cpl-track-duration">{formatTime(track.duration)}</div>
-                                    <button className="cpl-add-btn" onClick={() => addTrackToPlaylist(track)} disabled={isLoading}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#aaa" strokeWidth="2">
-                                            <path d="M12 5v14M5 12h14" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                <div style={{ padding: '20px', textAlign: 'center', color: '#aaa' }}>
+                    Плейлист будет создан пустым. Треки можно добавить позже.
                 </div>
 
                 <div className={`cpl-buttons ${isMobile ? 'mobile-center' : ''}`}>
@@ -393,9 +259,9 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSuccess }: CreatePlaylistModal
                     <button
                         className="cpl-btn-save"
                         onClick={handleSave}
-                        disabled={isLoading || playlistTracks.length === 0 || !playlistName.trim()}
+                        disabled={isLoading || !playlistName.trim()}
                     >
-                        {isLoading ? 'Сохранение...' : 'Сохранить'}
+                        {isLoading ? 'Создание...' : 'Создать'}
                     </button>
                 </div>
             </div>
