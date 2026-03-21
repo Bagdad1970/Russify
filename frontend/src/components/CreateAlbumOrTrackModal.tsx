@@ -194,15 +194,6 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "album" }) => {
 
             // Основные поля альбома
             formData.append('title', albumName);
-
-            let userId = 1;
-            if (token) {
-                try {
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    userId = payload.userId || payload.sub;
-                } catch (e) { console.warn('Token parse error'); }
-            }
-            formData.append('authorId', String(userId));
             formData.append('typeId', '1');
             formData.append('releasedAt', new Date().toISOString());
 
@@ -225,9 +216,6 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "album" }) => {
 
                     // ID жанра (временная заглушка)
                     formData.append('trackGenreIds', '1');
-
-                    // ID автора трека
-                    formData.append('trackAuthorIds', String(userId));
                 }
             });
 
@@ -240,7 +228,7 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "album" }) => {
                 }
             }
 
-            const url = `${API_URL}/api/albums`;
+            const url = `${API_URL}/api/user/albums`;
             console.log('🌐 Sending to:', url);
 
             const response = await fetch(url, {
@@ -260,7 +248,7 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "album" }) => {
             const result = await response.json();
             console.log('✅ Success:', result);
 
-            alert('Альбом успешно создан!');
+            alert('Альбом отправлен на модерацию');
             onClose();
 
         } catch (err: any) {
@@ -403,7 +391,9 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "album" }) => {
 
                                     <input
                                         type="file"
-                                        ref={el => audioFileInputRefs.current[track.id] = el}
+                                        ref={(el) => {
+                                            audioFileInputRefs.current[track.id] = el;
+                                        }}
                                         onChange={(e) => handleAudioFileChange(track.id, e)}
                                         accept="audio/mpeg"
                                         style={{ display: 'none' }}

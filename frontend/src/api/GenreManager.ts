@@ -37,7 +37,7 @@ export class GenreManager {
         }
     }
 
-    async findById(id: bigint): Promise<Genre> {
+    async findById(id: number | bigint): Promise<Genre> {
         try {
             const response = await api.get<Genre>(`genres/${id}`);
             return response.data;
@@ -48,7 +48,7 @@ export class GenreManager {
         }
     }
 
-    async deleteById(id: bigint): Promise<void> {
+    async deleteById(id: number | bigint): Promise<void> {
         try {
             await api.delete(`genres/${id}`);
         }

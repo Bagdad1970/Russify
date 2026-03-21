@@ -36,6 +36,7 @@ import ru.russify.russifyservice.service.interfaces.AlbumService;
 import ru.russify.russifyservice.service.interfaces.FileService;
 
 import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -366,12 +367,16 @@ public class AlbumServiceImpl implements AlbumService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
         Author author = resolveOwnedAuthor(user, request.getAuthorId());
+        List<Long> normalizedTrackAuthorIds = normalizeTrackAuthorIds(
+                request.getTrackNames(),
+                request.getTrackAuthorIds()
+        );
 
         validateTrackPayload(
                 request.getTrackNames(),
                 request.getTrackGenreIds(),
                 request.getTrackAudioFiles(),
-                request.getTrackAuthorIds()
+                normalizedTrackAuthorIds
         );
 
         Album album = new Album();
@@ -402,7 +407,7 @@ public class AlbumServiceImpl implements AlbumService {
                 request.getTrackNames(),
                 request.getTrackGenreIds(),
                 request.getTrackAudioFiles(),
-                request.getTrackAuthorIds()
+                normalizedTrackAuthorIds
         );
 
         Album result = albumRepository.save(savedAlbum);
@@ -460,6 +465,14 @@ public class AlbumServiceImpl implements AlbumService {
         ) {
             throw new BadRequestException("Track arrays size mismatch");
         }
+    }
+
+    private List<Long> normalizeTrackAuthorIds(List<String> trackNames, List<Long> trackAuthorIds) {
+        if (trackNames == null || trackNames.isEmpty() || trackAuthorIds != null) {
+            return trackAuthorIds;
+        }
+
+        return Collections.nCopies(trackNames.size(), null);
     }
 
     private void linkAlbumAuthor(Album album, Author author) {

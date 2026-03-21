@@ -15,6 +15,7 @@ import {FileManager} from "../api/FileManager.ts";
 import noCover from '../assets/images/no-cover.svg';
 import {useFavorites} from "../hooks/useFavorites.ts";
 import { AlbumManager } from "../api/AlbumManager.ts";
+import type { TrackId } from "../types/Track.ts";
 
 const FavoritesPage = () => {
     const [category, setCategory] = useState("Треки");
@@ -33,7 +34,7 @@ const FavoritesPage = () => {
     const [searchQuery, setSearchQuery] = useState("");
 
     const [pendingRemovalIds, setPendingRemovalIds] = useState<Set<string>>(new Set());
-    const removalTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
+    const removalTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
     const {
         favoriteTrackIds,
@@ -114,7 +115,7 @@ const FavoritesPage = () => {
 
     const [menuVisible, setMenuVisible] = useState<number | null>(null);
     const [startY, setStartY] = useState(0);
-    const menuRef = useRef(null);
+    const menuRef = useRef<HTMLDivElement | null>(null);
 
     const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist>();
     const [selectedPlaylistData, setSelectedPlaylistData] = useState<PlaylistWithTracks | null>(null);
@@ -152,7 +153,7 @@ const FavoritesPage = () => {
         );
     };
 
-    const toggleRemoveTrack = (trackId: bigint) => {
+    const toggleRemoveTrack = (trackId: TrackId) => {
         const idStr = trackId.toString();
 
         if (pendingRemovalIds.has(idStr)) {
@@ -192,7 +193,7 @@ const FavoritesPage = () => {
         removalTimers.current.set(idStr, timer);
     };
 
-    const removeAlbum = async (albumId: bigint) => {
+    const removeAlbum = async (albumId: number | bigint) => {
         if (!window.confirm('Удалить этот альбом из избранного?')) {
             return;
         }
@@ -207,7 +208,7 @@ const FavoritesPage = () => {
         }
     };
 
-    const removePlaylist = async (playlistId: bigint) => {
+    const removePlaylist = async (playlistId: number | bigint) => {
         if (!window.confirm('Вы уверены? Плейлист будет удален безвозвратно.')) {
             return;
         }
@@ -263,8 +264,7 @@ const FavoritesPage = () => {
     const openPlaylistModal = async (playlist: Playlist) => {
         try {
             const playlistInfo = await playlistManager.findById(playlist.id);
-            const tracksResult = await playlistManager.findTracksByPlaylistId(playlist.id);
-            const tracksArray = Array.isArray(tracksResult) ? tracksResult : (tracksResult?.tracks || []);
+            const tracksArray = await playlistManager.findTracksByPlaylistId(playlist.id);
 
             const playlistWithTracks: PlaylistWithTracks = {
                 ...playlistInfo,
@@ -382,7 +382,8 @@ const FavoritesPage = () => {
                                                     style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
                                                     onError={(e) => {
                                                         e.currentTarget.style.display = 'none';
-                                                        e.currentTarget.nextSibling?.style?.setProperty('display', 'block');
+                                                        const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+                                                        fallback?.style.setProperty('display', 'block');
                                                     }}
                                                 />
                                             ) : null}

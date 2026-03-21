@@ -1,6 +1,11 @@
+import type { ReactNode } from 'react';
 import '../assets/styles/components/GridContainer.css';
 
-const GridContainer = ({ children }) => (
+interface GridContainerProps {
+    children: ReactNode;
+}
+
+const GridContainer = ({ children }: GridContainerProps) => (
     <div className="grid-container-wrapper">
         <div className="grid-container">
             {children}

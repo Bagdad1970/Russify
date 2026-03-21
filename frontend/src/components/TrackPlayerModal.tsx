@@ -1,14 +1,35 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
 import '../assets/styles/components/TrackPlayerModal.css';
 
-const TrackPlayerModal = ({ isOpen, onClose, track = null, anchorPosition = null, isMobile = false }) => {
+interface PlayerTrack {
+    title?: string;
+    artist?: string;
+    duration?: number;
+}
+
+interface AnchorPosition {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+}
+
+interface TrackPlayerModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    track?: PlayerTrack | null;
+    anchorPosition?: AnchorPosition | null;
+    isMobile?: boolean;
+}
+
+const TrackPlayerModal = ({ isOpen, onClose, track = null, anchorPosition = null, isMobile = false }: TrackPlayerModalProps) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(30);
     const [isShuffle, setIsShuffle] = useState(false);
     const [isRepeat, setIsRepeat] = useState(false);
     const [isFavorite, setIsFavorite] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
-    const modalRef = useRef(null);
+    const modalRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         if (isOpen) {
@@ -19,7 +40,7 @@ const TrackPlayerModal = ({ isOpen, onClose, track = null, anchorPosition = null
     }, [isOpen]);
 
     useEffect(() => {
-        let interval;
+        let interval: ReturnType<typeof setInterval> | undefined;
         if (isPlaying) {
             interval = setInterval(() => {
                 setProgress(prev => {
@@ -37,8 +58,8 @@ const TrackPlayerModal = ({ isOpen, onClose, track = null, anchorPosition = null
 
     useEffect(() => {
         if (!isMobile && isOpen) {
-            const handleClickOutside = (event) => {
-                if (modalRef.current && !modalRef.current.contains(event.target)) {
+            const handleClickOutside = (event: MouseEvent) => {
+                if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
                     onClose();
                 }
             };
@@ -55,7 +76,7 @@ const TrackPlayerModal = ({ isOpen, onClose, track = null, anchorPosition = null
 
     if (!isOpen || !track) return null;
 
-    const formatTime = (percent) => {
+    const formatTime = (percent: number) => {
         const totalSec = track.duration || 240;
         const currentSec = Math.floor((percent / 100) * totalSec);
         const mins = Math.floor(currentSec / 60);
@@ -70,13 +91,13 @@ const TrackPlayerModal = ({ isOpen, onClose, track = null, anchorPosition = null
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     };
 
-    const handleProgressClick = (e) => {
+    const handleProgressClick = (e: ReactMouseEvent<HTMLDivElement>) => {
         const rect = e.currentTarget.getBoundingClientRect();
         const pos = (e.clientX - rect.left) / rect.width;
         setProgress(Math.min(100, Math.max(0, pos * 100)));
     };
 
-    const getModalStyle = () => {
+    const getModalStyle = (): CSSProperties => {
         if (isMobile || !anchorPosition) return {};
 
         return {

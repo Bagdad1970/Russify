@@ -22,7 +22,7 @@ export class AuthorManager {
         return response.data;
     }
 
-    async deleteById(id: bigint): Promise<void> {
+    async deleteById(id: number | bigint): Promise<void> {
         await api.delete(`authors/${id}`);
     }
 }

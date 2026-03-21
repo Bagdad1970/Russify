@@ -1,7 +1,15 @@
 import '../assets/styles/components/AlbumCard.css';
 import noCover from '../assets/images/no-cover.svg';
 
-const AlbumCard = ({ title, artist, year, cover, onClick }) => {
+interface AlbumCardProps {
+    title: string;
+    artist?: string;
+    year?: string | number;
+    cover?: string | null;
+    onClick?: () => void;
+}
+
+const AlbumCard = ({ title, artist, year, cover, onClick }: AlbumCardProps) => {
     return (
         <div className="album-card" onClick={onClick}>
             <div className="album-cover">

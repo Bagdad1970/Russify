@@ -12,9 +12,10 @@ interface AlbumModalProps {
     albumName: string;
     authorName?: string;
     tracks: Track[];
-    albumAuthors?: Array<{ id: number; name: string }>;
+    albumAuthors?: Array<{ id: number | bigint; name: string }>;
     albumId?: number | bigint;
     album?: Album;
+    coverHash?: string | null;
 }
 
 const AlbumModal = ({
@@ -25,7 +26,8 @@ const AlbumModal = ({
                         tracks = [],
                         albumAuthors = [],
                         albumId,
-                        album
+                        album,
+                        coverHash
                     }: AlbumModalProps) => {
     const modalRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -43,13 +45,13 @@ const AlbumModal = ({
 
     useEffect(() => {
         const loadCover = async () => {
-            const coverHash = album?.coverHash;
-            if (!coverHash) {
+            const actualCoverHash = coverHash ?? album?.coverHash;
+            if (!actualCoverHash) {
                 setCoverSrc("");
                 return;
             }
             try {
-                const src = await fileManager.getFileUrl("images", coverHash);
+                const src = await fileManager.getFileUrl("images", actualCoverHash);
                 if (src) setCoverSrc(src);
             } catch (err) {
                 console.error('Error loading cover:', err);
@@ -60,7 +62,7 @@ const AlbumModal = ({
         if (isOpen) {
             loadCover();
         }
-    }, [isOpen, album?.coverHash]);
+    }, [isOpen, album?.coverHash, coverHash]);
 
     useEffect(() => {
         if (!isOpen) {

@@ -152,7 +152,7 @@ const ProfilePage = () => {
         setIsCreateModalOpen(false);
     };
 
-    const handleDeleteAlbum = async (e: React.MouseEvent, albumId: bigint, albumTitle: string) => {
+    const handleDeleteAlbum = async (e: React.MouseEvent, albumId: number | bigint, albumTitle: string) => {
         e.stopPropagation();
 
         if (!window.confirm(`Вы уверены, что хотите удалить альбом "${albumTitle}"? Это действие нельзя отменить.`)) {

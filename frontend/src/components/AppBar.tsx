@@ -4,12 +4,20 @@ import TrackPlayerModal from './TrackPlayerModal.jsx';
 import '../assets/styles/components/AppBar.css';
 import { useAuthModal } from '../hooks/useAuthModal';
 
+interface AppBarProps {
+    activeTab?: string;
+    onFavoritesClick?: () => void;
+    trackTitle?: string;
+    artistName?: string;
+    onRegistrationClick?: () => void;
+    onLoginClick?: () => void;
+}
 
 const getTrackInfo = () => {
     return { title: "Название трека", artist: "Исполнитель", duration: 240 };
 };
 
-const AppBar = ({ activeTab = 'Главная', onFavoritesClick }) => {
+const AppBar = ({ activeTab = 'Главная', onFavoritesClick, trackTitle, artistName }: AppBarProps) => {
     const navigate = useNavigate();
 
     const { requireAuth } = useAuthModal();
@@ -25,7 +33,10 @@ const AppBar = ({ activeTab = 'Главная', onFavoritesClick }) => {
 
     const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 
-    const { title, artist, duration } = getTrackInfo();
+    const defaultTrackInfo = getTrackInfo();
+    const title = trackTitle ?? defaultTrackInfo.title;
+    const artist = artistName ?? defaultTrackInfo.artist;
+    const duration = defaultTrackInfo.duration;
 
     useEffect(() => {
         const handleResize = () => {

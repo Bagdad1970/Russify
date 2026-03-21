@@ -3,7 +3,15 @@ import '../assets/styles/components/LoginModal.css';
 import type {LoginUserDto} from "../types/request/auth/LoginUserDto.ts";
 import {AuthManager} from "../api/AuthManager.ts";
 
-const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
+interface LoginModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSwitchToRegistration: () => void;
+}
+
+type LoginErrors = Partial<Record<keyof LoginUserDto, string>>;
+
+const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }: LoginModalProps) => {
     const [formData, setFormData] = useState<LoginUserDto>({
         email: '',
         password: ''
@@ -11,14 +19,14 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
 
     const authManager = new AuthManager();
 
-    const [errors, setErrors] = useState({});
+    const [errors, setErrors] = useState<LoginErrors>({});
     const [serverError, setServerError] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [inputKey, setInputKey] = useState(Date.now());
     const [showPassword, setShowPassword] = useState(false);
 
-    const modalRef = useRef(null);
-    const passwordInputRef = useRef(null);
+    const modalRef = useRef<HTMLDivElement | null>(null);
+    const passwordInputRef = useRef<HTMLInputElement | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -50,8 +58,8 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
         }
     }, [isOpen]);
 
-    const handleMouseDown = (e) => {
-        if (e.target.closest('.logm-header') && !e.target.closest('.logm-close-btn')) {
+    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (e.target instanceof Element && e.target.closest('.logm-header') && !e.target.closest('.logm-close-btn') && modalRef.current) {
             setIsDragging(true);
             const rect = modalRef.current.getBoundingClientRect();
             setDragOffset({
@@ -61,8 +69,8 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
         }
     };
 
-    const handleMouseMove = (e) => {
-        if (!isDragging) return;
+    const handleMouseMove = (e: MouseEvent) => {
+        if (!isDragging || !modalRef.current) return;
 
         const newX = e.clientX - dragOffset.x;
         const newY = e.clientY - dragOffset.y;
@@ -91,7 +99,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
     }, [isDragging, dragOffset]);
 
     const validateForm = () => {
-        const newErrors = {};
+        const newErrors: LoginErrors = {};
 
         if (isSubmitted) {
             if (!formData.email.trim()) {
@@ -110,7 +118,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
         validateForm();
     }, [formData, isSubmitted]);
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -120,7 +128,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
         setServerError('');
     };
 
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.ctrlKey || e.metaKey) {
             const key = e.key.toLowerCase();
             if (['a', 'z', 'c', 'v', 'x'].includes(key)) {
@@ -186,7 +194,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
         return message;
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsSubmitted(true);
         setServerError('');
@@ -219,7 +227,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
                                 setServerError(translateErrorMessage(errorMessage));
                             }
                         } else if (Array.isArray(errorMessage)) {
-                            const newErrors = {};
+                            const newErrors: LoginErrors = {};
                             errorMessage.forEach((msg: string) => {
                                 const translatedMsg = translateErrorMessage(msg);
                                 const lowerMsg = msg.toLowerCase();
@@ -320,7 +328,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegistration }) => {
                                 type="button"
                                 className="logm-password-toggle"
                                 onClick={togglePasswordVisibility}
-                                tabIndex="-1"
+                                tabIndex={-1}
                             >
                                 {showPassword ? (
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

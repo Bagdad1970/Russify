@@ -5,13 +5,30 @@ import { AuthManager } from "../api/AuthManager.ts";
 import { FileManager } from "../api/FileManager.ts";
 import defaultAvatar from '../assets/images/no-cover.svg';
 
-const ProfileHeader = () => {
-    const [userData, setUserData] = useState<MeResponse>();
-    const [avatarUrl, setAvatarUrl] = useState<string>("");
+interface ProfileHeaderProps {
+    user?: Partial<MeResponse> | null;
+    avatarUrl?: string;
+}
+
+const ProfileHeader = ({ user, avatarUrl: initialAvatarUrl }: ProfileHeaderProps) => {
+    const [userData, setUserData] = useState<Partial<MeResponse> | undefined>(user ?? undefined);
+    const [avatarUrl, setAvatarUrl] = useState<string>(initialAvatarUrl ?? "");
     const authManager = new AuthManager();
     const fileManager = new FileManager();
 
     useEffect(() => {
+        setUserData(user ?? undefined);
+    }, [user]);
+
+    useEffect(() => {
+        setAvatarUrl(initialAvatarUrl ?? "");
+    }, [initialAvatarUrl]);
+
+    useEffect(() => {
+        if (user) {
+            return;
+        }
+
         const loadUserData = async () => {
             try {
                 const data = await authManager.getCurrentUser();
@@ -32,7 +49,7 @@ const ProfileHeader = () => {
         };
 
         loadUserData();
-    }, []);
+    }, [user]);
 
     const formatDate = (dateStr?: string) => {
         if (!dateStr) return "";

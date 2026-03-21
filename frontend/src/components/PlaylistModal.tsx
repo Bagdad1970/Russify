@@ -15,7 +15,9 @@ interface PlaylistModalProps {
     tracks: Track[];
     playlistId?: number | bigint;
     playlist?: Playlist;
-    coverHash?: string;
+    coverHash?: string | null;
+    authorName?: string;
+    defaultIsSystem?: boolean;
 }
 
 const PlaylistModal = ({

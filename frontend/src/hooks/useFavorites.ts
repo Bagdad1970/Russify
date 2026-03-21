@@ -13,7 +13,9 @@ export const useFavorites = () => {
             setFavoritePlaylistIds(new Set(favoriteStore.getFavoritePlaylistIds()));
         });
 
-        return unsubscribe;
+        return () => {
+            unsubscribe();
+        };
     }, []);
 
     return {

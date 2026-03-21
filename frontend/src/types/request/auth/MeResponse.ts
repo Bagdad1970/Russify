@@ -4,8 +4,6 @@ export interface MeResponse {
     email: string;
     avatarHash?: string;
     createdAt?: string;
-    role?: {
-        id: number;
-        name: string;
-    };
+    roleId?: number;
+    roleID?: number;
 }

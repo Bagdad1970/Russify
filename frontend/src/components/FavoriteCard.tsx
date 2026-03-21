@@ -5,9 +5,13 @@ import '../assets/styles/components/FavoriteCard.css';
 //ВНИМАНИЕ! ЩАС ТУТ АЛЬБОМЫ ВСЕ НАХОДЯТСЯ! ОБНОВИТЬ КОГДА РУЧКА БУДЕТ ГОТОВА НАДО!
 //ОСТАЛЬНОЕ ПРОСТО СДЕЛАЙТЕ ПО АНАЛОГИИ!!
 
+interface FavoriteCardProps {
+    title?: string;
+    onCategoryChange: (category: string) => void;
+    initialCategory?: string;
+}
 
-
-const FavoriteCard = ({ title = "Избранное", onCategoryChange, initialCategory = "Треки" }) => {
+const FavoriteCard = ({ title = "Избранное", onCategoryChange, initialCategory = "Треки" }: FavoriteCardProps) => {
     const items = ["Альбомы", "Плейлисты", "Треки"];
 
     const [currentIndex, setCurrentIndex] = useState(() => {
@@ -60,7 +64,6 @@ const FavoriteCard = ({ title = "Избранное", onCategoryChange, initialC
     };
 
     const leftItem = items[(currentIndex - 1 + items.length) % items.length];
-    const centerItem = items[currentIndex];
     const rightItem = items[(currentIndex + 1) % items.length];
 
     return (

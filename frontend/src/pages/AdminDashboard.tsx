@@ -70,7 +70,7 @@ const tableConfigs = {
             { accessorKey: 'title', header: 'Название' },
             { accessorKey: 'albumTypeId', header: 'Тип альбома' },
             { accessorKey: 'releasedAt', header: 'Дата релиза', cell: ({ getValue }) => {
-                    const date = getValue();
+                    const date = getValue() as string | number | Date | null | undefined;
                     return date ? new Date(date).toLocaleDateString('ru-RU') : '—';
                 } },
             { accessorKey: 'status', header: 'Статус' },
@@ -101,7 +101,7 @@ const tableConfigs = {
             { accessorKey: 'name', header: 'Название' },
             { accessorKey: 'genreId', header: 'Жанр ID' },
             { accessorKey: 'duration', header: 'Длительность', cell: ({ getValue }) => {
-                    const sec = getValue();
+                    const sec = Number((getValue() as number | string | null | undefined) ?? 0);
                     if (!sec) return '—';
                     const mins = Math.floor(sec / 60);
                     const secs = sec % 60;
@@ -160,7 +160,7 @@ const AdminDashboard: React.FC = () => {
     const tableKeys = Object.keys(tableConfigs) as TableKey[];
 
     const [selectedTable, setSelectedTable] = useState<TableKey>('genres');
-    const currentConfig = tableConfigs[selectedTable];
+    const currentConfig = tableConfigs[selectedTable] as any;
 
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -338,7 +338,6 @@ const AdminDashboard: React.FC = () => {
                 <button
                     onClick={() => navigate('/')}
                     style={{
-                        marginTop: 'auto',
                         padding: '12px',
                         background: '#6c757d',
                         color: 'white',

@@ -16,7 +16,7 @@ interface SystemPlaylistExtended extends Playlist {
 
 interface SystemPlaylistsPageProps {
     onPlaylistUpdate?: (playlist: SystemPlaylistExtended) => void;
-    onPlaylistDelete?: (id: number) => void;
+    onPlaylistDelete?: (id: number | bigint) => void;
     onPlaylistCreate?: (playlist: SystemPlaylistExtended) => void;
 }
 
@@ -76,9 +76,10 @@ const SystemPlaylistsPage: React.FC<SystemPlaylistsPageProps> = ({
         }
     };
 
-    const generateColor = (seed: number | string) => {
+    const generateColor = (seed: number | bigint | string) => {
         const colors = ['#00ffff', '#ff0055', '#8b00ff', '#90ee90', '#ffff00', '#ffaa00', '#ff66cc'];
-        const num = typeof seed === 'number' ? seed : seed.charCodeAt(0);
+        const normalizedSeed = typeof seed === 'bigint' ? Number(seed) : seed;
+        const num = typeof normalizedSeed === 'number' ? normalizedSeed : normalizedSeed.charCodeAt(0);
         return colors[Math.abs(num) % colors.length];
     };
 
@@ -96,10 +97,7 @@ const SystemPlaylistsPage: React.FC<SystemPlaylistsPageProps> = ({
         try {
             setLoading(true);
             const playlistInfo = await playlistManager.findById(playlist.id);
-            const tracksResult = await playlistManager.findTracksByPlaylistId(playlist.id);
-            const tracksArray = Array.isArray(tracksResult)
-                ? tracksResult
-                : (tracksResult as any)?.tracks || [];
+            const tracksArray = await playlistManager.findTracksByPlaylistId(playlist.id);
 
             const playlistWithTracks: PlaylistWithTracks = {
                 ...playlistInfo,
@@ -171,7 +169,7 @@ const SystemPlaylistsPage: React.FC<SystemPlaylistsPageProps> = ({
         async (playlist: SystemPlaylistExtended) => {
             if (!window.confirm(`Вы уверены, что хотите удалить системный плейлист "${playlist.name}"?`)) return;
             try {
-                await playlistManager.deleteById(BigInt(playlist.id));
+                await playlistManager.deleteById(playlist.id);
                 setPlaylists(prev => prev.filter(p => p.id !== playlist.id));
                 onPlaylistDelete?.(playlist.id);
             } catch (err) {

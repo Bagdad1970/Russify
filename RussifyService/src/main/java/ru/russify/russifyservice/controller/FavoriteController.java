@@ -3,7 +3,7 @@ package ru.russify.russifyservice.controller;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.russify.models.AlbumDto;
@@ -36,7 +35,7 @@ public class FavoriteController {
     @GetMapping("/albums")
     public List<AlbumDto> getFavouriteAlbums(Authentication authentication) {
 
-        String email = authentication.getName();
+        String email = requireEmail(authentication);
 
         return albumService.getFavouriteAlbums(email);
     }
@@ -48,7 +47,7 @@ public class FavoriteController {
             Authentication authentication
     ) {
 
-        String email = authentication.getName();
+        String email = requireEmail(authentication);
 
         favouriteService.addFavouriteAlbum(email, request.getAlbumId());
     }
@@ -56,7 +55,7 @@ public class FavoriteController {
     @DeleteMapping("/albums/{albumId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteFavouriteAlbum(Authentication authentication, @PathVariable Long albumId) {
-        String email = authentication.getName();
+        String email = requireEmail(authentication);
 
         favouriteService.deleteAlbumFromFavoritesById(email, albumId);
     }
@@ -67,7 +66,7 @@ public class FavoriteController {
             @RequestBody AddFavouriteTrackRequest request,
             Authentication authentication
     ) {
-        String email = authentication.getName();
+        String email = requireEmail(authentication);
 
         favouriteService.addFavouriteTrack(email, request.getTrackId());
     }
@@ -75,7 +74,7 @@ public class FavoriteController {
     @GetMapping("/tracks")
     public List<FavouriteTrackDto> getFavouriteTracks(Authentication authentication) {
 
-        String email = authentication.getName();
+        String email = requireEmail(authentication);
 
         return favouriteService.getFavouriteTracks(email);
     }
@@ -83,7 +82,7 @@ public class FavoriteController {
     @DeleteMapping("/tracks/{trackId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteFavouriteTrack(Authentication authentication, @PathVariable Long trackId) {
-        String email = authentication.getName();
+        String email = requireEmail(authentication);
 
         favouriteService.deleteTrackFromFavoritesById(email, trackId);
     }
@@ -91,7 +90,7 @@ public class FavoriteController {
     @GetMapping("/playlists")
     public List<PlaylistDto> getFavouritePlaylists(Authentication authentication) {
 
-        String email = authentication.getName();
+        String email = requireEmail(authentication);
 
         return favouriteService.getFavouritePlaylists(email);
     }
@@ -103,7 +102,7 @@ public class FavoriteController {
             Authentication authentication
     ) {
 
-        favouriteService.addPlaylistToFavourites(authentication.getName(), request.getPlaylistId());
+        favouriteService.addPlaylistToFavourites(requireEmail(authentication), request.getPlaylistId());
     }
 
     @DeleteMapping("/playlists/{playlistId}")
@@ -112,7 +111,15 @@ public class FavoriteController {
             Authentication authentication,
             @PathVariable Long playlistId
     ) {
-        String email = authentication.getName();
+        String email = requireEmail(authentication);
         favouriteService.removePlaylistFromFavourites(email, playlistId);
+    }
+
+    private String requireEmail(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null || authentication.getName().isBlank()) {
+            throw new AccessDeniedException("Authentication required");
+        }
+
+        return authentication.getName();
     }
 }

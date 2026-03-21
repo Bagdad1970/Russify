@@ -3,7 +3,15 @@ import '../assets/styles/components/RegistrationModal.css';
 import type {CreateUserDto} from "../types/request/auth/CreateUserDto.ts";
 import {AuthManager} from "../api/AuthManager.ts";
 
-const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
+interface RegistrationModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSwitchToLogin: () => void;
+}
+
+type RegistrationErrors = Partial<Record<keyof CreateUserDto, string>>;
+
+const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }: RegistrationModalProps) => {
     const [formData, setFormData] = useState<CreateUserDto>({
         username: '',
         email: '',
@@ -13,7 +21,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
 
     const authManager = new AuthManager();
 
-    const [errors, setErrors] = useState({});
+    const [errors, setErrors] = useState<RegistrationErrors>({});
     const [serverError, setServerError] = useState('');
     const [showRequirements, setShowRequirements] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -21,8 +29,8 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const modalRef = useRef(null);
-    const passwordInputRef = useRef(null);
+    const modalRef = useRef<HTMLDivElement | null>(null);
+    const passwordInputRef = useRef<HTMLInputElement | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -58,8 +66,8 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         }
     }, [isOpen]);
 
-    const handleMouseDown = (e) => {
-        if (e.target.closest('.regm-header') && !e.target.closest('.regm-close-btn')) {
+    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (e.target instanceof Element && e.target.closest('.regm-header') && !e.target.closest('.regm-close-btn') && modalRef.current) {
             setIsDragging(true);
             const rect = modalRef.current.getBoundingClientRect();
             setDragOffset({
@@ -69,8 +77,8 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         }
     };
 
-    const handleMouseMove = (e) => {
-        if (!isDragging) return;
+    const handleMouseMove = (e: MouseEvent) => {
+        if (!isDragging || !modalRef.current) return;
 
         const newX = e.clientX - dragOffset.x;
         const newY = e.clientY - dragOffset.y;
@@ -98,7 +106,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         }
     }, [isDragging, dragOffset]);
 
-    const validatePassword = (password) => {
+    const validatePassword = (password: string) => {
         const minLength = password.length >= 8;
         const hasUpperCase = /[A-Z]/.test(password);
         const hasLowerCase = /[a-z]/.test(password);
@@ -109,7 +117,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
     };
 
     const validateForm = () => {
-        const newErrors = {};
+        const newErrors: RegistrationErrors = {};
 
         if (isSubmitted) {
             if (!formData.username.trim()) {
@@ -151,7 +159,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         validateForm();
     }, [formData, isSubmitted]);
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -165,7 +173,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         setServerError('');
     };
 
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.ctrlKey || e.metaKey) {
             const key = e.key.toLowerCase();
             if (['a', 'z', 'c', 'v', 'x'].includes(key)) {
@@ -284,7 +292,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                                 setServerError(translateErrorMessage(errorMessage));
                             }
                         } else if (Array.isArray(errorMessage)) {
-                            const newErrors = {};
+                            const newErrors: RegistrationErrors = {};
                             errorMessage.forEach((msg: string) => {
                                 const translatedMsg = translateErrorMessage(msg);
                                 const lowerMsg = msg.toLowerCase();
@@ -401,7 +409,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                                 type="button"
                                 className="regm-password-toggle"
                                 onClick={togglePasswordVisibility}
-                                tabIndex="-1"
+                                tabIndex={-1}
                             >
                                 {showPassword ? (
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -466,7 +474,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                                 type="button"
                                 className="regm-password-toggle"
                                 onClick={toggleConfirmPasswordVisibility}
-                                tabIndex="-1"
+                                tabIndex={-1}
                             >
                                 {showConfirmPassword ? (
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

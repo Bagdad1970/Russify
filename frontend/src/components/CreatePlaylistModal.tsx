@@ -8,10 +8,12 @@ interface CreatePlaylistModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess?: () => void;
+    onSave?: (payload: { name: string; coverFile: File | null; isSystem: boolean }) => Promise<void>;
     defaultIsSystem?: boolean;
+    mode?: string;
 }
 
-const CreatePlaylistModal = ({ isOpen, onClose, onSuccess, defaultIsSystem = false }: CreatePlaylistModalProps) => {
+const CreatePlaylistModal = ({ isOpen, onClose, onSuccess, onSave, defaultIsSystem = false }: CreatePlaylistModalProps) => {
     const modalRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -136,6 +138,16 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSuccess, defaultIsSystem = fal
         setIsLoading(true);
 
         try {
+            if (onSave) {
+                await onSave({
+                    name: playlistName.trim() || "Новый плейлист",
+                    coverFile: playlistCoverFile,
+                    isSystem: defaultIsSystem
+                });
+                onClose();
+                return;
+            }
+
             const formData = new FormData();
             const token = localStorage.getItem('auth_token');
 

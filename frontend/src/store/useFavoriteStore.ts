@@ -1,7 +1,4 @@
 import { FavoriteManager } from '../api/FavoriteManager';
-import type { Track } from '../types/Track';
-import type { Album } from '../types/Album';
-import type { Playlist } from '../types/Playlist';
 
 class FavoriteStore {
     private static instance: FavoriteStore;
@@ -39,7 +36,36 @@ class FavoriteStore {
         this.listeners.forEach(listener => listener());
     }
 
+    private resetFavorites() {
+        this.favoriteTrackIds = new Set();
+        this.favoriteAlbumIds = new Set();
+        this.favoritePlaylistIds = new Set();
+        this.notify();
+    }
+
+    private ensureAuthenticated(): boolean {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+            return true;
+        }
+
+        const isModalOpen = localStorage.getItem('auth_modal_open');
+        if (!isModalOpen) {
+            localStorage.setItem('auth_modal_open', 'true');
+            window.dispatchEvent(new CustomEvent('openAuthModal', {
+                detail: { type: 'registration' }
+            }));
+        }
+
+        return false;
+    }
+
     async loadFavorites() {
+        if (!localStorage.getItem('auth_token')) {
+            this.resetFavorites();
+            return;
+        }
+
         try {
             const [tracks, albums, playlists] = await Promise.all([
                 this.favoriteManager.getFavoriteTracks(),
@@ -52,12 +78,20 @@ class FavoriteStore {
             this.favoritePlaylistIds = new Set(playlists.map(playlist => Number(playlist.id)));
 
             this.notify();
-        } catch (error) {
+        } catch (error: any) {
+            if (error?.response?.status === 401 || error?.response?.status === 403) {
+                this.resetFavorites();
+                return;
+            }
             console.error('Error loading favorites:', error);
         }
     }
 
     async addFavoriteTrack(trackId: number) {
+        if (!this.ensureAuthenticated()) {
+            return;
+        }
+
         try {
             await this.favoriteManager.addFavoriteTrack(BigInt(trackId));
             this.favoriteTrackIds.add(trackId);
@@ -68,6 +102,10 @@ class FavoriteStore {
     }
 
     async removeFavoriteTrack(trackId: number) {
+        if (!this.ensureAuthenticated()) {
+            return;
+        }
+
         try {
             await this.favoriteManager.deleteFavoriteTrack(BigInt(trackId));
             this.favoriteTrackIds.delete(trackId);
@@ -78,6 +116,10 @@ class FavoriteStore {
     }
 
     async addFavoriteAlbum(albumId: number) {
+        if (!this.ensureAuthenticated()) {
+            return;
+        }
+
         try {
             await this.favoriteManager.addFavoriteAlbum(BigInt(albumId));
             this.favoriteAlbumIds.add(albumId);
@@ -88,6 +130,10 @@ class FavoriteStore {
     }
 
     async removeFavoriteAlbum(albumId: number) {
+        if (!this.ensureAuthenticated()) {
+            return;
+        }
+
         try {
             await this.favoriteManager.deleteFavoriteAlbum(BigInt(albumId));
             this.favoriteAlbumIds.delete(albumId);
@@ -98,6 +144,10 @@ class FavoriteStore {
     }
 
     async addFavoritePlaylist(playlistId: number) {
+        if (!this.ensureAuthenticated()) {
+            return;
+        }
+
         try {
             await this.favoriteManager.addFavoritePlaylist(BigInt(playlistId));
             this.favoritePlaylistIds.add(playlistId);
@@ -108,6 +158,10 @@ class FavoriteStore {
     }
 
     async removeFavoritePlaylist(playlistId: number) {
+        if (!this.ensureAuthenticated()) {
+            return;
+        }
+
         try {
             await this.favoriteManager.deleteFavoritePlaylist(BigInt(playlistId));
             this.favoritePlaylistIds.delete(playlistId);

@@ -1,18 +1,60 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../assets/styles/pages/AdminLogin.css';
+import { authManager } from '../api/AuthManager.ts';
+
+const ADMIN_ROLE_ID = 1;
+
+const resolveRoleId = (roleData: { roleId?: number; roleID?: number }) => {
+    return roleData.roleId ?? roleData.roleID;
+};
 
 const AdminLogin = () => {
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
-        username: '',
+        email: '',
         password: ''
     });
 
     const [error, setError] = useState('');
+    const [isCheckingAccess, setIsCheckingAccess] = useState(true);
 
-    const handleInputChange = (e) => {
+    useEffect(() => {
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+            setIsCheckingAccess(false);
+            return;
+        }
+
+        let isMounted = true;
+
+        const resolveCurrentUser = async () => {
+            try {
+                const currentUser = await authManager.getCurrentUser();
+                if (isMounted && resolveRoleId(currentUser) === ADMIN_ROLE_ID) {
+                    navigate('/admin/dashboard', { replace: true });
+                    return;
+                }
+            } catch (currentUserError) {
+                console.error('Failed to resolve current user before admin login', currentUserError);
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('auth_user');
+            } finally {
+                if (isMounted) {
+                    setIsCheckingAccess(false);
+                }
+            }
+        };
+
+        void resolveCurrentUser();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [navigate]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -21,24 +63,44 @@ const AdminLogin = () => {
         if (error) setError('');
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if (!formData.username || !formData.password) {
+        if (!formData.email || !formData.password) {
             setError('Пожалуйста, заполните все поля');
             return;
         }
 
-        // Здесь будет логика аутентификации
-        console.log('Попытка входа:', formData);
+        try {
+            await authManager.login({
+                email: formData.email,
+                password: formData.password
+            });
 
-        // Пример проверки (замените на реальную логику)
-        if (formData.username === 'admin' && formData.password === 'admin123') {
-            navigate('/admin/dashboard');
-        } else {
-            setError('Неверное имя пользователя или пароль');
+            const currentUser = await authManager.getCurrentUser();
+            if (resolveRoleId(currentUser) !== ADMIN_ROLE_ID) {
+                await authManager.logout();
+                setError('Недостаточно прав для входа в админ-панель');
+                return;
+            }
+
+            navigate('/admin/dashboard', { replace: true });
+        } catch (loginError) {
+            console.error('Admin login failed', loginError);
+            setError('Неверный email или пароль');
         }
     };
+
+    if (isCheckingAccess) {
+        return (
+            <div className="admin-login-container">
+                <div className="login-card">
+                    <h1 className="login-title">Admin Panel</h1>
+                    <div className="login-footer">Проверка доступа...</div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="admin-login-container">
@@ -47,17 +109,17 @@ const AdminLogin = () => {
 
                 <form onSubmit={handleSubmit} className="login-form">
                     <div className="form-group">
-                        <label htmlFor="username" className="form-label">
-                            Имя пользователя
+                        <label htmlFor="email" className="form-label">
+                            Email
                         </label>
                         <input
-                            type="text"
-                            id="username"
-                            name="username"
-                            value={formData.username}
+                            type="email"
+                            id="email"
+                            name="email"
+                            value={formData.email}
                             onChange={handleInputChange}
                             className="form-input"
-                            placeholder="Введите имя пользователя"
+                            placeholder="Введите email"
                             autoComplete="off"
                         />
                     </div>

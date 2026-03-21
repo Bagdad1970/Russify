@@ -1,10 +1,6 @@
-import {type Track} from "./Track.ts";
+import type { Track } from "./Track.ts";
+import type { Playlist } from "./Playlist.ts";
 
-export type PlaylistWithTracks = {
-    id: bigint;
-    userId: bigint;
-    name: string;
-    isSystem: boolean;
-    coverHash: string;
-    tracks: Track[]
+export type PlaylistWithTracks = Playlist & {
+    tracks: Track[];
 }

@@ -1,9 +1,15 @@
+export type TrackId = number | bigint;
+
 export type Track = {
-    id: bigint,
-    name: string,
-    genreId: bigint,
-    authorIds: Set<bigint>,
-    albumIds: Set<bigint>,
-    coverHash: string,
-    audioHash: string
+    id: TrackId;
+    name: string;
+    title?: string;
+    genreId?: TrackId | null;
+    authorIds?: Set<TrackId>;
+    albumIds?: Set<TrackId>;
+    coverHash?: string | null;
+    audioHash?: string | null;
+    duration?: number;
+    artist?: string;
+    album?: string;
 }

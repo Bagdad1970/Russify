@@ -1,6 +1,14 @@
 import '../assets/styles/components/AlbumModalModeration.css';
 
-const AlbumModalModeration = ({ album, onClose, onApprove, onReject }) => {
+interface AlbumModalModerationProps {
+    album: any;
+    onClose: () => void;
+    onApprove: (album: any) => void | Promise<void>;
+    onReject: (album: any) => void | Promise<void>;
+    isLoading?: boolean;
+}
+
+const AlbumModalModeration = ({ album, onClose, onApprove, onReject, isLoading = false }: AlbumModalModerationProps) => {
     if (!album) return null;
 
     // Заглушка для треков (в реальности будут приходить из API или пропсов)
@@ -70,7 +78,7 @@ const AlbumModalModeration = ({ album, onClose, onApprove, onReject }) => {
           <textarea
               className="modal-comment-input"
               placeholder="Комментарий к решению (необязательно)"
-              rows="3"
+              rows={3}
           />
                 </div>
 
@@ -79,12 +87,14 @@ const AlbumModalModeration = ({ album, onClose, onApprove, onReject }) => {
                     <button
                         className="modal-btn modal-btn-reject"
                         onClick={() => onReject(album)}
+                        disabled={isLoading}
                     >
                         Отклонить
                     </button>
                     <button
                         className="modal-btn modal-btn-approve"
                         onClick={() => onApprove(album)}
+                        disabled={isLoading}
                     >
                         Одобрить
                     </button>

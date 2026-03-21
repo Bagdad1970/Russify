@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 
 import ProtectedRoute from './ProtectedRoute.tsx';
+import AdminRoute from './AdminRoute.tsx';
 import HomePage from './pages/HomePage.tsx';
 import FavoritesPage from './pages/FavoritesPage.tsx';
 import ProfilePage from './pages/ProfilePage.tsx';
@@ -22,10 +23,11 @@ import AdminDashboard from "./pages/AdminDashboard.tsx";
 
 import { ThemeProvider } from './context/ThemeContext';
 import {favoriteStore} from "./store/useFavoriteStore.ts";
+import type { Track } from './types/Track.ts';
 
 
 function App() {
-    const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+    const [selectedPlaylist, setSelectedPlaylist] = useState<any>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSystemModalOpen, setIsSystemModalOpen] = useState(false);
     const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
@@ -37,25 +39,34 @@ function App() {
 
     useEffect(() => {
         favoriteStore.loadFavorites();
+
+        const handleAuthChange = () => {
+            favoriteStore.loadFavorites();
+        };
+
+        window.addEventListener('authChange', handleAuthChange);
+        return () => {
+            window.removeEventListener('authChange', handleAuthChange);
+        };
     }, []);
 
-    const albums = [
+    const albums: Array<{ name: string; author: string; tracks: Track[] }> = [
         {
             name: "Альбом",
             author: "Автор",
             tracks: [
-                { title: "Трек 1", artist: "Автор" },
-                { title: "Трек 2", artist: "Автор" },
+                { id: 1, name: "Трек 1", artist: "Автор", genreId: 1, authorIds: new Set([1]), albumIds: new Set([1]) },
+                { id: 2, name: "Трек 2", artist: "Автор", genreId: 1, authorIds: new Set([1]), albumIds: new Set([1]) },
             ]
         }
     ];
 
-    const openPlaylistModal = (playlist) => {
+    const openPlaylistModal = (playlist: any) => {
         setSelectedPlaylist(playlist);
         setIsModalOpen(true);
     };
 
-    const openSystemModal = (playlist) => {
+    const openSystemModal = (playlist: any) => {
         setSelectedPlaylist(playlist);
         setIsSystemModalOpen(true);
     };
@@ -168,10 +179,7 @@ function App() {
                         path="/favorites"
                         element={
                             <ProtectedRoute>
-                                <FavoritesPage
-                                    onOpenAlbumModal={openAlbumModal}
-                                    onOpenPlaylistModal={openPlaylistModal}
-                                />
+                                <FavoritesPage />
                             </ProtectedRoute>
                         }
                     />
@@ -198,10 +206,11 @@ function App() {
                     <Route
                         path="/moderation"
                         element={
-                            <ModerationPage
-                                onOpenAlbumModal={openAlbumModal}
-                                onModerateAlbum={(album) => console.log('Модерировать:', album)}
-                            />
+                            <AdminRoute>
+                                <ModerationPage
+                                    onModerateAlbum={(album) => console.log('Модерировать:', album)}
+                                />
+                            </AdminRoute>
                         }
                     />
                     <Route
@@ -215,7 +224,11 @@ function App() {
                         }
                     />
                     <Route path="/admin/dashboard"
-                           element={<AdminDashboard />}
+                           element={
+                               <AdminRoute>
+                                   <AdminDashboard />
+                               </AdminRoute>
+                           }
                     />
                 </Routes>
 

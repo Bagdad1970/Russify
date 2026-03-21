@@ -4,10 +4,11 @@ import api from "./ApiClient.ts";
 import type {PlaylistWithTracks} from "../types/PlaylistWithTracks.ts";
 
 export class PlaylistManager {
-
-    /*async create(playlist: PlaylistCreateRequest): Promise<Playlist> {
+    async create(playlist: FormData | Record<string, unknown>): Promise<Playlist> {
         try {
-            const response = await api.post<Playlist>("playlists", playlist);
+            const response = await api.post<Playlist>("playlists", playlist, {
+                headers: playlist instanceof FormData ? { "Content-Type": "multipart/form-data" } : undefined
+            });
             return response.data;
         }
         catch (error) {
@@ -15,7 +16,10 @@ export class PlaylistManager {
             throw error;
         }
     }
-    */
+
+    async createMultipart(formData: FormData): Promise<Playlist> {
+        return this.create(formData);
+    }
 
     async addTrackToPlaylist(playlistId: number | bigint, trackId: number): Promise<void> {
         try {
@@ -69,7 +73,7 @@ export class PlaylistManager {
         }
     }
 
-    async findById(id: bigint): Promise<PlaylistWithTracks> {
+    async findById(id: number | bigint): Promise<PlaylistWithTracks> {
         try {
             const response = await api.get<PlaylistWithTracks>(`playlists/${id}`);
             return response.data;
@@ -80,7 +84,7 @@ export class PlaylistManager {
         }
     }
 
-    async deleteById(id: bigint): Promise<void> {
+    async deleteById(id: number | bigint): Promise<void> {
         try {
             await api.delete(`playlists/${id}`);
         }

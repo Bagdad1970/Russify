@@ -15,18 +15,26 @@ import { AlbumManager } from "../api/AlbumManager.ts";
 import { FileManager } from "../api/FileManager.ts";
 import { useEffect, useState } from "react";
 import {useFavorites} from "../hooks/useFavorites.ts";
+import type { TrackId } from "../types/Track.ts";
 
 const playlistManager = new PlaylistManager();
 const trackManager = new TrackManager();
 const albumManager = new AlbumManager();
 const fileManager = new FileManager();
 
+interface HomePageProps {
+    onOpenPlaylistModal?: (playlist: Playlist) => void;
+    onOpenSystemModal?: (playlist: Playlist) => void;
+    onOpenAlbumModal?: () => void;
+    onOpenCreatePlaylistModal?: () => void;
+}
+
 const HomePage = ({
                       onOpenPlaylistModal: parentOnOpenPlaylistModal,
                       onOpenSystemModal,
                       onOpenAlbumModal: parentOnOpenAlbumModal,
                       onOpenCreatePlaylistModal,
-                  }) => {
+                  }: HomePageProps) => {
 
     const { favoriteTrackIds, favoriteAlbumIds, removeFavoriteTrack, removeFavoriteAlbum, loadFavorites } = useFavorites();
     const [loading, setLoading] = useState(false);
@@ -199,7 +207,7 @@ const HomePage = ({
         }
     };
 
-    const handleSystemTileClick = (playlist) => {
+    const handleSystemTileClick = (playlist: Playlist) => {
         openPlaylistModal(playlist.id);
     };
 
@@ -207,7 +215,7 @@ const HomePage = ({
         await openPlaylistModal(playlist.id);
     };
 
-    const handleTrackClick = (track) => {
+    const handleTrackClick = (track: Track) => {
         console.log('Track clicked:', track);
     };
 
@@ -221,16 +229,13 @@ const HomePage = ({
         }
     };
 
-    const openPlaylistModal = async (playlistId: bigint | number) => {
+    const openPlaylistModal = async (playlistId: TrackId) => {
         try {
             setLoading(true);
             setError(null);
 
             const playlistInfo = await playlistManager.findById(playlistId);
-
-            const tracksResult = await playlistManager.findTracksByPlaylistId(playlistId);
-
-            const tracksArray = Array.isArray(tracksResult) ? tracksResult : (tracksResult?.tracks || []);
+            const tracksArray = await playlistManager.findTracksByPlaylistId(playlistId);
 
             const playlistWithTracks: PlaylistWithTracks = {
                 ...playlistInfo,
@@ -287,7 +292,7 @@ const HomePage = ({
                                             <GridContainer>
                                                 {searchResults.tracks.map((track) => (
                                                     <ColorTile
-                                                        key={track.id}
+                                                        key={String(track.id)}
                                                         title={track.name || 'Без названия'}
                                                         subtitle={track.artist || track.album || ''}
                                                         imageUrl={trackCovers[track.id.toString()]}
@@ -305,7 +310,7 @@ const HomePage = ({
                                             <GridContainer>
                                                 {searchResults.albums.map((album) => (
                                                     <ColorTile
-                                                        key={album.id}
+                                                        key={String(album.id)}
                                                         title={album.title || 'Без названия'}
                                                         subtitle={`Статус: ${album.status === 'APPROVED' ? 'Опубликован' : album.status === 'IN_PROGRESS' ? 'В процессе' : 'Отклонён'}`}
                                                         imageUrl={albumCovers[album.id.toString()]}
@@ -323,7 +328,7 @@ const HomePage = ({
                                             <GridContainer>
                                                 {searchResults.playlists.map((playlist) => (
                                                     <ColorTile
-                                                        key={playlist.id}
+                                                        key={String(playlist.id)}
                                                         title={playlist.name || 'Без названия'}
                                                         subtitle="Плейлист"
                                                         imageUrl={playlistCovers[playlist.id.toString()]}
@@ -348,7 +353,7 @@ const HomePage = ({
                             <GridContainer>
                                 {moodPlaylists.map((playlist) => (
                                     <ColorTile
-                                        key={playlist.id}
+                                        key={String(playlist.id)}
                                         title={playlist.name}
                                         imageUrl={playlistCovers[playlist.id.toString()]}
                                         onClick={() => handleSystemTileClick(playlist)}

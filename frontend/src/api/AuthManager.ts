@@ -12,6 +12,7 @@ export class AuthManager {
 
             if (response.data.token) {
                 localStorage.setItem("auth_token", response.data.token);
+                localStorage.removeItem("auth_user");
                 window.dispatchEvent(new Event('authChange'));
             }
 
@@ -29,6 +30,7 @@ export class AuthManager {
 
             if (response.data.token) {
                 localStorage.setItem("auth_token", response.data.token);
+                localStorage.removeItem("auth_user");
                 window.dispatchEvent(new Event('authChange'));
             }
 
@@ -58,12 +60,15 @@ export class AuthManager {
         }
         finally {
             localStorage.removeItem("auth_token");
+            localStorage.removeItem("auth_user");
+            window.dispatchEvent(new Event('authChange'));
         }
     }
 
     async getCurrentUser(): Promise<MeResponse> {
         try {
             const response = await api.get<MeResponse>("auth/me");
+            localStorage.setItem("auth_user", JSON.stringify(response.data));
             return response.data;
         }
         catch (error) {
