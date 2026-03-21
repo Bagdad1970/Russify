@@ -15,6 +15,7 @@ import { PlaylistManager } from '../api/PlaylistManager.ts';
 import { AlbumManager } from '../api/AlbumManager.ts';
 import { TrackManager } from '../api/TrackManager.ts';
 import { AuthorManager } from '../api/AuthorManager.ts';
+import { FileManager } from '../api/FileManager.ts';
 
 import type { Genre } from '../types/Genre';
 import type { Playlist } from '../types/Playlist';
@@ -23,6 +24,8 @@ import type { Track } from '../types/Track';
 import type { Author } from '../types/Author';
 
 import '../assets/styles/pages/AdminDashboard.css';
+
+const fileManager = new FileManager();
 
 const tableConfigs = {
     genres: {
