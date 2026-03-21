@@ -105,10 +105,10 @@ public class PlaylistServiceImpl implements PlaylistService {
 
     @Override
     @Transactional
-    public PlaylistResponse createPlaylist(PlaylistCreateRequest request) {
+    public PlaylistResponse createPlaylist(String email, PlaylistCreateRequest request) {
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new UserNotFoundException(request.getUserId()));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
 
         Playlist playlist = new Playlist();
         playlist.setName(request.getName());
@@ -120,12 +120,14 @@ public class PlaylistServiceImpl implements PlaylistService {
             playlist.setIsSystem(false);
         }
 
-        String coverHash = fileService.uploadFile(
-                "images",
-                request.getCoverFile()
-        );
+        if (request.getCoverFile() != null && !request.getCoverFile().isEmpty()) {
+            String coverHash = fileService.uploadFile(
+                    "images",
+                    request.getCoverFile()
+            );
 
-        playlist.setCoverHash(coverHash);
+            playlist.setCoverHash(coverHash);
+        }
 
         Playlist saved = playlistRepository.save(playlist);
 

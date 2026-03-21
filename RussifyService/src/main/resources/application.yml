@@ -10,8 +10,6 @@ spring:
       max-file-size: 30MB
       max-request-size: 50MB
 
-  domain-name: ${DOMAIN_NAME:russify.k-lab.su}
-
   jpa:
     hibernate:
       ddl-auto: none    # У нас схемой управлять будет liquibase так что вот так вот
@@ -32,6 +30,8 @@ spring:
 
 app:
   schemas: liquibase, app
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173}
 
 s3:
   minio:

@@ -43,8 +43,8 @@ export class PlaylistManager {
 
     async findTracksByPlaylistId(id: number | bigint): Promise<Track[]> {
         try {
-            const response = await api.get<Track[]>(`playlists/${id}/tracks`);
-            return response.data;
+            const response = await api.get<PlaylistWithTracks>(`playlists/${id}/tracks`);
+            return response.data.tracks ?? [];
         } catch (error) {
             console.error(`Error fetching tracks for playlist ${id}:`, error);
             throw error;

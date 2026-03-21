@@ -3,6 +3,7 @@ import '../assets/styles/components/AlbumModal.css';
 import type { Track } from '../types/Track.ts';
 import type { Album } from '../types/Album.ts';
 import { useFavorites } from '../hooks/useFavorites';
+import { useTrackPlayback } from '../hooks/useTrackPlayback';
 import { FileManager } from '../api/FileManager';
 import noCover from '../assets/images/no-cover.svg';
 
@@ -39,6 +40,7 @@ const AlbumModal = ({
     const [coverSrc, setCoverSrc] = useState<string>("");
 
     const { favoriteTrackIds, favoriteAlbumIds, addFavoriteTrack, removeFavoriteTrack, addFavoriteAlbum, removeFavoriteAlbum } = useFavorites();
+    const { playTrack, isTrackPlaying, isTrackLoading } = useTrackPlayback();
     const fileManager = new FileManager();
     const actualAlbumId = albumId || album?.id;
     const isAlbumFavorite = actualAlbumId ? favoriteAlbumIds.has(Number(actualAlbumId)) : false;
@@ -145,6 +147,21 @@ const AlbumModal = ({
         }
     };
 
+    const playFirstAvailableTrack = async () => {
+        const playableTrack = playbackTracks.find((track) => track.audioHash);
+        if (!playableTrack) {
+            alert('У этого альбома нет доступных для воспроизведения треков');
+            return;
+        }
+
+        try {
+            await playTrack(playableTrack, { queue: playbackTracks });
+        } catch (error) {
+            console.error('Error playing album track:', error);
+            alert('Не удалось воспроизвести трек');
+        }
+    };
+
     if (!isOpen) return null;
 
     const totalSec = tracks.reduce((sum, t) => sum + (t.duration || 0), 0);
@@ -162,6 +179,11 @@ const AlbumModal = ({
     }
 
     const albumAuthorName = albumAuthors.length > 0 ? albumAuthors[0].name : authorName;
+    const playbackTracks = tracks.map((track) => ({
+        ...track,
+        artist: track.artist || albumAuthorName,
+        album: track.album || albumName,
+    }));
 
     return (
         <div className="alm-overlay" onClick={() => setMenuTrack(null)} style={{ opacity: isPositionCalculated ? 1 : 0 }}>
@@ -198,7 +220,9 @@ const AlbumModal = ({
                         <button
                             className="alm-btn alm-btn-play"
                             title="Воспроизвести альбом"
-                            onClick={() => console.log("Воспроизвести альбом:", albumName)}
+                            onClick={() => {
+                                void playFirstAvailableTrack();
+                            }}
                         >
                             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2">
                                 <path d="M8 5v14l11-7z" />
@@ -255,8 +279,17 @@ const AlbumModal = ({
                                 authorName={albumAuthorName}
                                 isMobile={isMobile}
                                 isFavorite={favoriteTrackIds.has(Number(track.id))}
+                                isPlaying={isTrackPlaying(track.id)}
+                                isLoading={isTrackLoading(track.id)}
                                 onAddFavorite={() => addFavoriteTrack(Number(track.id))}
                                 onRemoveFavorite={() => removeFavoriteTrack(Number(track.id))}
+                                onPlay={() => {
+                                    const playbackTrack = playbackTracks.find((item) => item.id === track.id) ?? track;
+                                    void playTrack(playbackTrack, { queue: playbackTracks }).catch((error) => {
+                                        console.error('Error playing track:', error);
+                                        alert('Не удалось воспроизвести трек');
+                                    });
+                                }}
                                 onMoreClick={() => setMenuTrack(track)}
                             />
                         ))
@@ -333,8 +366,11 @@ interface TrackItemProps {
     authorName: string;
     isMobile: boolean;
     isFavorite: boolean;
+    isPlaying: boolean;
+    isLoading: boolean;
     onAddFavorite: () => void;
     onRemoveFavorite: () => void;
+    onPlay: () => void;
     onMoreClick: () => void;
 }
 
@@ -344,8 +380,11 @@ const TrackItem = ({
                        authorName,
                        isMobile,
                        isFavorite,
+                       isPlaying,
+                       isLoading,
                        onAddFavorite,
                        onRemoveFavorite,
+                       onPlay,
                        onMoreClick
                    }: TrackItemProps) => {
 
@@ -395,9 +434,18 @@ const TrackItem = ({
             <div className="alm-track-actions">
                 {isMobile ? (
                     <>
-                        <button className="alm-btn alm-btn-play">
+                        <button className="alm-btn alm-btn-play" onClick={onPlay} title={isPlaying ? 'Пауза' : 'Воспроизвести'}>
                             <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2">
-                                <path d="M8 5v14l11-7z"/>
+                                {isLoading ? (
+                                    <circle cx="12" cy="12" r="3" fill="currentColor" />
+                                ) : isPlaying ? (
+                                    <>
+                                        <rect x="8" y="6" width="3" height="12" fill="currentColor" stroke="none" />
+                                        <rect x="13" y="6" width="3" height="12" fill="currentColor" stroke="none" />
+                                    </>
+                                ) : (
+                                    <path d="M8 5v14l11-7z"/>
+                                )}
                             </svg>
                         </button>
                         <button
@@ -416,9 +464,18 @@ const TrackItem = ({
                     </>
                 ) : (
                     <>
-                        <button className="alm-btn alm-btn-play">
+                        <button className="alm-btn alm-btn-play" onClick={onPlay} title={isPlaying ? 'Пауза' : 'Воспроизвести'}>
                             <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2">
-                                <path d="M8 5v14l11-7z"/>
+                                {isLoading ? (
+                                    <circle cx="12" cy="12" r="3" fill="currentColor" />
+                                ) : isPlaying ? (
+                                    <>
+                                        <rect x="8" y="6" width="3" height="12" fill="currentColor" stroke="none" />
+                                        <rect x="13" y="6" width="3" height="12" fill="currentColor" stroke="none" />
+                                    </>
+                                ) : (
+                                    <path d="M8 5v14l11-7z"/>
+                                )}
                             </svg>
                         </button>
 

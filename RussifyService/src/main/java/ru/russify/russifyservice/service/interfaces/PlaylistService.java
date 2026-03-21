@@ -18,7 +18,10 @@ public interface PlaylistService {
 
     PlaylistWithTracks getPlaylistWithTracks(Long playlistId);
 
-    PlaylistResponse createPlaylist(PlaylistCreateRequest request);
+    PlaylistResponse createPlaylist(
+            String email,
+            PlaylistCreateRequest request
+    );
 
     PlaylistDto update(
             String email,

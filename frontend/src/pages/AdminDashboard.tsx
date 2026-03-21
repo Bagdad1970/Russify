@@ -54,7 +54,7 @@ const tableConfigs = {
                     if (!hash) return '—';
                     return (
                         <img
-                            src={`http://localhost:9000/images/${hash}`}
+                            src={fileManager.getFileUrl('images', String(hash))}
                             alt="cover"
                             style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
                             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -85,7 +85,7 @@ const tableConfigs = {
                     if (!hash) return '—';
                     return (
                         <img
-                            src={`http://localhost:9000/images/${hash}`}
+                            src={fileManager.getFileUrl('images', String(hash))}
                             alt="cover"
                             style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
                             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -118,7 +118,7 @@ const tableConfigs = {
                     if (!hash) return '—';
                     return (
                         <img
-                            src={`http://localhost:9000/images/${hash}`}
+                            src={fileManager.getFileUrl('images', String(hash))}
                             alt="cover"
                             style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
                             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -143,7 +143,7 @@ const tableConfigs = {
                     if (!hash) return '—';
                     return (
                         <img
-                            src={`http://localhost:9000/images/${hash}`}
+                            src={fileManager.getFileUrl('images', String(hash))}
                             alt="photo"
                             style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '50%' }}
                             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}

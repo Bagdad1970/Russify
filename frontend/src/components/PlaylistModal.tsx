@@ -7,6 +7,7 @@ import { FileManager } from '../api/FileManager';
 import { PlaylistManager } from '../api/PlaylistManager';
 import { TrackManager } from '../api/TrackManager';
 import { useFavorites } from '../hooks/useFavorites';
+import { useTrackPlayback } from '../hooks/useTrackPlayback';
 
 interface PlaylistModalProps {
     isOpen: boolean;
@@ -43,6 +44,7 @@ const PlaylistModal = ({
     const [availableTracks, setAvailableTracks] = useState<Track[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
+    const { playTrack, isTrackPlaying, isTrackLoading } = useTrackPlayback();
     const fileManager = new FileManager();
     const playlistManager = new PlaylistManager();
     const trackManager = new TrackManager();
@@ -98,7 +100,10 @@ const PlaylistModal = ({
     };
 
     useEffect(() => {
-        if (!isOpen) { setIsPositionCalculated(false); return; }
+        if (!isOpen) {
+            setIsPositionCalculated(false);
+            return;
+        }
         const updateLayout = () => {
             const w = window.innerWidth;
             setIsMobile(w < 768);
@@ -189,6 +194,27 @@ const PlaylistModal = ({
         return `${m}:${s.toString().padStart(2, '0')}`;
     };
 
+    const playbackTracks = currentTracks.map((track) => ({
+        ...track,
+        artist: track.artist || 'Исполнитель',
+        album: track.album || playlistName,
+    }));
+
+    const playFirstAvailableTrack = async () => {
+        const playableTrack = playbackTracks.find((track) => track.audioHash);
+        if (!playableTrack) {
+            alert('У этого плейлиста нет доступных для воспроизведения треков');
+            return;
+        }
+
+        try {
+            await playTrack(playableTrack, { queue: playbackTracks });
+        } catch (error) {
+            console.error('Error playing playlist:', error);
+            alert('Не удалось воспроизвести плейлист');
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -221,8 +247,10 @@ const PlaylistModal = ({
                             <button className="pml-btn pml-btn-add" onClick={() => setIsAddMode(true)} title="Добавить трек" disabled={isLoading}>
                                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                             </button>
-                            <button className="pml-btn pml-btn-play" onClick={() => console.log("Play")}>
-                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2"><path d="M8 5v14l11-7z" /></svg>
+                            <button className="pml-btn pml-btn-play" onClick={() => { void playFirstAvailableTrack(); }} title="Воспроизвести плейлист">
+                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2">
+                                    <path d="M8 5v14l11-7z" />
+                                </svg>
                             </button>
                             <button className={`pml-btn pml-btn-heart ${isPlaylistFavorite ? 'active' : ''}`} onClick={togglePlaylistFavorite}>
                                 <svg viewBox="0 0 24 24" width="20" height="20" fill={isPlaylistFavorite ? "#ff2d55" : "none"} stroke="#aaa" strokeWidth="2"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
@@ -262,6 +290,30 @@ const PlaylistModal = ({
                                     {!isMobile && <div className="pml-track-album">{track.album}</div>}
                                     <div className="pml-track-duration">{formatDuration(track.duration)}</div>
                                     <div className="pml-track-actions">
+                                        <button
+                                            className="pml-btn pml-btn-play"
+                                            onClick={() => {
+                                                const playbackTrack = playbackTracks.find((item) => item.id === track.id) ?? track;
+                                                void playTrack(playbackTrack, { queue: playbackTracks }).catch((error) => {
+                                                    console.error('Error playing playlist track:', error);
+                                                    alert('Не удалось воспроизвести трек');
+                                                });
+                                            }}
+                                            title={isTrackPlaying(track.id) ? 'Пауза' : 'Воспроизвести'}
+                                        >
+                                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2">
+                                                {isTrackLoading(track.id) ? (
+                                                    <circle cx="12" cy="12" r="3" fill="currentColor" />
+                                                ) : isTrackPlaying(track.id) ? (
+                                                    <>
+                                                        <rect x="8" y="6" width="3" height="12" fill="currentColor" stroke="none" />
+                                                        <rect x="13" y="6" width="3" height="12" fill="currentColor" stroke="none" />
+                                                    </>
+                                                ) : (
+                                                    <path d="M8 5v14l11-7z" />
+                                                )}
+                                            </svg>
+                                        </button>
                                         <button className="pml-btn pml-btn-remove" onClick={() => handleRemoveTrack(track)} title="Удалить из плейлиста" disabled={isLoading}>
                                             <svg viewBox="0 0 24 24" width="18" height="18" stroke="#ff4444" strokeWidth="2">
                                                 <polyline points="3 6 5 6 21 6"/>

@@ -52,8 +52,10 @@ public class PlaylistController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public PlaylistResponse createPlaylist(
-            @ModelAttribute PlaylistCreateRequest request) {
-        return service.createPlaylist(request); //исправить - убрать из реквеста айди пользователя
+            @ModelAttribute PlaylistCreateRequest request,
+            Authentication authentication
+    ) {
+        return service.createPlaylist(authentication.getName(), request);
     }
 
     @PutMapping(

@@ -14,8 +14,8 @@ import java.util.List;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    @Value("${spring.domain-name}")
-    private String domainName;
+    @Value("${app.cors.allowed-origins}")
+    private List<String> corsAllowedOrigins;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -42,13 +42,9 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     private List<String> allowedOrigins() {
-        return List.of(
-                "http://" + domainName,
-                "https://" + domainName,
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-                "http://localhost:4173",
-                "http://127.0.0.1:4173"
-        );
+        return corsAllowedOrigins.stream()
+                .map(String::trim)
+                .filter(origin -> !origin.isBlank())
+                .toList();
     }
 }

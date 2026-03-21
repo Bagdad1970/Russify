@@ -8,6 +8,7 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.StatObjectArgs;
+import io.minio.StatObjectResponse;
 import io.minio.errors.ErrorResponseException;
 import io.minio.errors.MinioException;
 import io.minio.http.Method;
@@ -19,6 +20,7 @@ import ru.russify.russifyservice.service.interfaces.FileService;
 import ru.russify.russifyservice.utils.FileHashGenerator;
 
 import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
@@ -28,16 +30,16 @@ public class FileServiceImpl implements FileService {
 
     private final MinioClient client;
 
-    private boolean doesObjectExist(String bucket, String filename) {
+    private Long getObjectSize(String bucket, String filename) {
         try {
-            client.statObject(StatObjectArgs.builder()
+            StatObjectResponse response = client.statObject(StatObjectArgs.builder()
                             .bucket(bucket)
                             .object(filename)
                     .build());
-            return true;
+            return response.size();
         }
         catch (ErrorResponseException e) {
-            return false;
+            return null;
         }
         catch (Exception e) {
             throw new RuntimeException("Unhandled exception " + e.getMessage());
@@ -51,15 +53,18 @@ public class FileServiceImpl implements FileService {
         }
 
         try {
-            InputStream inputStream = file.getInputStream();
+            byte[] fileBytes = file.getBytes();
+            InputStream hashInputStream = new ByteArrayInputStream(fileBytes);
 
-            String filename = generateFilename(inputStream, file.getOriginalFilename());
+            String filename = generateFilename(hashInputStream, file.getOriginalFilename());
+            Long existingObjectSize = getObjectSize(bucket, filename);
 
-            if (!doesObjectExist(bucket, filename)) {
+            if (existingObjectSize == null || existingObjectSize != fileBytes.length) {
+                InputStream uploadInputStream = new ByteArrayInputStream(fileBytes);
                 client.putObject(PutObjectArgs.builder()
                         .bucket(bucket)
                         .object(filename)
-                        .stream(inputStream, inputStream.available(), -1)
+                        .stream(uploadInputStream, fileBytes.length, -1)
                         .contentType(file.getContentType() != null ? file.getContentType() : "application/octet-stream")
                         .build()
                 );

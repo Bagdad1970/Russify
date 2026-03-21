@@ -1,4 +1,4 @@
-import {useState, useRef, useEffect} from 'react';
+import {useState, useRef, useEffect, useCallback} from 'react';
 import '../assets/styles/pages/FavoritesPage.css';
 import FavoriteCard from '../components/FavoriteCard.tsx';
 import SearchBar from '../components/SearchBar.tsx';
@@ -16,13 +16,15 @@ import noCover from '../assets/images/no-cover.svg';
 import {useFavorites} from "../hooks/useFavorites.ts";
 import { AlbumManager } from "../api/AlbumManager.ts";
 import type { TrackId } from "../types/Track.ts";
+import { useTrackPlayback } from "../hooks/useTrackPlayback.ts";
+
+const playlistManager = new PlaylistManager();
+const favoriteManager = new FavoriteManager();
+const fileManager = new FileManager();
+const albumManager = new AlbumManager();
 
 const FavoritesPage = () => {
     const [category, setCategory] = useState("Треки");
-    const playlistManager = new PlaylistManager();
-    const favoriteManager = new FavoriteManager();
-    const fileManager = new FileManager();
-    const albumManager = new AlbumManager();
 
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
     const [tracks, setTracks] = useState<Track[]>([]);
@@ -44,74 +46,72 @@ const FavoritesPage = () => {
         removeFavoriteAlbum,
         removeFavoritePlaylist
     } = useFavorites();
+    const { playTrack, isTrackPlaying, isTrackLoading } = useTrackPlayback();
+
+    const loadAllData = useCallback(async () => {
+        try {
+            const userPlaylists = await favoriteManager.getFavoritePlaylists();
+            setPlaylists(userPlaylists);
+
+            const favoriteTracks = await favoriteManager.getFavoriteTracks();
+            setTracks(favoriteTracks);
+
+            const favoriteAlbums = await favoriteManager.getFavoriteAlbums();
+            setAlbums(favoriteAlbums);
+
+            const playlistCoversMap: Record<string, string> = {};
+            await Promise.all(userPlaylists.map(async (playlist) => {
+                if (playlist.coverHash) {
+                    try {
+                        const coverSrc = await fileManager.getFileUrl("images", playlist.coverHash);
+                        if (coverSrc) {
+                            playlistCoversMap[playlist.id.toString()] = coverSrc;
+                        }
+                    } catch (err) {
+                        console.log(`Error loading cover for playlist ${playlist.id}:`, err);
+                    }
+                }
+            }));
+            setPlaylistCovers(playlistCoversMap);
+
+            const trackCoversMap: Record<string, string> = {};
+            await Promise.all(favoriteTracks.map(async (track) => {
+                if (track.coverHash) {
+                    try {
+                        const coverSrc = await fileManager.getFileUrl("images", track.coverHash);
+                        if (coverSrc) {
+                            trackCoversMap[track.id.toString()] = coverSrc;
+                        }
+                    } catch (err) {
+                        console.log(`Error loading cover for track ${track.id}:`, err);
+                    }
+                }
+            }));
+            setTrackCovers(trackCoversMap);
+
+            const albumCoversMap: Record<string, string> = {};
+            await Promise.all(favoriteAlbums.map(async (album) => {
+                if (album.coverHash) {
+                    try {
+                        const coverSrc = await fileManager.getFileUrl("images", album.coverHash);
+                        if (coverSrc) {
+                            albumCoversMap[album.id.toString()] = coverSrc;
+                        }
+                    } catch (err) {
+                        console.log(`Error loading cover for album ${album.id}:`, err);
+                    }
+                }
+            }));
+            setAlbumCovers(albumCoversMap);
+
+        } catch (err) {
+            console.log('Error loading data:', err);
+        }
+    }, []);
 
     useEffect(() => {
-        const loadAllData = async () => {
-            try {
-                const userPlaylists = await favoriteManager.getFavoritePlaylists();
-                setPlaylists(userPlaylists);
-
-                const favoriteTracks = await favoriteManager.getFavoriteTracks();
-                setTracks(favoriteTracks);
-
-                const favoriteAlbums = await favoriteManager.getFavoriteAlbums();
-                setAlbums(favoriteAlbums);
-
-                // Загружаем обложки для плейлистов
-                const playlistCoversMap: Record<string, string> = {};
-                await Promise.all(userPlaylists.map(async (playlist) => {
-                    if (playlist.coverHash) {
-                        try {
-                            const coverSrc = await fileManager.getFileUrl("images", playlist.coverHash);
-                            if (coverSrc) {
-                                playlistCoversMap[playlist.id.toString()] = coverSrc;
-                            }
-                        } catch (err) {
-                            console.log(`Error loading cover for playlist ${playlist.id}:`, err);
-                        }
-                    }
-                }));
-                setPlaylistCovers(playlistCoversMap);
-
-                // Загружаем обложки для треков
-                const trackCoversMap: Record<string, string> = {};
-                await Promise.all(favoriteTracks.map(async (track) => {
-                    if (track.coverHash) {
-                        try {
-                            const coverSrc = await fileManager.getFileUrl("images", track.coverHash);
-                            if (coverSrc) {
-                                trackCoversMap[track.id.toString()] = coverSrc;
-                            }
-                        } catch (err) {
-                            console.log(`Error loading cover for track ${track.id}:`, err);
-                        }
-                    }
-                }));
-                setTrackCovers(trackCoversMap);
-
-                // Загружаем обложки для альбомов
-                const albumCoversMap: Record<string, string> = {};
-                await Promise.all(favoriteAlbums.map(async (album) => {
-                    if (album.coverHash) {
-                        try {
-                            const coverSrc = await fileManager.getFileUrl("images", album.coverHash);
-                            if (coverSrc) {
-                                albumCoversMap[album.id.toString()] = coverSrc;
-                            }
-                        } catch (err) {
-                            console.log(`Error loading cover for album ${album.id}:`, err);
-                        }
-                    }
-                }));
-                setAlbumCovers(albumCoversMap);
-
-            } catch (err) {
-                console.log('Error loading data:', err);
-            }
-        };
-
-        loadAllData();
-    }, []);
+        void loadAllData();
+    }, [loadAllData]);
 
     const [menuVisible, setMenuVisible] = useState<number | null>(null);
     const [startY, setStartY] = useState(0);
@@ -327,8 +327,27 @@ const FavoritesPage = () => {
     const filteredTracks = getFilteredTracks();
     const filteredPlaylists = getFilteredPlaylists();
     const filteredAlbums = getFilteredAlbums();
+    const playbackTracks = filteredTracks.map((track) => {
+        const authorCount = track.authorIds ? track.authorIds.size : 0;
+        const playbackArtist = track.artist || (authorCount > 0 ? `${authorCount} исполнителей` : "Неизвестный исполнитель");
+
+        return {
+            ...track,
+            artist: playbackArtist,
+            album: track.album || "Избранные треки"
+        };
+    });
 
     const isSearchActive = searchQuery.trim().length > 0;
+
+    const handleTrackPlay = (track: Track) => {
+        const playbackTrack = playbackTracks.find((item) => item.id === track.id) ?? track;
+
+        void playTrack(playbackTrack, { queue: playbackTracks }).catch((error) => {
+            console.error('Error playing favorite track:', error);
+            alert('Не удалось воспроизвести трек');
+        });
+    };
 
     return (
         <div className="favorites-page-container">
@@ -401,9 +420,22 @@ const FavoritesPage = () => {
                                         </div>
 
                                         <div className="favorites-track-actions-desktop">
-                                            <button className="favorites-action-btn" title="Играть">
+                                            <button
+                                                className="favorites-action-btn"
+                                                title={isTrackPlaying(track.id) ? 'Пауза' : 'Играть'}
+                                                onClick={() => handleTrackPlay(track)}
+                                            >
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#aaa" strokeWidth="2">
-                                                    <path d="M8 5v14l11-7z" />
+                                                    {isTrackLoading(track.id) ? (
+                                                        <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
+                                                    ) : isTrackPlaying(track.id) ? (
+                                                        <>
+                                                            <rect x="8" y="5" width="3" height="14" fill="currentColor" stroke="none" />
+                                                            <rect x="13" y="5" width="3" height="14" fill="currentColor" stroke="none" />
+                                                        </>
+                                                    ) : (
+                                                        <path d="M8 5v14l11-7z" />
+                                                    )}
                                                 </svg>
                                             </button>
                                             <button className="favorites-action-btn" title="Играть следующим">
@@ -440,9 +472,22 @@ const FavoritesPage = () => {
                                         </div>
 
                                         <div className="favorites-track-actions-mobile">
-                                            <button className="favorites-action-btn">
+                                            <button
+                                                className="favorites-action-btn"
+                                                title={isTrackPlaying(track.id) ? 'Пауза' : 'Играть'}
+                                                onClick={() => handleTrackPlay(track)}
+                                            >
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#aaa" strokeWidth="2">
-                                                    <path d="M8 5v14l11-7z" />
+                                                    {isTrackLoading(track.id) ? (
+                                                        <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
+                                                    ) : isTrackPlaying(track.id) ? (
+                                                        <>
+                                                            <rect x="8" y="5" width="3" height="14" fill="currentColor" stroke="none" />
+                                                            <rect x="13" y="5" width="3" height="14" fill="currentColor" stroke="none" />
+                                                        </>
+                                                    ) : (
+                                                        <path d="M8 5v14l11-7z" />
+                                                    )}
                                                 </svg>
                                             </button>
                                             <button
@@ -627,6 +672,9 @@ const FavoritesPage = () => {
                     <CreatePlaylistModal
                         isOpen={true}
                         onClose={closeCreatePlaylistModal}
+                        onSuccess={() => {
+                            void loadAllData();
+                        }}
                     />
                 )}
 

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import '../assets/styles/components/CreateAlbumOrTrackModal.css';
+import { appEnv } from '../config/env.ts';
 
 const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "album" }) => {
     const modalRef = useRef(null);
@@ -190,8 +191,6 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "album" }) => {
         try {
             const formData = new FormData();
             const token = localStorage.getItem('auth_token');
-            const API_URL = import.meta.env.VITE_BASE_URL_PROD || import.meta.env.VITE_BASE_URL_DEV || 'http://localhost:8080';
-
             // Основные поля альбома
             formData.append('title', albumName);
             formData.append('typeId', '1');
@@ -228,7 +227,7 @@ const CreateAlbumOrTrackModal = ({ isOpen, onClose, mode = "album" }) => {
                 }
             }
 
-            const url = `${API_URL}/api/user/albums`;
+            const url = `${appEnv.apiBaseUrl}/api/user/albums`;
             console.log('🌐 Sending to:', url);
 
             const response = await fetch(url, {

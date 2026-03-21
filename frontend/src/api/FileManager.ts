@@ -1,11 +1,13 @@
+import { appEnv } from '../config/env.ts';
+
 export class FileManager {
     private readonly baseUrl: string;
 
     constructor() {
-        this.baseUrl = 'http://localhost:9000';
+        this.baseUrl = appEnv.mediaBaseUrl;
     }
 
-    async getFileUrl(bucket: 'music' | 'images', hash: string): Promise<string> {
+    getFileUrl(bucket: 'music' | 'images', hash: string): string {
         return `${this.baseUrl}/${bucket}/${hash}`;
     }
 }

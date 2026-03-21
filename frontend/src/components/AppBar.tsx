@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import TrackPlayerModal from './TrackPlayerModal.jsx';
 import '../assets/styles/components/AppBar.css';
 import { useAuthModal } from '../hooks/useAuthModal';
+import { useTrackPlayback } from '../hooks/useTrackPlayback';
+import { useFavorites } from '../hooks/useFavorites';
+import { FileManager } from '../api/FileManager';
+import noCover from '../assets/images/no-cover.svg';
 
 interface AppBarProps {
     activeTab?: string;
@@ -13,30 +17,39 @@ interface AppBarProps {
     onLoginClick?: () => void;
 }
 
-const getTrackInfo = () => {
-    return { title: "Название трека", artist: "Исполнитель", duration: 240 };
-};
-
 const AppBar = ({ activeTab = 'Главная', onFavoritesClick, trackTitle, artistName }: AppBarProps) => {
     const navigate = useNavigate();
-
     const { requireAuth } = useAuthModal();
+    const fileManagerRef = useRef(new FileManager());
+    const trackRef = useRef<HTMLDivElement | null>(null);
 
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [isShuffle, setIsShuffle] = useState(false);
-    const [isRepeat, setIsRepeat] = useState(false);
-    const [isFavorite, setIsFavorite] = useState(false);
-    const [progress, setProgress] = useState(30);
+    const {
+        currentTrack,
+        isPlaying,
+        currentTime,
+        duration,
+        isShuffle,
+        isRepeat,
+        togglePlayback,
+        seekTo,
+        playNext,
+        playPrevious,
+        toggleShuffle,
+        toggleRepeat,
+    } = useTrackPlayback();
+
+    const { favoriteTrackIds, addFavoriteTrack, removeFavoriteTrack } = useFavorites();
+
+    const [coverSrc, setCoverSrc] = useState('');
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-    const trackRef = useRef(null);
-    const [trackPosition, setTrackPosition] = useState(null);
-
+    const [trackPosition, setTrackPosition] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
     const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 
-    const defaultTrackInfo = getTrackInfo();
-    const title = trackTitle ?? defaultTrackInfo.title;
-    const artist = artistName ?? defaultTrackInfo.artist;
-    const duration = defaultTrackInfo.duration;
+    const title = currentTrack?.name || trackTitle || 'Трек дня';
+    const artist = currentTrack?.artist || artistName || 'Исполнитель';
+    const hasCurrentTrack = Boolean(currentTrack);
+    const effectiveDuration = duration || currentTrack?.duration || 0;
+    const isFavorite = currentTrack ? favoriteTrackIds.has(Number(currentTrack.id)) : false;
 
     useEffect(() => {
         const handleResize = () => {
@@ -47,8 +60,37 @@ const AppBar = ({ activeTab = 'Главная', onFavoritesClick, trackTitle, ar
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const handleTrackClick = (e) => {
+    useEffect(() => {
+        const loadCover = async () => {
+            if (!currentTrack?.coverHash) {
+                setCoverSrc('');
+                return;
+            }
+
+            try {
+                const nextCoverSrc = await fileManagerRef.current.getFileUrl('images', currentTrack.coverHash);
+                setCoverSrc(nextCoverSrc);
+            } catch (error) {
+                console.error('Error loading player cover:', error);
+                setCoverSrc('');
+            }
+        };
+
+        void loadCover();
+    }, [currentTrack?.coverHash]);
+
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    };
+
+    const handleTrackClick = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
+
+        if (!hasCurrentTrack) {
+            return;
+        }
 
         if (trackRef.current) {
             const rect = trackRef.current.getBoundingClientRect();
@@ -56,7 +98,7 @@ const AppBar = ({ activeTab = 'Главная', onFavoritesClick, trackTitle, ar
                 top: rect.top,
                 left: rect.left,
                 width: rect.width,
-                height: rect.height
+                height: rect.height,
             });
         }
 
@@ -67,44 +109,33 @@ const AppBar = ({ activeTab = 'Главная', onFavoritesClick, trackTitle, ar
         setIsPlayerOpen(false);
     };
 
-    const handlePlayPause = () => {
-        setIsPlaying(!isPlaying);
+    const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        seekTo(Number(e.target.value));
     };
 
-    const handleNext = () => {
-        console.log("Следующий трек");
-    };
+    const handleFavoriteToggle = () => {
+        if (!currentTrack) {
+            return;
+        }
 
-    const handlePrev = () => {
-        console.log("Предыдущий трек");
-    };
-
-    const toggleShuffle = () => {
-        setIsShuffle(!isShuffle);
-    };
-
-    const toggleRepeat = () => {
-        setIsRepeat(!isRepeat);
-    };
-
-    const toggleFavorite = () => {
-        setIsFavorite(!isFavorite);
+        const currentTrackId = Number(currentTrack.id);
+        if (isFavorite) {
+            void removeFavoriteTrack(currentTrackId);
+        } else {
+            void addFavoriteTrack(currentTrackId);
+        }
     };
 
     const handleAddToPlaylist = () => {
-        console.log("Добавить в плейлист");
-    };
+        requireAuth(() => {
+            if (onFavoritesClick) {
+                onFavoritesClick();
+                return;
+            }
 
-    const handleProgressChange = (e) => {
-        setProgress(Number(e.target.value));
+            navigate('/favorites');
+        });
     };
-
-    const formatTime = (seconds) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    };
-
 
     const handleProfileClick = () => {
         requireAuth(() => {
@@ -117,8 +148,6 @@ const AppBar = ({ activeTab = 'Главная', onFavoritesClick, trackTitle, ar
             navigate('/favorites');
         });
     };
-
-
 
     return (
         <div className="app-bar">
@@ -137,10 +166,18 @@ const AppBar = ({ activeTab = 'Главная', onFavoritesClick, trackTitle, ar
                     className="track-and-controls"
                     onClick={handleTrackClick}
                     ref={trackRef}
+                    data-has-track={hasCurrentTrack}
                 >
                     <div className="track-info">
                         <div className="track-cover">
-                            <div className="cover-placeholder"></div>
+                            <img
+                                src={coverSrc || noCover}
+                                alt={title}
+                                className="cover-image"
+                                onError={(e) => {
+                                    e.currentTarget.src = noCover;
+                                }}
+                            />
                         </div>
                         <div className="track-text">
                             <div className="track-title-AppBar">{title}</div>
@@ -151,27 +188,39 @@ const AppBar = ({ activeTab = 'Главная', onFavoritesClick, trackTitle, ar
                     {!isMobile && (
                         <>
                             <div className="controls">
-                                <button className={`btn shuffle ${isShuffle ? 'active' : ''}`} onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleShuffle();
-                                }}>
+                                <button
+                                    className={`btn shuffle ${isShuffle ? 'active' : ''}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleShuffle();
+                                    }}
+                                    disabled={!hasCurrentTrack}
+                                >
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                                         <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.95 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
                                     </svg>
                                 </button>
-                                <button className="btn prev" onClick={(e) => {
-                                    e.stopPropagation();
-                                    handlePrev();
-                                }}>
+                                <button
+                                    className="btn prev"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        void playPrevious();
+                                    }}
+                                    disabled={!hasCurrentTrack}
+                                >
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                                         <rect x="4" y="4" width="3" height="16" fill="currentColor" />
                                         <polygon points="20,4 20,20 8,12" fill="currentColor" />
                                     </svg>
                                 </button>
-                                <button className="btn play-pause" onClick={(e) => {
-                                    e.stopPropagation();
-                                    handlePlayPause();
-                                }}>
+                                <button
+                                    className="btn play-pause"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        void togglePlayback();
+                                    }}
+                                    disabled={!hasCurrentTrack}
+                                >
                                     {isPlaying ? (
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                                             <rect x="8" y="4" width="3" height="16" fill="currentColor" />
@@ -183,49 +232,67 @@ const AppBar = ({ activeTab = 'Главная', onFavoritesClick, trackTitle, ar
                                         </svg>
                                     )}
                                 </button>
-                                <button className="btn next" onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleNext();
-                                }}>
+                                <button
+                                    className="btn next"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        void playNext();
+                                    }}
+                                    disabled={!hasCurrentTrack}
+                                >
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                                         <rect x="17" y="4" width="3" height="16" fill="currentColor" />
                                         <polygon points="4,4 4,20 16,12" fill="currentColor" />
                                     </svg>
                                 </button>
-                                <button className={`btn repeat ${isRepeat ? 'active' : ''}`} onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleRepeat();
-                                }}>
+                                <button
+                                    className={`btn repeat ${isRepeat ? 'active' : ''}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleRepeat();
+                                    }}
+                                    disabled={!hasCurrentTrack}
+                                >
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                                         <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
                                     </svg>
                                 </button>
                             </div>
                             <div className="progress-section">
-                                <span className="time">{formatTime(progress)}</span>
+                                <span className="time">{formatTime(currentTime)}</span>
                                 <input
                                     type="range"
                                     min="0"
-                                    max={duration}
-                                    value={progress}
+                                    max={Math.max(effectiveDuration, 1)}
+                                    value={Math.min(currentTime, Math.max(effectiveDuration, 1))}
                                     onChange={handleProgressChange}
+                                    onClick={(e) => e.stopPropagation()}
                                     className="progress-slider"
+                                    disabled={!hasCurrentTrack}
                                 />
-                                <span className="time">{formatTime(duration)}</span>
+                                <span className="time">{formatTime(effectiveDuration)}</span>
                             </div>
                             <div className="extra-controls">
-                                <button className={`btn favorite ${isFavorite ? 'active' : ''}`} onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleFavorite();
-                                }}>
+                                <button
+                                    className={`btn favorite ${isFavorite ? 'active' : ''}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleFavoriteToggle();
+                                    }}
+                                    disabled={!hasCurrentTrack}
+                                >
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill={isFavorite ? "#ff2d55" : "none"} stroke="#aaa" strokeWidth="2">
                                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                                     </svg>
                                 </button>
-                                <button className="btn playlist" onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleAddToPlaylist();
-                                }}>
+                                <button
+                                    className="btn playlist"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleAddToPlaylist();
+                                    }}
+                                    disabled={!hasCurrentTrack}
+                                >
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                                         <path d="M14 10H2v2h12v-2zm0-4H2v2h12V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM2 16h8v-2H2v2z"/>
                                     </svg>
@@ -244,11 +311,10 @@ const AppBar = ({ activeTab = 'Главная', onFavoritesClick, trackTitle, ar
                 </span>
             </div>
 
-            {/* Модальное окно плеера */}
             <TrackPlayerModal
                 isOpen={isPlayerOpen}
                 onClose={closePlayer}
-                track={{ title, artist, duration }}
+                track={{ title, artist, duration: effectiveDuration }}
                 anchorPosition={trackPosition}
                 isMobile={isMobile}
             />

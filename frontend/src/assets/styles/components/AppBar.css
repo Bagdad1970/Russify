@@ -119,6 +119,14 @@
     background: var(--appbar-hover-bg);
 }
 
+.track-and-controls[data-has-track="false"] {
+    cursor: default;
+}
+
+.track-and-controls[data-has-track="false"]:hover {
+    background: transparent;
+}
+
 .track-info {
     display: flex;
     align-items: center;
@@ -143,6 +151,14 @@
     background: var(--appbar-placeholder-bg);
     border-radius: 4px;
     transition: background-color 0.3s ease;
+}
+
+.cover-image {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 6px;
+    background: var(--appbar-placeholder-bg);
 }
 
 .track-text {
@@ -227,6 +243,15 @@
 
 .btn:hover {
     background: var(--appbar-btn-hover);
+}
+
+.btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.btn:disabled:hover {
+    background: transparent;
 }
 
 .btn.active {

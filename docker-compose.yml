@@ -15,7 +15,7 @@ services:
       retries: 5
       start_period: 10s
     ports:
-      - "15532:5432"
+      - "${POSTGRES_PORT:-15532}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -24,14 +24,14 @@ services:
     image: quay.io/minio/minio:latest
     container_name: minio
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
     command: [ "server", "--console-address", ":9001", "/data" ]
     volumes:
       - minio-data:/data
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: miniopassword
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-miniopassword}
 
   minio-buckets:
     image: quay.io/minio/mc:latest
@@ -39,11 +39,10 @@ services:
     depends_on:
       - minio
     restart: on-failure
-    entrypoint: >
-      /bin/sh -c "
-      /usr/bin/mc alias set dockerminio http://minio:9000 minioadmin miniopassword;
-      exit 0;
-      "
+    volumes:
+      - ../music:/seed-music:ro
+      - ./scripts/seed-minio-media.sh:/seed-minio-media.sh:ro
+    entrypoint: ["/bin/sh", "/seed-minio-media.sh"]
 
   backend:
     container_name: backend
@@ -51,15 +50,15 @@ services:
       context: .
       dockerfile: RussifyService/Dockerfile
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT:-8080}:8080"
     environment:
-      - POSTGRES_URL=jdbc:postgresql://postgres:5432/postgres
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=password
-      - MINIO_URL=http://minio:9000
-      - MINIO_ACCESS_KEY=minioadmin
-      - MINIO_SECRET_KEY=miniopassword
-      - DOMAIN_NAME=localhost
+      POSTGRES_URL: ${POSTGRES_URL:-jdbc:postgresql://postgres:5432/postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      MINIO_URL: ${MINIO_URL:-http://minio:9000}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-miniopassword}
+      APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173}
     depends_on:
       postgres:
         condition: service_healthy
@@ -70,7 +69,13 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
     ports:
-      - "5173:5173"
+      - "${FRONTEND_PORT:-5173}:5173"
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080}
+      VITE_MEDIA_BASE_URL: ${VITE_MEDIA_BASE_URL:-http://localhost:9000}
+      VITE_DEV_PROXY_TARGET: ${VITE_DEV_PROXY_TARGET:-http://backend:8080}
+      VITE_ALLOWED_HOSTS: ${VITE_ALLOWED_HOSTS:-localhost,russify.k-lab.su}
+      VITE_PORT: ${VITE_PORT:-5173}
 
 volumes:
   postgres_data:

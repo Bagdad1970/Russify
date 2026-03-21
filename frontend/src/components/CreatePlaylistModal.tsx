@@ -3,6 +3,7 @@ import '../assets/styles/components/CreatePlaylistModal.css';
 import { PlaylistManager } from '../api/PlaylistManager';
 import { useFavorites } from '../hooks/useFavorites';
 import noCover from '../assets/images/no-cover.svg';
+import { appEnv } from '../config/env.ts';
 
 interface CreatePlaylistModalProps {
     isOpen: boolean;
@@ -151,13 +152,6 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSuccess, onSave, defaultIsSyst
             const formData = new FormData();
             const token = localStorage.getItem('auth_token');
 
-            if (token) {
-                try {
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    if (payload.userId) formData.append("userId", String(payload.userId));
-                } catch (e) {}
-            }
-
             formData.append("name", playlistName.trim() || "Новый плейлист");
             formData.append("isSystem", String(defaultIsSystem));
 
@@ -165,9 +159,7 @@ const CreatePlaylistModal = ({ isOpen, onClose, onSuccess, onSave, defaultIsSyst
                 formData.append("coverFile", playlistCoverFile);
             }
 
-            const API_URL = import.meta.env.VITE_BASE_URL_PROD || import.meta.env.VITE_BASE_URL_DEV || 'http://localhost:8080';
-
-            const response = await fetch(`${API_URL}/api/playlists`, {
+            const response = await fetch(`${appEnv.apiBaseUrl}/api/playlists`, {
                 method: 'POST',
                 headers: token ? { 'Authorization': `Bearer ${token}` } : {},
                 body: formData,
